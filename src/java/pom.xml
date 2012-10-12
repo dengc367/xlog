@@ -17,5 +17,6 @@
   <modules>
     <module>client</module>
     <module>dispatcher</module>
+    <module>logger</module>
   </modules>
 </project>

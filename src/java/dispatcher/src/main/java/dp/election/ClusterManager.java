@@ -11,7 +11,7 @@ import dp.zk.ZkConn;
 import xlog.proto.Xlog.ClusterInfo;
 
 public abstract class ClusterManager<K, V> {
-  
+
   protected ZkConn conn;
   protected String clusterpath;
   protected GenericHashBuilder<K> keyBuilder;
@@ -21,7 +21,7 @@ public abstract class ClusterManager<K, V> {
   protected String currentZnode;
   protected WatcherManager watcherManager;
   protected NodeChooseAlgorithm chooseAlgorithm;
-  
+
   public void initialize() throws KeeperException, InterruptedException, IOException {
     byte[] data = conn.get().getData(clusterpath, false, null);
     ClusterInfo clusterInfo = ClusterInfo.parseFrom(data);
@@ -31,11 +31,11 @@ public abstract class ClusterManager<K, V> {
     String path;
     List<ServingItem> siList = null;
     for (int i = 0; i < size; ++i) {
-      path=clusterpath + "/" + i;
+      path = clusterpath + "/" + i;
       List<String> childrenList = conn.get().getChildren(path, false);
       siList = new ArrayList<ServingItem>();
       for (String znode : childrenList) {
-        si = new ServingItem(conn, path+"/"+znode);
+        si = new ServingItem(conn, path + "/" + znode);
         si.initialize();
 
         siList.add(si);
@@ -47,7 +47,7 @@ public abstract class ClusterManager<K, V> {
   public int size() {
     return slots.length;
   }
-  
+
   public V get(K key) throws InterruptedException {
     int size = size();
     int kid = keyBuilder.hash(key, size);
@@ -59,6 +59,6 @@ public abstract class ClusterManager<K, V> {
 
     return valueBuilder.cast(config);
   }
-  
+
   public abstract void addWatchers(long delayTime) throws KeeperException, InterruptedException, IOException;
 }
