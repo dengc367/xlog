@@ -1,5 +1,6 @@
 package com.renren.dp.xlog.dispatcher;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -17,18 +18,26 @@ public class Publisher {
   public static int SUBSCRIPTION_PARAM_ILLEGAL = 1000;
   Map<String, SubscriberInfo> subMap;
 
-  PublisherAdapter pa;
+  PublishAdapter pa;
 
   public Publisher() {
-    pa = PublisherAdapter.getInstance();
+    pa = PublishAdapter.getInstance();
     subMap = Maps.newHashMap();
   }
 
   public void publish(LogData data) {
     SubscriberInfo sub = subMap.get(serializeCategories(data.categories));
     if (null != sub) {
-      for (String h : sub.getSubScribeHosts()) {
-        pa.publish(h, data);
+      List<String> hosts = sub.getSubScribeHosts();
+      for (String h : hosts) {
+        // TODO the best method to solve the publish problems
+        int ret = pa.publish(h, data);
+        if (ret != 0) {
+          ret += pa.publish(h, data); // try twice
+        }
+        if (ret >= 2) {
+          sub.setBlackHost(h);
+        }
       }
     }
   }
@@ -42,10 +51,19 @@ public class Publisher {
       if (si == null) {
         subMap.put(catStr, new SubscriberInfo(Lists.newArrayList(sub.host), shouldPublishAllNodes));
       } else {
-        si.addSubScribeHost(sub.host);
+        si.addHost(sub.host);
         si.setShouldPublishAllNodes(shouldPublishAllNodes);
         subMap.put(catStr, si);
       }
+    }
+    return ret;
+  }
+
+  public int unsubscribe(Subscription sub) {
+    int ret = checkSubscription(sub);
+    if (ret == SUCCESS) {
+      String catStr = serializeCategories(sub.categories);
+      subMap.remove(catStr);
     }
     return ret;
   }

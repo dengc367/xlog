@@ -4,18 +4,16 @@ import com.renren.dp.xlog.logger.client.Subscriber;
 
 public class XLogLoggerServer {
 
-  public String host;
   public int port;
 
-  public XLogLoggerServer(String host, int port) {
-    this.host = host;
+  public XLogLoggerServer(int port) {
     this.port = port;
 
   }
 
   public void bind(String[] categories, Class<? extends XLogLogger> clazz) {
-    sub = new Subscriber(host, port, categories);
-    ps = new PublishService(host, port, clazz);
+    sub = new Subscriber(port, categories);
+    ps = new PublishService(port, clazz);
   }
 
   private PublishService ps;

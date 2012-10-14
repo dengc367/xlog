@@ -41,6 +41,7 @@ module slice {
     void createZNode(int slot);
     bool register(Logger* subscriber, int frequence);
     int subscribe(Subscription sub); // pub sub 
+    int unsubscribe(Subscription sub); // pub sub 
   };
 
   //pub sub 

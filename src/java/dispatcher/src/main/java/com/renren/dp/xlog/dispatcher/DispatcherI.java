@@ -14,6 +14,7 @@ import xlog.slice.LogData;
 import xlog.slice.LoggerPrx;
 import xlog.slice.Subscription;
 import xlog.slice._DispatcherDisp;
+import Ice.Connection;
 import Ice.Current;
 import Ice.Endpoint;
 import Ice.ObjectAdapter;
@@ -29,7 +30,6 @@ import dp.zk.ZkConn;
 public class DispatcherI extends _DispatcherDisp {
   private static final long serialVersionUID = 5776184542612999955L;
 
-  // private String uuid;
   private ObjectPrx myprx;
   private DispatcherCluster<DispatcherPrx> cfg;
   private LoggerI logger;
@@ -111,13 +111,22 @@ public class DispatcherI extends _DispatcherDisp {
 
   @Override
   public void addLogData(LogData data, Current __current) {
-    System.out.println("the logs: " + Arrays.toString(data.categories) + "\n" + Arrays.toString(data.logs));
     publisher.publish(data);
     logger.addLogData(data);
   }
 
   @Override
   public int subscribe(Subscription sub, Current __current) {
+    String remoteIp = ClientInfo.getRemoteClientIp(__current);
+    sub.host = sub.host.replace("<HOST>", remoteIp);
     return publisher.subscribe(sub);
   }
+
+  @Override
+  public int unsubscribe(Subscription sub, Current __current) {
+    String remoteIp = ClientInfo.getRemoteClientIp(__current);
+    sub.host = sub.host.replace("<HOST>", remoteIp);
+    return publisher.unsubscribe(sub);
+  }
+
 }

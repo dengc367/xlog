@@ -1,24 +1,51 @@
 package com.renren.dp.xlog.logger.client;
 
-import java.text.MessageFormat;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Subscriber {
 
-  public static String hostPattern = "P:{0} -h {1} -p {2}";
+  private static final Logger logger = LoggerFactory.getLogger(Subscriber.class);
+  public static String endPointPattern = "P:default -h <HOST> -p <PORT>";
   private SubscriberAdapter sa;
   private String[] categories;
-  private String host;
+  private String endpoint;
+  private Timer t;
 
-  public Subscriber(String ip, int port, String[] categories) {
+  public Subscriber(int port, String[] categories) {
     sa = SubscriberAdapter.getInstance();
-    host = MessageFormat.format(hostPattern, "tcp", ip, port);
+    endpoint = endPointPattern.replace("<PORT>", String.valueOf(port));
     this.categories = categories;
   }
 
   public void subscribe() {
+    t = new Timer();
+    t.schedule(new SubscribeTimer(), 0, 10000);
+  }
+
+  public void unsubscribe() {
     String[] ips = ClientZooKeeperAdapter.getAddresses();
     for (int i = 0; i < ips.length; i++) {
-      sa.subscribe(ips[i], host, categories);
+      sa.unsubscribe(ips[i], endpoint, categories);
+      logger.debug("the subscription: " + ips[i]);
     }
+    t.cancel();
+    t = null;
+  }
+
+  class SubscribeTimer extends TimerTask {
+
+    @Override
+    public void run() {
+      String[] ips = ClientZooKeeperAdapter.getAddresses();
+      for (int i = 0; i < ips.length; i++) {
+        sa.subscribe(ips[i], endpoint, categories);
+        logger.debug("the subscription: " + ips[i]);
+      }
+    }
+
   }
 }
