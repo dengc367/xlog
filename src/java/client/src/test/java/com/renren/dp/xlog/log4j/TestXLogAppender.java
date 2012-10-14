@@ -21,16 +21,16 @@ public class TestXLogAppender {
     //
     // l.addAppender(app);
 
-//    l.fatal("first fatal");
+    // l.fatal("first fatal");
     // l = Logger.getLogger("test.3g.access.test 2");
-//    l.error("second error");
-//    l.debug("third debug");
+    // l.error("second error");
+    // l.debug("third debug");
     long i = 0;
     // while (true) {
-    for (; i < 13; i++) {
+    for (; i < 10; i++) {
       l.info("third23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 info"
           + i);
-//      l.error("second error" + i);
+      // l.error("second error" + i);
       // try {
       // Thread.sleep(100);
       // } catch (InterruptedException e) {
@@ -43,11 +43,11 @@ public class TestXLogAppender {
       System.out.println("second error" + i);
     }
 
-     try {
-     Thread.sleep(1000 * 100);
-     } catch (InterruptedException e) {
-     e.printStackTrace();
-     }
+    try {
+      Thread.sleep(1000 * 100);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 
 }

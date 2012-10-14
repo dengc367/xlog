@@ -23,6 +23,7 @@ public class SubscriberAdapter {
     DispatcherPrx ps = psMap.get(host);
     if (ps == null) {
       ps = DispatcherPrxHelper.uncheckedCast(ic.stringToProxy(host).ice_locatorCacheTimeout(60).ice_compress(true));
+      psMap.put(host, ps);
     }
     return ps;
   }
@@ -40,7 +41,11 @@ public class SubscriberAdapter {
     return _sa;
   }
 
-  public void subscribe(String serverip, String host, String[] categories) {
-    getDispatcherPrx(serverip).subscribe(new Subscription(host, categories, null));
+  public void subscribe(String serverip, String endpoint, String[] categories) {
+    getDispatcherPrx(serverip).subscribe(new Subscription(endpoint, categories, null));
+  }
+
+  public void unsubscribe(String serverip, String endpoint, String[] categories) {
+    getDispatcherPrx(serverip).unsubscribe(new Subscription(endpoint, categories, null));
   }
 }

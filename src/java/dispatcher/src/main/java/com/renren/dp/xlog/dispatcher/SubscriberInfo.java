@@ -2,15 +2,23 @@ package com.renren.dp.xlog.dispatcher;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class SubscriberInfo {
 
-  private List<String> hosts;
+  /**
+   * <host, time>
+   */
+  private Map<String, Long> hostMap = Maps.newHashMap();
+  private Map<String, Long> blackHostMap = Maps.newHashMap();
+  private List<String> hosts = Lists.newArrayList();
   private boolean shouldPublishAllNodes;
-  private Random rand;
+  private Random rand = new Random();
 
   public List<String> getSubScribeHosts() {
     if (shouldPublishAllNodes)
@@ -32,17 +40,36 @@ public class SubscriberInfo {
 
   public SubscriberInfo(List<String> hosts, boolean shouldPublishAllNodes) {
     this.shouldPublishAllNodes = shouldPublishAllNodes;
-    rand = new Random(hosts.size());
+    Long time = System.currentTimeMillis();
+    for (String host : hosts) {
+      this.hostMap.put(host, time);
+      if (!hosts.contains(host))
+        this.hosts.add(host);
+    }
   }
 
-  public void addSubScribeHost(String host) {
-    this.hosts.add(host);
-    rand = new Random(hosts.size());
+  public void addHost(String host) {
+    this.hostMap.put(host, System.currentTimeMillis());
+    if (!hosts.contains(host)) {
+      hosts.add(host);
+    }
+    this.blackHostMap.remove(host);
   }
 
-  public static void main(String[] args) {
-    Random r = new Random(10);
-    for (int i = 0; i < 10; i++)
-      System.out.println(r.nextInt(10));
+  public void removeHost(String host) {
+    this.hostMap.remove(host);
+    this.hosts.remove(host);
+    this.blackHostMap.remove(host);
+  }
+
+  /**
+   * TODO the better black host policy needed
+   * 
+   * @param host
+   */
+  public void setBlackHost(String host) {
+    Long time = this.hostMap.remove(host);
+    this.blackHostMap.put(host, time);
+    this.hosts.remove(host);
   }
 }
