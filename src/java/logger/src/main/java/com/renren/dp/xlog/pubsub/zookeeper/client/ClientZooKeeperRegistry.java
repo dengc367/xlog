@@ -1,6 +1,6 @@
-package com.renren.dp.xlog.logger.client;
+package com.renren.dp.xlog.pubsub.zookeeper.client;
 
-import com.renren.dp.xlog.logger.zookeeper.ZooKeeperRegister;
+import com.renren.dp.xlog.pubsub.zookeeper.ZooKeeperRegister;
 
 
 

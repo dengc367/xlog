@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.logger.client;
+package com.renren.dp.xlog.pubsub.zookeeper.client;
 
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -6,7 +6,7 @@ import org.apache.zookeeper.KeeperException.ConnectionLossException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.renren.dp.xlog.logger.zookeeper.ZooKeeperRegister;
+import com.renren.dp.xlog.pubsub.zookeeper.ZooKeeperRegister;
 
 
 

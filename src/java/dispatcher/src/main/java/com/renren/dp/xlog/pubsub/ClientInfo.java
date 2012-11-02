@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.dispatcher;
+package com.renren.dp.xlog.pubsub;
 
 import Ice.Current;
 

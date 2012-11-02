@@ -21,6 +21,7 @@
         	<param name="async" value="true"/>
         	<param name="cacheFileDir" value="/tmp/xlog"/>
         	<param name="cacheQueueSize" value="500"/>
+        	<param name="maxSendSize" value="50000"/>
         	<param name="protocolType" value="tcp"/>
         		<layout class="org.apache.log4j.PatternLayout">
                         <param name="ConversionPattern" value="%m" />

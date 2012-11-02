@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.logger.zookeeper;
+package com.renren.dp.xlog.pubsub.zookeeper;
 
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
@@ -15,7 +15,7 @@ public abstract class ZooKeeperHelper{
 	
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	public static String ZOOKEEPER_ROOT_PATH = "/0";  // 位于/open开放平台系统的/cloud模块之下
+	public static String ZOOKEEPER_ROOT_PATH = "/";  
 	protected  ZooKeeper zk ;
 	
 	public ZooKeeperHelper(Watcher watcher) {

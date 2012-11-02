@@ -1,12 +1,12 @@
-package com.renren.dp.xlog.logger.server;
+package com.renren.dp.xlog.pubsub.zookeeper.server;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Ids;
 
-import com.renren.dp.xlog.logger.zookeeper.ZooKeeperHelper;
-import com.renren.dp.xlog.logger.zookeeper.ZooKeeperRegister;
+import com.renren.dp.xlog.pubsub.zookeeper.ZooKeeperHelper;
+import com.renren.dp.xlog.pubsub.zookeeper.ZooKeeperRegister;
 
 
 

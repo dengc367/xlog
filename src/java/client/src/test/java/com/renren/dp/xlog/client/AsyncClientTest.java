@@ -2,6 +2,7 @@ package com.renren.dp.xlog.client;
 
 import xlog.slice.LogData;
 
+import com.renren.dp.xlog.client.XlogClient.ProtocolType;
 import com.renren.dp.xlog.client.exception.InitializationException;
 
 import junit.framework.TestCase;
@@ -14,7 +15,7 @@ public class AsyncClientTest extends TestCase {
   protected void setUp() {
     try {
       client = XlogClientFactory.getInstance(true);
-      client.initialize();
+      client.initialize("/tmp/xlog", 30, ProtocolType.TCP);
       // Properties prop=new Properties();
       // prop.setProperty(XlogClient.CACHE_FILE_DIR,"/home/xianquanzhang/xlog/src/java/client/tmp");
       // prop.setProperty(XlogClient.CACHE_QUEUE_SIZE,"20000");
@@ -84,11 +85,11 @@ public class AsyncClientTest extends TestCase {
 
   public void testDoSend() {
     try {
-      // for(int i =0 ; i < 100; i++){
-      while (true) {
+       for(int i =0 ; i < 100; i++){
+//      while (true) {
         client.doSend(new LogData[] { logData4, logData4, logData4 });
       }
-//      Thread.sleep(1000 * 100);
+      Thread.sleep(1000 * 100);
     } catch (Exception e) {
       fail();
       e.printStackTrace();

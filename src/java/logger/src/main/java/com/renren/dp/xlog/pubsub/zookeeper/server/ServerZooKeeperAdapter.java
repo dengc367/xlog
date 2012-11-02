@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.logger.server;
+package com.renren.dp.xlog.pubsub.zookeeper.server;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;

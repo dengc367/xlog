@@ -47,7 +47,8 @@ public class XLogAppender extends AppenderSkeleton {
   }
 
   public void setCacheFileDir(String cacheFileDir) {
-    this.cacheFileDir = cacheFileDir;
+    if (cacheFileDir != null && !cacheFileDir.isEmpty())
+      this.cacheFileDir = cacheFileDir;
   }
 
   public void setAsync(String async) {

@@ -23,6 +23,8 @@ import Ice.ObjectPrx;
 import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.config.DispatcherCluster;
 import com.renren.dp.xlog.logger.LoggerI;
+import com.renren.dp.xlog.pubsub.ClientInfo;
+import com.renren.dp.xlog.pubsub.Publisher;
 
 import dp.election.impl.DefaultWatcher;
 import dp.zk.ZkConn;
@@ -41,6 +43,7 @@ public class DispatcherI extends _DispatcherDisp {
     logger = new LoggerI();
     logger.initialize(adapter);
     publisher = new Publisher();
+    logger.setPublisher(publisher);
     long delayTime = Configuration.getLong("master.start.delay", 300) * 1000;
     int zkSessionTimeOut = Configuration.getInt("zk.session.timeout", 2) * 1000;
     conn = new ZkConn(Configuration.getString("zookeeper.connstr"), zkSessionTimeOut, new DefaultWatcher(this));
@@ -111,7 +114,6 @@ public class DispatcherI extends _DispatcherDisp {
 
   @Override
   public void addLogData(LogData data, Current __current) {
-    publisher.publish(data);
     logger.addLogData(data);
   }
 
