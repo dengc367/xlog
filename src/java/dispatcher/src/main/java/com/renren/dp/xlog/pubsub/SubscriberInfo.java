@@ -1,13 +1,11 @@
-package com.renren.dp.xlog.dispatcher;
+package com.renren.dp.xlog.pubsub;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 public class SubscriberInfo {
 
@@ -16,18 +14,21 @@ public class SubscriberInfo {
    */
   private Map<String, Long> hostMap = Maps.newHashMap();
   private Map<String, Long> blackHostMap = Maps.newHashMap();
+  // TODO add the gray hosts
+  private Map<String, Long> grayhostMap = Maps.newHashMap();  
   private List<String> hosts = Lists.newArrayList();
   private boolean shouldPublishAllNodes;
-  private Random rand = new Random();
 
   public List<String> getSubScribeHosts() {
-    if (shouldPublishAllNodes)
-      return hosts;
-    return Lists.newArrayList(hosts.get(rand.nextInt(hosts.size())));
+    return hosts;
   }
 
   public void setShouldPublishAllNodes(boolean shouldPublishAllNodes) {
     this.shouldPublishAllNodes = shouldPublishAllNodes;
+  }
+
+  public boolean isPulishAllNodes() {
+    return this.shouldPublishAllNodes;
   }
 
   public SubscriberInfo() {
@@ -71,5 +72,14 @@ public class SubscriberInfo {
     Long time = this.hostMap.remove(host);
     this.blackHostMap.put(host, time);
     this.hosts.remove(host);
+  }
+
+  public void setBlackHosts(List<String> blackhosts) {
+    if (null == blackhosts || blackhosts.isEmpty()) {
+      return;
+    }
+    for (String host : blackhosts) {
+      setBlackHost(host);
+    }
   }
 }

@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.logger.server;
+package com.renren.dp.xlog.pubsub.zookeeper.server;
 
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;

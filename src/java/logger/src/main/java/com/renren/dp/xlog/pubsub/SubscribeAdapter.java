@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.logger.client;
+package com.renren.dp.xlog.pubsub;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,12 +7,12 @@ import xlog.slice.DispatcherPrx;
 import xlog.slice.DispatcherPrxHelper;
 import xlog.slice.Subscription;
 
-public class SubscriberAdapter {
+public class SubscribeAdapter {
 
   private static Ice.Communicator ic;
   private static Map<String, DispatcherPrx> psMap = new HashMap<String, DispatcherPrx>();
 
-  public SubscriberAdapter() {
+  public SubscribeAdapter() {
     Ice.Properties prop = Ice.Util.createProperties();
     Ice.InitializationData initData = new Ice.InitializationData();
     initData.properties = prop;
@@ -28,13 +28,13 @@ public class SubscriberAdapter {
     return ps;
   }
 
-  private/* volatile */static SubscriberAdapter _sa;
+  private/* volatile */static SubscribeAdapter _sa;
 
-  public static SubscriberAdapter getInstance() {
+  public static SubscribeAdapter getInstance() {
     if (_sa == null) {
-      synchronized (SubscriberAdapter.class) {
+      synchronized (SubscribeAdapter.class) {
         if (_sa == null) {
-          _sa = new SubscriberAdapter();
+          _sa = new SubscribeAdapter();
         }
       }
     }

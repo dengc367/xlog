@@ -16,23 +16,23 @@ public class SyncClientTest extends TestCase{
 	    try {
 	    	client=XlogClientFactory.getInstance(true);
 	    	
-	    	client.initialize("tmp",0,ProtocolType.UDP);
+	    	client.initialize("tmp",0,ProtocolType.TCP);
 	    } catch (InitializationException e) {
 			e.printStackTrace();
 		}
 	    
 	    logData1=new LogData();
-	    logData1.categories=new String[]{"3g","access"};
+	    logData1.categories=new String[]{"test", "3g","access"};
 	    logData1.checkSum="123";
 	    logData1.logs=new String[]{"hello21","hi21"};
 	    
 	    logData2=new LogData();
-	    logData2.categories=new String[]{"som","cdn"};
+	    logData2.categories=new String[]{"test", "3g","access"};
 	    logData2.checkSum="222";
 	    logData2.logs=new String[]{"hello31","hi31"};
 	    
 	    logData3=new LogData();
-	    logData3.categories=new String[]{"sds","feed"};
+	    logData3.categories=new String[]{"test", "3g","access"};
 	    logData3.checkSum="333";
 	    logData3.logs=new String[]{"hello41","hi41"};
 	  }

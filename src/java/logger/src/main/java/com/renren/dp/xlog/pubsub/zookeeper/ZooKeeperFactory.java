@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.logger.zookeeper;
+package com.renren.dp.xlog.pubsub.zookeeper;
 
 import java.io.IOException;
 import java.io.InputStream;
