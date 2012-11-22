@@ -9,3 +9,6 @@ target
 logs
 generated
 build
+*.swp
+.gradle
+tmp

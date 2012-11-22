@@ -47,13 +47,6 @@ public class LoggerI extends _LoggerDisp {
     if(data==null){
       return ;
      }
-//    for (LogData logdata : data) {
-//      System.out.println("=========================" + Arrays.toString(logdata.categories)
-//          + "=========================");
-//      for (String log : logdata.logs) {
-//        System.out.println("=> " + log);
-//      }
-//    }
     for(LogData o:data){
     	addLogData(o,__current);
     }

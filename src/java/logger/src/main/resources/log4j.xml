@@ -8,8 +8,8 @@
                 </layout>
         </appender>
 
-        <appender name="log" class="org.apache.log4j.RollingFileAppender">
-                <param name="File" value="logs/dp-server.log" />
+        <appender name="xlog-logger-appender" class="org.apache.log4j.RollingFileAppender">
+                <param name="File" value="logs/xloglogger.log" />
                 <param name="maxFileSize" value="100MB" />
                 <param name="maxBackupIndex" value="10" />
                 <layout class="org.apache.log4j.PatternLayout">
@@ -17,19 +17,9 @@
                 </layout>
         </appender>
         
-        <appender name="log3" class="com.renren.dp.xlog.log4j.XLogAppender">
-        	<param name="async" value="true"/>
-        	<param name="cacheFileDir" value="/tmp/xlog"/>
-        	<param name="cacheQueueSize" value="500"/>
-        	<param name="protocolType" value="tcp"/>
-        		<layout class="org.apache.log4j.PatternLayout">
-                        <param name="ConversionPattern" value="%m" />
-                </layout>
-        </appender>
-    
-        <logger name="test.3g.access" additivity="false">
+        <logger name="com.renren.dp.xlog" additivity="false">
                 <level value="debug" />
-                <appender-ref ref="log3" />
+                <appender-ref ref="xlog-logger-appender" />
         </logger>
         
 </log4j:configuration>
