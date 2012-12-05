@@ -12,3 +12,7 @@ build
 *.swp
 .gradle
 tmp
+*.mk
+*.un~
+gyp/out/Default
+build

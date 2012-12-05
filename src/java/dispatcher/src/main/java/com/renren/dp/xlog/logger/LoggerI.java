@@ -7,7 +7,7 @@ import com.renren.dp.xlog.cache.CacheManagerFactory;
 import com.renren.dp.xlog.cache.WriteLocalOnlyCategoriesCache;
 import com.renren.dp.xlog.handler.AbstractFileNameHandler;
 import com.renren.dp.xlog.handler.FileNameHandlerFactory;
-import com.renren.dp.xlog.pubsub.Publisher;
+import com.renren.dp.xlog.pubsub.PubSubService;
 import com.renren.dp.xlog.storage.StorageRepositoryFactory;
 import com.renren.dp.xlog.sync.LogSyncInitialization;
 
@@ -23,7 +23,7 @@ public class LoggerI extends _LoggerDisp {
   private AbstractFileNameHandler fileNameHandler = null;
   private WriteLocalOnlyCategoriesCache wlcc = null;
 
-  private Publisher publisher;
+  private PubSubService pubsub;
 
   public boolean initialize(ObjectAdapter adapter) {
     adapter.add(this, adapter.getCommunicator().stringToIdentity("L"));
@@ -62,9 +62,9 @@ public class LoggerI extends _LoggerDisp {
     }
     String logFileNum = fileNameHandler.getCacheLogFileNum();
     LogMeta logMeta;
-    if (publisher.isSubscribed(data.categories)) {
+    if (pubsub.isSubscribed(data.categories)) {
       logMeta = new LogMeta(logFileNum, data, 3);
-      publisher.publish(logMeta);
+      pubsub.publish(logMeta);
     } else {
       logMeta = new LogMeta(logFileNum, data, 2);
     }
@@ -74,8 +74,8 @@ public class LoggerI extends _LoggerDisp {
     }
   }
 
-  public void setPublisher(Publisher publisher) {
-    this.publisher = publisher;
+  public void setPubSub(PubSubService pubsub) {
+    this.pubsub = pubsub;
   }
 
 }

@@ -1,21 +1,24 @@
-package com.renren.dp.xlog.logger;
+package com.renren.dp.xlog.pubsub.push;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.renren.dp.xlog.logger.XLogLogger;
+import com.renren.dp.xlog.logger.ConsoleXLogLogger;
+
 import Ice.Current;
+import Ice.Endpoint;
 import xlog.slice.LogData;
 import xlog.slice._PublisherServiceDisp;
 
-public class PublishService extends _PublisherServiceDisp {
+public class PushService extends _PublisherServiceDisp {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PublishService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PushService.class);
   private static final long serialVersionUID = 6920617857631824253L;
   private int port;
   XLogLogger logger;
-  private boolean receivedLog;
 
-  public PublishService(int port, Class<? extends XLogLogger> clazz) {
+  public PushService(int port, Class<? extends XLogLogger> clazz) {
     this.port = port;
     if (null == clazz) {
       clazz = ConsoleXLogLogger.class;
@@ -35,7 +38,6 @@ public class PublishService extends _PublisherServiceDisp {
   @Override
   public int publish(LogData data, Current __current) {
     logger.print(data.logs);
-    receivedLog = true;
     return 0;
   }
 
@@ -48,26 +50,14 @@ public class PublishService extends _PublisherServiceDisp {
     initData.properties = prop;
     ic = Ice.Util.initialize(initData);
   }
-  Ice.ObjectAdapter adapter;
 
   public void serve() {
-    adapter = ic.createObjectAdapterWithEndpoints("XlogLogger", "default -p " + port);
+    Ice.ObjectAdapter adapter = ic.createObjectAdapterWithEndpoints("XlogLogger", "default -p " + port);
     adapter.add(this, adapter.getCommunicator().stringToIdentity("P"));
     // TODO add the host, and port
     adapter.activate();
     String msg = "the XLog Publish/Subscribe Service program activated! the listening port is: " + port;
     System.out.println(msg);
     LOG.info(msg);
-  }
-
-  public void destroy() {
-    adapter.deactivate();
-    adapter.destroy();
-  }
-
-  public boolean isReceivedLog() {
-    boolean b = receivedLog;
-    receivedLog = false;
-    return b;
   }
 }

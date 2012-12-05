@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.apache.zookeeper.KeeperException;
 
 import xlog.proto.Xlog.ItemInfo;
@@ -13,6 +14,7 @@ import xlog.slice.DispatcherPrx;
 import xlog.slice.LogData;
 import xlog.slice.LoggerPrx;
 import xlog.slice.Subscription;
+import xlog.slice.XLogException;
 import xlog.slice._DispatcherDisp;
 import Ice.Connection;
 import Ice.Current;
@@ -23,8 +25,10 @@ import Ice.ObjectPrx;
 import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.config.DispatcherCluster;
 import com.renren.dp.xlog.logger.LoggerI;
-import com.renren.dp.xlog.pubsub.ClientInfo;
-import com.renren.dp.xlog.pubsub.Publisher;
+import com.renren.dp.xlog.pubsub.PubSubService;
+import com.renren.dp.xlog.pubsub.PubSubUtils;
+import com.renren.dp.xlog.pubsub.pull.PullService;
+import com.renren.dp.xlog.pubsub.push.Pusher;
 
 import dp.election.impl.DefaultWatcher;
 import dp.zk.ZkConn;
@@ -35,15 +39,15 @@ public class DispatcherI extends _DispatcherDisp {
   private ObjectPrx myprx;
   private DispatcherCluster<DispatcherPrx> cfg;
   private LoggerI logger;
-  private Publisher publisher;
+  private PubSubService pubsub;
   private ZkConn conn = null;
 
   protected boolean initialize(ObjectAdapter adapter) {
     myprx = adapter.add(this, adapter.getCommunicator().stringToIdentity("D"));
     logger = new LoggerI();
     logger.initialize(adapter);
-    publisher = new Publisher();
-    logger.setPublisher(publisher);
+    pubsub = new PubSubService();
+    logger.setPubSub(pubsub);
     long delayTime = Configuration.getLong("master.start.delay", 300) * 1000;
     int zkSessionTimeOut = Configuration.getInt("zk.session.timeout", 2) * 1000;
     conn = new ZkConn(Configuration.getString("zookeeper.connstr"), zkSessionTimeOut, new DefaultWatcher(this));
@@ -115,20 +119,29 @@ public class DispatcherI extends _DispatcherDisp {
   @Override
   public void addLogData(LogData data, Current __current) {
     logger.addLogData(data);
+    // TODO
   }
 
   @Override
-  public int subscribe(Subscription sub, Current __current) {
-    String remoteIp = ClientInfo.getRemoteClientIp(__current);
-    sub.host = sub.host.replace("<HOST>", remoteIp);
-    return publisher.subscribe(sub);
+  public int subscribe(Subscription sub, Current __current) throws XLogException {
+    return pubsub.subscribe(sub, __current);
   }
 
   @Override
   public int unsubscribe(Subscription sub, Current __current) {
-    String remoteIp = ClientInfo.getRemoteClientIp(__current);
-    sub.host = sub.host.replace("<HOST>", remoteIp);
-    return publisher.unsubscribe(sub);
+    return pubsub.unsubscribe(sub, __current);
+  }
+
+  private static Logger LOG = Logger.getLogger(DispatcherI.class);
+
+  @Override
+  public String[] getData(int categoryId, Current __current) throws XLogException {
+    try {
+      return pubsub.getData(categoryId, __current);
+    } catch (IOException e) {
+      LOG.error(e);
+      return null;
+    }
   }
 
 }

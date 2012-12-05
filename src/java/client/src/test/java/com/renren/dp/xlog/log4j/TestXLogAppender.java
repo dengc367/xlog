@@ -17,7 +17,7 @@ public class TestXLogAppender {
   public void test() {
     // PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
     DOMConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.xml"));
-    
+
     Logger l = Logger.getLogger("test.3g.access");
 
     // XLogAppender app = new XLogAppender();
@@ -29,11 +29,15 @@ public class TestXLogAppender {
     // l.error("second error");
     // l.debug("third debug");
     long i = 0;
-    while (true) {
-      i++;
-      // for (; i < 10; i++) {
-      l.info("third23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 info"
+    // while (true) {
+    // i++;
+    for (; i < 10; i++) {
+      l = Logger.getLogger("test.3g.access");
+      l.info("youku", new Exception("exp"));
+      l.info("third23 infothird23 infeothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 infothird23 info"
           + i);
+      l = Logger.getLogger("test.3g.action");
+      l.info("action action action action action action action action action action action action actioninfo" + i);
       // l.info("third23 " + i);
       // l.error("second error" + i);
       // try {

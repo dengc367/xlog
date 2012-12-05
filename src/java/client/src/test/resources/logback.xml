@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<configuration>  
+  <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">  
+    <layout class="ch.qos.logback.classic.PatternLayout">  
+      <pattern>%-20(%d{HH:mm:ss.SSS} [%thread]) %-5level %logger{80} - %msg%n</pattern>  
+    </layout>  
+  </appender>  
+  <appender name="xlog" class="com.renren.dp.xlog.logback.XLogAppender4LogBack">  
+    <cacheFileDir>/tmp/xlog</cacheFileDir>
+    <async>true</async>
+    <cacheQueueSize>1000</cacheQueueSize>
+    <maxSendSize>100</maxSendSize>
+    <protocolType>udp</protocolType>
+    <layout class="ch.qos.logback.classic.PatternLayout">  
+      <pattern>%msg%n</pattern>  
+    </layout>  
+  </appender> 
+  <logger name="test.3g.access" level="INFO" additivity="false">
+  	<appender-ref ref="xlog" />  
+  </logger> 
+  <root level="INFO">  
+    <appender-ref ref="stdout" />  
+  </root>  
+</configuration> 

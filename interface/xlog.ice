@@ -11,10 +11,18 @@ module slice {
 
   // pub sub structure
   dictionary<string, string> Str2StrDict;
-  struct Subscription{
-      string host;
+  class Subscription{
       Ice::StringSeq categories;
       Str2StrDict options;
+  };
+  class PushSubscription extends Subscription{
+      string host;
+  };
+
+  enum ErrorCode { NoSubscription, IllegalParameters, IOException };
+  exception XLogException{
+    ErrorCode code;
+    string msg;
   };
   //end
 
@@ -40,8 +48,9 @@ module slice {
     void addLogData(LogData data);
     void createZNode(int slot);
     bool register(Logger* subscriber, int frequence);
-    int subscribe(Subscription sub); // pub sub 
-    int unsubscribe(Subscription sub); // pub sub 
+    int subscribe(Subscription sub) throws XLogException; // pub sub 
+    int unsubscribe(Subscription sub) throws XLogException; // pub sub 
+    Ice::StringSeq getData(int categoryId) throws XLogException;
   };
 
   //pub sub 

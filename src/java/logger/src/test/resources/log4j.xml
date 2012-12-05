@@ -19,7 +19,6 @@
         
         <logger name="com.renren.dp.xlog" additivity="false">
                 <level value="debug" />
-                <appender-ref ref="xlog-logger-appender" />
+                <appender-ref ref="stdout" />
         </logger>
-        
 </log4j:configuration>

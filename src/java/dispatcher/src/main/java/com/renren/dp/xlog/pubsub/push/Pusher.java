@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.pubsub;
+package com.renren.dp.xlog.pubsub.push;
 
 import java.util.List;
 import java.util.Map;
@@ -6,7 +6,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,20 +13,26 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.logger.LogMeta;
+import com.renren.dp.xlog.pubsub.PubSubUtils;
 
 import xlog.slice.LogData;
+import xlog.slice.PushSubscription;
 import xlog.slice.Subscription;
 
-public class Publisher {
+public class Pusher {
   public static int SUCCESS = 0;
   public static int SUBSCRIPTION_PARAM_ILLEGAL = 1000;
-  Map<String, SubscriberInfo> subMap;
+  Map<String, PushServiceNodesInfo> subMap;
 
-  private PublishAdapter pa;
+  private BlockingQueue<LogMeta> bq = new ArrayBlockingQueue<LogMeta>(MAX_BLOCKING_QUEUE_SIZE, false);
+  private static int MAX_BLOCKING_QUEUE_SIZE = 100000;
+  private Logger LOG = LoggerFactory.getLogger(this.getClass());
+  
+  private PushAdapter pa;
   Thread pubThread;
 
-  public Publisher() {
-    pa = PublishAdapter.getInstance();
+  public Pusher() {
+    pa = PushAdapter.getInstance();
     subMap = Maps.newHashMap();
     pubThread = new PublishThread("PublishThread");
     pubThread.setDaemon(true);
@@ -45,7 +50,7 @@ public class Publisher {
      * @param data
      */
     public void sendLog(LogData data) {
-      SubscriberInfo sub = subMap.get(serializeCategories(data.categories));
+      PushServiceNodesInfo sub = subMap.get(PubSubUtils.serializeCategories(data.categories));
       if (null != sub) {
         List<String> hosts = sub.getSubScribeHosts();
         for (String h : hosts) {
@@ -83,28 +88,26 @@ public class Publisher {
 
   }
 
-  private BlockingQueue<LogMeta> bq = new ArrayBlockingQueue<LogMeta>(MAX_BLOCKING_QUEUE_SIZE, false);
-  private static int MAX_BLOCKING_QUEUE_SIZE = 100000;
-  private Logger logger = LoggerFactory.getLogger(this.getClass());
+  
 
   public void publish(LogMeta logMeta) {
 
     if (bq.size() >= MAX_BLOCKING_QUEUE_SIZE) {
-      logger.warn("the log size is full(>=" + MAX_BLOCKING_QUEUE_SIZE + "), drop the new log");
+      LOG.warn("the log size is full(>=" + MAX_BLOCKING_QUEUE_SIZE + "), drop the new log");
       logMeta.free();
       return;
     }
     bq.add(logMeta);
   }
 
-  public int subscribe(Subscription sub) {
+  public int subscribe(PushSubscription sub) {
     int ret = checkSubscription(sub);
     if (ret == SUCCESS) {
-      String catStr = serializeCategories(sub.categories);
-      boolean shouldPublishAllNodes = Configuration.getBoolean(catStr + ".shouldPublishAllNodes", true);
-      SubscriberInfo si = subMap.get(catStr);
+      String catStr = PubSubUtils.serializeCategories(sub.categories);
+      boolean shouldPublishAllNodes = Configuration.getBoolean(catStr + ".shouldPublishAllNodes", false);
+      PushServiceNodesInfo si = subMap.get(catStr);
       if (si == null) {
-        subMap.put(catStr, new SubscriberInfo(Lists.newArrayList(sub.host), shouldPublishAllNodes));
+        subMap.put(catStr, new PushServiceNodesInfo(Lists.newArrayList(sub.host), shouldPublishAllNodes));
       } else {
         si.addHost(sub.host);
         si.setShouldPublishAllNodes(shouldPublishAllNodes);
@@ -114,30 +117,18 @@ public class Publisher {
     return ret;
   }
 
-  public int unsubscribe(Subscription sub) {
+  public int unsubscribe(PushSubscription sub) {
     int ret = checkSubscription(sub);
     if (ret == SUCCESS) {
-      String catStr = serializeCategories(sub.categories);
+      String catStr = PubSubUtils.serializeCategories(sub.categories);
       subMap.remove(catStr);
     }
     return ret;
   }
 
-  private String serializeCategories(String[] categories) {
-    StringBuilder catStr = new StringBuilder();
-    for (int i = 0; i < categories.length; i++) {
-      catStr.append(categories[i]);
-      if (i < categories.length - 1) {
-        catStr.append(".");
-      }
-    }
-    return catStr.toString();
-  }
-
   private int checkSubscription(Subscription sub) {
-
     String[] cat = sub.categories;
-    if (!ArrayUtils.isEmpty(cat) && StringUtils.isNotBlank(sub.host)) {
+    if (!ArrayUtils.isEmpty(cat)) {
       for (int i = 0; i < cat.length; i++) {
         if (cat[i].isEmpty()) {
           return SUBSCRIPTION_PARAM_ILLEGAL;
@@ -149,7 +140,7 @@ public class Publisher {
   }
 
   public boolean isSubscribed(String[] categories) {
-    return subMap.containsKey(serializeCategories(categories));
+    return subMap.containsKey(PubSubUtils.serializeCategories(categories));
   }
 
 }

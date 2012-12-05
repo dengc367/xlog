@@ -1,0 +1,4 @@
+ hosts=xlogagent1.d.xiaonei.com:10001,xlogagent2.d.xiaonei.com:10001
+maxSendSize=100
+maxQueueSize=300
+isUdpProtocol=false
