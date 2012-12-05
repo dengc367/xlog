@@ -6,13 +6,14 @@ import java.util.Map;
 import xlog.slice.DispatcherPrx;
 import xlog.slice.DispatcherPrxHelper;
 import xlog.slice.Subscription;
+import xlog.slice.XLogException;
 
-public class SubscribeAdapter {
+public class DispatcherAdapter {
 
   private static Ice.Communicator ic;
   private static Map<String, DispatcherPrx> psMap = new HashMap<String, DispatcherPrx>();
 
-  public SubscribeAdapter() {
+  public DispatcherAdapter() {
     Ice.Properties prop = Ice.Util.createProperties();
     Ice.InitializationData initData = new Ice.InitializationData();
     initData.properties = prop;
@@ -28,24 +29,29 @@ public class SubscribeAdapter {
     return ps;
   }
 
-  private/* volatile */static SubscribeAdapter _sa;
+  private/* volatile */static DispatcherAdapter _sa;
 
-  public static SubscribeAdapter getInstance() {
+  public static DispatcherAdapter getInstance() {
     if (_sa == null) {
-      synchronized (SubscribeAdapter.class) {
+      synchronized (DispatcherAdapter.class) {
         if (_sa == null) {
-          _sa = new SubscribeAdapter();
+          _sa = new DispatcherAdapter();
         }
       }
     }
     return _sa;
   }
 
-  public void subscribe(String serverip, String endpoint, String[] categories) {
-    getDispatcherPrx(serverip).subscribe(new Subscription(endpoint, categories, null));
+  public int subscribe(String serverip, String[] categories, Map<String, String> options) throws XLogException {
+    return getDispatcherPrx(serverip).subscribe(new Subscription(categories, options));
+
   }
 
-  public void unsubscribe(String serverip, String endpoint, String[] categories) {
-    getDispatcherPrx(serverip).unsubscribe(new Subscription(endpoint, categories, null));
+  public void unsubscribe(String serverip, String[] categories, Map<String, String> options) throws XLogException {
+    getDispatcherPrx(serverip).unsubscribe(new Subscription(categories, options));
+  }
+
+  public String[] getData(String iceEndpoint, int categoryId) throws XLogException {
+    return getDispatcherPrx(iceEndpoint).getData(categoryId);
   }
 }

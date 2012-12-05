@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.pubsub;
+package com.renren.dp.xlog.pubsub.push;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import java.util.Map;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public class SubscriberInfo {
+public class PushServiceNodesInfo {
 
   /**
    * <host, time>
@@ -31,15 +31,15 @@ public class SubscriberInfo {
     return this.shouldPublishAllNodes;
   }
 
-  public SubscriberInfo() {
+  public PushServiceNodesInfo() {
     this(false);
   }
 
-  public SubscriberInfo(boolean shouldPublishAllNodes) {
+  public PushServiceNodesInfo(boolean shouldPublishAllNodes) {
     this(new ArrayList<String>(), shouldPublishAllNodes);
   }
 
-  public SubscriberInfo(List<String> hosts, boolean shouldPublishAllNodes) {
+  public PushServiceNodesInfo(List<String> hosts, boolean shouldPublishAllNodes) {
     this.shouldPublishAllNodes = shouldPublishAllNodes;
     Long time = System.currentTimeMillis();
     for (String host : hosts) {

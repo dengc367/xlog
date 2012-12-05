@@ -1,0 +1,23 @@
+#include "src/rsyslog/xlog_rsyslog.h"
+#include <string.h>
+#include <stdio.h>
+
+
+int init_xlog(char* const catStr){
+    //TODO
+	char* m = "xlgo_c inited";
+	write(1, m, strlen(m));
+    return 0;
+}
+int send_to_xlog(char* const msg, int const len ){	
+	char* m = "xlgo_c send";
+	write(1, m, strlen(m));
+	write(1, msg, len);
+    return 0;
+}
+
+
+int close_xlog(){
+    //TODO
+    return 0;
+}

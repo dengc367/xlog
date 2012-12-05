@@ -13,6 +13,7 @@ install Ice (version 3.3 +)
 install protobuff (version 2.2 +)
 install zookeeper (version 3.4.3+)
 install maven (version 2.2+)
+install gyp ( command `gyp --depth=. xlog.gyp -Dlibrary=static_library` can make the Makefile )
 
 3 set system environment variables
 ICE_HOME,ZOOKEEPER_HOME,PROTOBUF_HOME,BOOST_HOME,M2_HOME

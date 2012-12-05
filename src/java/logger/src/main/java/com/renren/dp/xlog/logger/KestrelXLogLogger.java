@@ -16,7 +16,7 @@ public class KestrelXLogLogger implements XLogLogger {
   CamelContext context = new DefaultCamelContext();
 
   @Override
-  public void log(String[] logs) {
+  public void print(String[] logs) {
     // Set up the ActiveMQ JMS Components
     // START SNIPPET: e2
     KestrelConfiguration conf = new KestrelConfiguration();
@@ -83,6 +83,12 @@ public class KestrelXLogLogger implements XLogLogger {
   }
 
   public static void main(String[] args) {
-    new KestrelXLogLogger().log(new String[] { "aa" });
+    new KestrelXLogLogger().print(new String[] { "aa" });
+  }
+
+  @Override
+  public void print(String log) {
+    // TODO Auto-generated method stub
+    
   }
 }

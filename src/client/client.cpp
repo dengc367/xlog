@@ -53,7 +53,7 @@ void Client::run()
                slice::LogDataSeq::iterator begin_it=_data.begin();
                slice::LogDataSeq::iterator end_it=begin_it+5;
                data.assign(begin_it,end_it);
-                _data.erase(begin_it,end_it);
+               _data.erase(begin_it,end_it);
             }else
             {
                data.swap(_data);

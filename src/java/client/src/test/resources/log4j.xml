@@ -21,14 +21,18 @@
         	<param name="async" value="true"/>
         	<param name="cacheFileDir" value="/tmp/xlog"/>
         	<param name="cacheQueueSize" value="500"/>
-        	<param name="maxSendSize" value="50000"/>
-        	<param name="protocolType" value="tcp"/>
+        	<param name="maxSendSize" value="500"/>
+        	<param name="protocolType" value="udp"/>
         		<layout class="org.apache.log4j.PatternLayout">
                         <param name="ConversionPattern" value="%m" />
                 </layout>
         </appender>
     
         <logger name="test.3g.access" additivity="false">
+                <level value="debug" />
+                <appender-ref ref="log3" />
+        </logger>
+        <logger name="test.3g.action" additivity="false">
                 <level value="debug" />
                 <appender-ref ref="log3" />
         </logger>

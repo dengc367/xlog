@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.pubsub;
+package com.renren.dp.xlog.pubsub.push;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,14 +7,14 @@ import xlog.slice.LogData;
 import xlog.slice.PublisherServicePrx;
 import xlog.slice.PublisherServicePrxHelper;
 
-public class PublishAdapter {
+public class PushAdapter {
 
   private static final String UDP_MESSAGE_SIZE = "10485760";
-  private/* volatile */static PublishAdapter _pa;
+  private/* volatile */static PushAdapter _pa;
   private static Map<String, PublisherServicePrx> psMap = new HashMap<String, PublisherServicePrx>();
   private static Ice.Communicator ic;
 
-  private PublishAdapter() {
+  private PushAdapter() {
     Ice.Properties prop = Ice.Util.createProperties();
     // 10M udp unit is bytes
     // prop.setProperty("Ice.UDP.SndSize", UDP_MESSAGE_SIZE);
@@ -45,11 +45,11 @@ public class PublishAdapter {
     return ps;
   }
 
-  public static PublishAdapter getInstance() {
+  public static PushAdapter getInstance() {
     if (_pa == null) {
-      synchronized (PublishAdapter.class) {
+      synchronized (PushAdapter.class) {
         if (_pa == null) {
-          _pa = new PublishAdapter();
+          _pa = new PushAdapter();
         }
       }
     }
