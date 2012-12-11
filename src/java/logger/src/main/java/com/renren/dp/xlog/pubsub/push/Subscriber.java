@@ -36,9 +36,9 @@ public class Subscriber {
 
   public void unsubscribe() throws XLogException {
     String[] ips = ClientZooKeeperAdapter.getAddresses();
+    Map<String, String> a = Maps.newHashMap();
+    a.put(PUSH_SERVICE_ENDPOINT, endpoint);
     for (int i = 0; i < ips.length; i++) {
-      Map<String, String> a = Maps.newHashMap();
-      a.put(PUSH_SERVICE_ENDPOINT, endpoint);
       sa.unsubscribe(ips[i], categories, a);
       logger.debug("the subscription: " + ips[i]);
     }
@@ -53,10 +53,10 @@ public class Subscriber {
     @Override
     public void run() {
       String[] ips = ClientZooKeeperAdapter.getAddresses();
+      Map<String, String> a = Maps.newHashMap();
+      a.put(PUSH_SERVICE_ENDPOINT, endpoint);
       for (int i = 0; i < ips.length; i++) {
         try {
-          Map<String, String> a = Maps.newHashMap();
-          a.put(PUSH_SERVICE_ENDPOINT, endpoint);
           sa.subscribe(ips[i], categories, a);
         } catch (XLogException e) {
           e.printStackTrace();

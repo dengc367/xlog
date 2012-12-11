@@ -94,7 +94,7 @@
             'sources': [
                 '<(ROOT)/build/generated/xlog.cpp',
                 '<(ROOT)/build/generated/xlog.pb.cc',
-                '<(ROOT)/src/config/dispatcher_config.cpp',
+               # '<(ROOT)/src/config/dispatcher_config.cpp',
                 '<(ROOT)/src/config/client_config_manager.cpp',
                 '<(ROOT)/src/config/config_bootstrap.cpp',
                 '<(ROOT)/src/common/zk_manager.cpp',

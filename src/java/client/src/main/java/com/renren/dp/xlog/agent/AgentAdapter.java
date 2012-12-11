@@ -7,7 +7,7 @@ import xlog.slice.LogData;
 
 public interface AgentAdapter {
 
-  public boolean init(String[] agents ,ProtocolType protocolType);
+  public boolean init(String[] agents ,ProtocolType protocolType, boolean compress);
   
   public boolean send(LogData[] data) throws XlogClientException; 
   

@@ -35,6 +35,9 @@ public abstract class XlogClient {
   public abstract void initialize(String cacheFileDir, int cacheQueueSize, ProtocolType pt)
       throws InitializationException;
 
+  public abstract void initialize(String cacheFileDir, int cacheQueueSize, ProtocolType pt, boolean compress)
+      throws InitializationException;
+
   protected Properties loadProp(String fileName) throws InitializationException {
     Properties prop = new Properties();
     InputStream is = XlogClient.class.getClassLoader().getResourceAsStream(fileName);

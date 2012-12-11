@@ -31,8 +31,12 @@ public class XLogClientWrapper implements XLogAppenderParamsI {
   private int DEFAULT_MAX_SEND_SIZE = 50000;
   private ProtocolType protocolType = ProtocolType.UDP;
   private boolean async = true;
+  private boolean compress = true;
   private Map<String, String[]> categoriesMapCache;
   private int cacheQueueSize;
+
+  private Map<String, List<String>> logMap;
+  private Map<String, Integer> lengthMap;
 
   public XLogClientWrapper() {
   }
@@ -47,6 +51,13 @@ public class XLogClientWrapper implements XLogAppenderParamsI {
   public void setAsync(String async) {
     if (null != async) {
       this.async = Boolean.parseBoolean(async);
+    }
+  }
+
+  @Override
+  public void setCompress(String compress) {
+    if (null != compress) {
+      this.compress = Boolean.parseBoolean(compress);
     }
   }
 
@@ -75,19 +86,18 @@ public class XLogClientWrapper implements XLogAppenderParamsI {
 
     client = XlogClientFactory.getInstance(async);
     try {
-      client.initialize(cacheFileDir, cacheQueueSize, protocolType);
+      client.initialize(cacheFileDir, cacheQueueSize, protocolType, compress);
       logMap = new HashMap<String, List<String>>();
       lengthMap = new HashMap<String, Integer>();
       categoriesMapCache = new HashMap<String, String[]>(10);
       initialized = true;
-      System.out.println("Xlog Appender (" + this + ") initialized, the appender parameters: cacheFileDir="
-          + cacheFileDir + ", cacheQueueSize=" + cacheQueueSize + ", maxSendSize=" + maxSendSize + ", protocolType="
-          + protocolType + ", async=" + async);
+      LogLog.debug("Xlog Appender (" + this + ") initialized, the appender parameters: cacheFileDir=" + cacheFileDir
+          + ", cacheQueueSize=" + cacheQueueSize + ", maxSendSize=" + maxSendSize + ", protocolType=" + protocolType
+          + ", async=" + async + ", compress=" + compress);
     } catch (InitializationException e) {
       initialized = false;
-      System.err.println("XLog Log4j Appender initialized failed.");
-      System.err
-          .println("the tutorial & Reference link: http://wiki.d.xiaonei.com/pages/viewpage.action?pageId=14846863");
+      LogLog.error("XLog Log4j Appender initialized failed.\n"
+          + "the tutorial & Reference link: http://wiki.d.xiaonei.com/pages/viewpage.action?pageId=14846863");
       e.printStackTrace();
     }
   }
@@ -127,9 +137,6 @@ public class XLogClientWrapper implements XLogAppenderParamsI {
     }
     return categoriesMapCache.get(loggerName);
   }
-
-  private Map<String, List<String>> logMap;
-  private Map<String, Integer> lengthMap;
 
   public void append(String categories, String formatedLog) {
     if (!initialized) {
