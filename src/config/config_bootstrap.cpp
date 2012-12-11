@@ -1,5 +1,5 @@
 #include "src/common/zk_conn.h"
-#include "src/config/dispatcher_config.h"
+#include "src/common/common.h"
 #include "build/generated/xlog.pb.h"
 #include <boost/lexical_cast.hpp>
 

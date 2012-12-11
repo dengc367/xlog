@@ -23,6 +23,7 @@
         	<param name="cacheQueueSize" value="500"/>
         	<param name="maxSendSize" value="500"/>
         	<param name="protocolType" value="udp"/>
+        	<param name="compress" value="false"/>
         		<layout class="org.apache.log4j.PatternLayout">
                         <param name="ConversionPattern" value="%m" />
                 </layout>

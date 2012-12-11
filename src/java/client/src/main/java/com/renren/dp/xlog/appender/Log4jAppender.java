@@ -47,6 +47,11 @@ public class Log4jAppender extends AppenderSkeleton implements XLogAppenderParam
   public void setAsync(String async) {
     wrapper.setAsync(async);
   }
+  
+  @Override
+  public void setCompress(String compress) {
+    wrapper.setCompress(compress);
+  }
 
   @Override
   public void setCacheQueueSize(int cacheQueueSize) {
@@ -88,4 +93,5 @@ public class Log4jAppender extends AppenderSkeleton implements XLogAppenderParam
     }
     wrapper.append(event.getLoggerName(), logBuilder.toString());
   }
+
 }

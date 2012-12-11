@@ -48,6 +48,11 @@ public class LogBackAppender extends AppenderBase<ILoggingEvent> implements XLog
   }
 
   @Override
+  public void setCompress(String compress) {
+    wrapper.setCompress(compress);
+  }
+
+  @Override
   public void setCacheQueueSize(int cacheQueueSize) {
     wrapper.setCacheQueueSize(cacheQueueSize);
   }

@@ -69,7 +69,13 @@ public class AsyncClient extends XlogClient {
   }
 
   @Override
-  public void initialize(String cacheFileDir, int cacheQueueSize, ProtocolType pt) throws InitializationException {
+  public void initialize(String cacheFileDir, int cacheQueueSize, ProtocolType pt)
+      throws InitializationException {
+    initialize(cacheFileDir,  cacheQueueSize, pt, true);
+  }
+  @Override
+  public void initialize(String cacheFileDir, int cacheQueueSize, ProtocolType pt, boolean compress)
+      throws InitializationException {
     lock.lock();
     if (!isInit) {
       isInit = true;
@@ -99,7 +105,7 @@ public class AsyncClient extends XlogClient {
       }
       agentAdapter = new DefaultAgentAdapter();
 
-      if (!agentAdapter.init(agentAddresses, protocol)) {
+      if (!agentAdapter.init(agentAddresses, protocol, compress)) {
         throw new InitializationException("Fail to initialise agent adapter,please check agent address parameter!");
       }
       try {
