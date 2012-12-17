@@ -54,8 +54,9 @@ namespace xlog
             logData.categories = _categories;
             logData.logs.swap(_logSeq);
             logDataSeq.push_back(logData);
-            _client->doSend(logDataSeq);
+            bool ret = _client->doSend(logDataSeq);
             _strlen = 0;
+            return ! ret;
         }
         return 0;
     }
