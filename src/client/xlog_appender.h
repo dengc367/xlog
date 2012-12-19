@@ -4,6 +4,9 @@
 #include <Ice/BuiltinSequences.h>
 #include "src/client/client.h"
 #include "src/client/xlog_properties.h"
+#include <IceUtil/Thread.h>
+#include <IceUtil/Mutex.h>
+#include <IceUtil/Monitor.h>
 
 
 using namespace std;
@@ -22,6 +25,7 @@ namespace xlog{
              vector<string> _categories;
              Ice::StringSeq _logSeq;
              int _strlen;
+             ::IceUtil::Monitor<IceUtil::Mutex> _mutex;
     };
 }
 
