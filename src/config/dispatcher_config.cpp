@@ -85,6 +85,8 @@ void DispatcherConfig::updateSlot(int slot_id)
         dispatcher_nodes.push_back(endpoint);
         znode_data.clear();
     }
+    if(dispatcher_nodes.empty())
+        return;
     _config[slot_id]=dispatcher_nodes;
     _version++;
 

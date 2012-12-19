@@ -20,7 +20,10 @@ int main(int argc , char** argv)
 
     for(int i = 0; i < count; i++){
         std::cout << "count: " << i << std::endl;
-        batchClient.append("test test test test test test test test" + boost::lexical_cast<std::string>(i));
+        int ret = batchClient.append("test test test test test test test test" + boost::lexical_cast<std::string>(i));
+        cout << "the ret is " << ret << endl;
+
+
     }
 
 }

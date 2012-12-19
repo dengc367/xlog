@@ -46,8 +46,9 @@ namespace xlog
 
     int XLogAppender::append(const std::string& msg)
     {
-        _logSeq.push_back(msg);
+        ::IceUtil::Monitor<IceUtil::Mutex>::Lock lock(_mutex);
         _strlen += msg.length();
+        _logSeq.push_back(msg);
         if(_strlen >= _maxSendSize){
             xlog::slice::LogDataSeq logDataSeq;
             xlog::slice::LogData logData;
@@ -58,6 +59,7 @@ namespace xlog
             _strlen = 0;
             return ! ret;
         }
+        _mutex.notify();
         return 0;
     }
 
