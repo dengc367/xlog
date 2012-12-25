@@ -11,6 +11,7 @@ import org.apache.zookeeper.KeeperException;
 import xlog.proto.Xlog.ItemInfo;
 import xlog.proto.Xlog.ItemInfo.Builder;
 import xlog.slice.DispatcherPrx;
+import xlog.slice.ErrorCode;
 import xlog.slice.LogData;
 import xlog.slice.LoggerPrx;
 import xlog.slice.Subscription;
@@ -39,15 +40,20 @@ public class DispatcherI extends _DispatcherDisp {
   private ObjectPrx myprx;
   private DispatcherCluster<DispatcherPrx> cfg;
   private LoggerI logger;
-  private PubSubService pubsub;
+  private PubSubService pubsub = null;
   private ZkConn conn = null;
+  boolean ispubSubStart = false;
 
   protected boolean initialize(ObjectAdapter adapter) {
     myprx = adapter.add(this, adapter.getCommunicator().stringToIdentity("D"));
     logger = new LoggerI();
     logger.initialize(adapter);
-    pubsub = new PubSubService();
-    logger.setPubSub(pubsub);
+    ispubSubStart = Configuration.getBoolean("xlog.pubsub.start", false);
+    if (ispubSubStart) {
+      LOG.info("the pubsub server is starting.");
+      pubsub = new PubSubService();
+      logger.setPubSub(pubsub);
+    }
     long delayTime = Configuration.getLong("master.start.delay", 300) * 1000;
     int zkSessionTimeOut = Configuration.getInt("zk.session.timeout", 2) * 1000;
     conn = new ZkConn(Configuration.getString("zookeeper.connstr"), zkSessionTimeOut, new DefaultWatcher(this));
@@ -124,6 +130,11 @@ public class DispatcherI extends _DispatcherDisp {
 
   @Override
   public int subscribe(Subscription sub, Current __current) throws XLogException {
+    if (!ispubSubStart) {
+      LOG.warn("the pubsub server is not started, but the client " + PubSubUtils.getRemoteClientIp(__current)
+          + " want to subscribe. ");
+      throw new XLogException(ErrorCode.PubSubNotStartedException, "the pubsub server is not started");
+    }
     return pubsub.subscribe(sub, __current);
   }
 
@@ -137,6 +148,11 @@ public class DispatcherI extends _DispatcherDisp {
   @Override
   public String[] getData(int categoryId, Current __current) throws XLogException {
     try {
+      if (!ispubSubStart) {
+        LOG.warn("the pubsub server is not started, but the client " + PubSubUtils.getRemoteClientIp(__current)
+            + " want to getData. ");
+        throw new XLogException(ErrorCode.PubSubNotStartedException, "the pubsub server is not started");
+      }
       return pubsub.getData(categoryId, __current);
     } catch (IOException e) {
       LOG.error(e);

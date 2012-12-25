@@ -2,6 +2,7 @@ package com.renren.dp.xlog.pubsub;
 
 import java.io.IOException;
 
+import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.logger.LogMeta;
 import com.renren.dp.xlog.pubsub.pull.PullService;
 import com.renren.dp.xlog.pubsub.push.Pusher;
@@ -48,9 +49,7 @@ public class PubSubService {
   }
 
   public boolean isSubscribed(String[] categories) {
-    return false;
-    // TODO
-    // return pusher.isSubscribed(categories);
+      return pusher.isSubscribed(categories);
   }
 
   public void publish(LogMeta logMeta) {

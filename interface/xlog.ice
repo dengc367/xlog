@@ -19,7 +19,7 @@ module slice {
       string host;
   };
 
-  enum ErrorCode { NoSubscription, IllegalParameters, IOException };
+  enum ErrorCode { NoSubscription, IllegalParameters, IOException, PubSubNotStartedException };
   exception XLogException{
     ErrorCode code;
     string msg;
