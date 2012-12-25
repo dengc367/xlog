@@ -23,7 +23,7 @@ public class LoggerI extends _LoggerDisp {
   private AbstractFileNameHandler fileNameHandler = null;
   private WriteLocalOnlyCategoriesCache wlcc = null;
 
-  private PubSubService pubsub;
+  private PubSubService pubsub = null;
 
   public boolean initialize(ObjectAdapter adapter) {
     adapter.add(this, adapter.getCommunicator().stringToIdentity("L"));
@@ -61,12 +61,12 @@ public class LoggerI extends _LoggerDisp {
       return;
     }
     String logFileNum = fileNameHandler.getCacheLogFileNum();
-    LogMeta logMeta;
-    if (pubsub.isSubscribed(data.categories)) {
+    LogMeta logMeta = null;
+    if (pubsub == null) {
+      logMeta = new LogMeta(logFileNum, data, 2);
+    } else if (pubsub.isSubscribed(data.categories)) {
       logMeta = new LogMeta(logFileNum, data, 3);
       pubsub.publish(logMeta);
-    } else {
-      logMeta = new LogMeta(logFileNum, data, 2);
     }
     boolean res = cacheManager.writeCache(logMeta);
     if (res && (!wlcc.isWriteLocalOnly(data))) {

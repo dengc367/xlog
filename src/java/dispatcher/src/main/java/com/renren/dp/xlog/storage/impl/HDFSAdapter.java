@@ -212,10 +212,9 @@ public abstract class HDFSAdapter implements StorageAdapter {
     try {
       // 判断文件是否存在，因为有可能别的节点已经创建了该文件
       if (fs.exists(p)) {
-        return fs.append(p, bufferSize);
-      } else {
-        return fs.create(p, false, bufferSize);
-      }
+        p = new Path(path + "." + uuid + "." + System.currentTimeMillis());
+      } 
+      return fs.create(p, false, bufferSize);
     } catch (Exception e) {
       logger.error("fail to create HDFSOutputstream,then reinitialize hdfs and recreate!the exception is "
           + e.getMessage());
