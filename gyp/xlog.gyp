@@ -66,7 +66,7 @@
                 ],
                 'action': [
                     '<(SLICE2CPP_BIN)',
-                    '-I<(ICE_HOME)/slice',
+                    '-I<(ICE_SLICE_HOME)/slice',
                     '<(RULE_INPUT_PATH)',
                     '--output-dir=<(SLICE_GEN_PATH)',
                 ],
