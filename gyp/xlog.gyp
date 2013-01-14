@@ -170,6 +170,48 @@
             ],
         },
 
+        ##### xlog client shared library
+        {
+            'target_name': 'XLogClient',
+            'type': 'static_library',
+            'msvs_guid': '5ECEC9E5-8F23-47B6-93E0-C3B328B3BE65',
+            'defines': [
+                'OS_LINUX',
+                'POSIX',
+                'NEWARCH',
+            ],
+            'include_dirs': [
+                '<(ROOT)',
+            ],
+            'dependencies': [
+                'xlog_generated', 
+            ],
+            'sources': [
+                '<(ROOT)/src/client/xlog_appender.cpp',
+                '<(ROOT)/src/client/xlog_properties.cpp',
+                '<(ROOT)/src/client/client.cpp',
+                '<(ROOT)/build/generated/xlog.cpp',
+                '<(ROOT)/src/adapter/agent_adapter.cpp',
+            ],
+            'conditions': [
+                ['OS=="linux"', {
+                    'include_dirs': [
+                        '<(ZOOKEEPER_HOME)/include', 
+                        '<(PROTOBUF_HOME)/include', 
+                        '<(RSYSLOG_HOME)/runtime', 
+                        '<(RSYSLOG_HOME)/', 
+                        '<(ICE_HOME)/include', 
+                        '<(GEN_PATH)',
+                    ],
+                    'libraries': [
+                        '-L<(ICE_HOME)/lib', 
+                        '-lIce', 
+                        '-lIceUtil', 
+                    ]
+                }],
+            ],
+        },
+
         ##### xlog client target
         {
             'target_name': 'xlog_client',
@@ -185,15 +227,16 @@
             ],
             'dependencies': [
                 'xlog_generated', 
+                'XLogClient', 
             ],
             'sources': [
-                #'<(ROOT)/src/example/xlog_appender_test.cpp',
-                '<(ROOT)/src/example/xlog_appender_test_for_multi_thread.cpp',
-                '<(ROOT)/src/client/xlog_appender.cpp',
-                '<(ROOT)/src/client/xlog_properties.cpp',
-                '<(ROOT)/src/client/client.cpp',
-                '<(ROOT)/build/generated/xlog.cpp',
-                '<(ROOT)/src/adapter/agent_adapter.cpp',
+                #'<(ROOT)/src/example/c++/xlog_appender_test.cpp',
+                '<(ROOT)/src/example/c++/xlog_appender_test_for_multi_thread.cpp',
+                #'<(ROOT)/src/client/xlog_appender.cpp',
+                #'<(ROOT)/src/client/xlog_properties.cpp',
+                #'<(ROOT)/src/client/client.cpp',
+                #'<(ROOT)/build/generated/xlog.cpp',
+                #'<(ROOT)/src/adapter/agent_adapter.cpp',
             ],
             'conditions': [
                 ['OS=="linux"', {
@@ -207,6 +250,7 @@
                         '-L<(ICE_HOME)/lib', 
                         '-lIce', 
                         '-lIceUtil', 
+                        #'-L<(GYP_HOME)/out/Default/lib.target',
                     ]
                 }],
             ],
