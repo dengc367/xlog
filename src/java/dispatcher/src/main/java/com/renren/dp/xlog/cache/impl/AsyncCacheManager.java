@@ -16,13 +16,13 @@ import com.renren.dp.xlog.io.LogWriter;
 import com.renren.dp.xlog.io.impl.DefaultLogWriter;
 import com.renren.dp.xlog.logger.LogMeta;
 import com.renren.dp.xlog.util.Constants;
-import com.renren.dp.xlog.util.LogDataFormat;
 
 public class AsyncCacheManager extends CacheManager {
 
   private Map<String, TaskWriter> taskWriterMap = null;
 
-  private final static Logger logger = LoggerFactory.getLogger(AsyncCacheManager.class);
+  private final static Logger logger = LoggerFactory
+      .getLogger(AsyncCacheManager.class);
 
   public AsyncCacheManager() {
     super();
@@ -33,25 +33,28 @@ public class AsyncCacheManager extends CacheManager {
   }
 
   public boolean writeCache(LogMeta logMeta) {
-    String category = LogDataFormat.transformCategories(logMeta.getLogData().categories);
-    TaskWriter tw = null;
-    if (taskWriterMap.containsKey(category)) {
-      tw = taskWriterMap.get(category);
-      tw.add(logMeta);
-    } else {
-      LogWriter logWriter = new DefaultLogWriter();
-      logWriter.createFile(new File(cacheRootDir + "/" + category + "/"
-          + FileNameHandlerFactory.getInstance().getCacheLogFileNum()));
-      BlockingQueue<LogMeta> bq = new ArrayBlockingQueue<LogMeta>(Constants.CACHE_MANAGER_QUEUE_SIZE);
+    synchronized (taskWriterMap) {
+      TaskWriter tw = null;
+      String category=logMeta.getCategory();
+      if (taskWriterMap.containsKey(category)) {
+        tw = taskWriterMap.get(category);
+        tw.add(logMeta);
+      } else {
+        LogWriter logWriter = new DefaultLogWriter();
+        logWriter.createFile(new File(cacheRootDir + "/" + category + "/"
+            + FileNameHandlerFactory.getInstance().getCacheLogFileNum()));
+        BlockingQueue<LogMeta> bq = new ArrayBlockingQueue<LogMeta>(
+            Constants.CACHE_MANAGER_QUEUE_SIZE);
 
-      tw = new TaskWriter(bq, logWriter, cacheRootDir + "/" + category);
-      tw.setDaemon(true);
-      tw.start();
+        tw = new TaskWriter(bq, logWriter, cacheRootDir + "/" + category);
+        tw.setDaemon(true);
+        tw.start();
 
-      tw.add(logMeta);
-      taskWriterMap.put(category, tw);
+        tw.add(logMeta);
+        taskWriterMap.put(category, tw);
+      }
+      return true;
     }
-    return true;
   }
 
   class TaskWriter extends Thread {
@@ -68,8 +71,8 @@ public class AsyncCacheManager extends CacheManager {
 
     public void add(LogMeta logMeta) {
       if (bq.size() == Constants.CACHE_MANAGER_QUEUE_SIZE) {
-        logger.error("cache memory queue is full!log file rootpath is :" + rootPath + ",file name is : "
-            + currentLogFileNum);
+        logger.error("cache memory queue is full!log file rootpath is :"
+            + rootPath + ",file name is : " + currentLogFileNum);
       } else {
         bq.add(logMeta);
       }
@@ -81,7 +84,8 @@ public class AsyncCacheManager extends CacheManager {
         logWriter.close();
         logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
 
-        boolean res = logWriter.createFile(new File(rootPath + "/" + currentLogFileNum));
+        boolean res = logWriter.createFile(new File(rootPath + "/"
+            + currentLogFileNum));
         if (!res) {
           logger.error("fail to create log file!");
         }
@@ -97,15 +101,18 @@ public class AsyncCacheManager extends CacheManager {
           logMeta = bq.take();
 
           if (currentLogFileNum.equals(logMeta.getLogFileNum())) {
-            logWriter.write(logMeta.getLogFileNum(), logMeta.getLogData().logs, true);
+            logWriter.write(logMeta.getLogFileNum(), logMeta.getLogData().logs,
+                true);
           } else {
             logWriter.close();
             logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
 
             currentLogFileNum = logMeta.getLogFileNum();
-            res = logWriter.createFile(new File(rootPath + "/" + currentLogFileNum));
+            res = logWriter.createFile(new File(rootPath + "/"
+                + currentLogFileNum));
             if (res) {
-              logWriter.write(currentLogFileNum, logMeta.getLogData().logs, true);
+              logWriter.write(currentLogFileNum, logMeta.getLogData().logs,
+                  true);
             } else {
               logger.error("fail to create log file!");
             }
@@ -113,7 +120,8 @@ public class AsyncCacheManager extends CacheManager {
           logMeta.free();
           logMeta = null;
         } catch (InterruptedException e) {
-          logger.error("fail to write data to cache file!the exception is : " + e.getMessage());
+          logger.error("fail to write data to cache file!the exception is : "
+              + e.getMessage());
           continue;
         }
       }
@@ -121,7 +129,8 @@ public class AsyncCacheManager extends CacheManager {
   }
 
   public void checkCache() {
-    String logFileNum = FileNameHandlerFactory.getInstance().getCacheLogFileNum();
+    String logFileNum = FileNameHandlerFactory.getInstance()
+        .getCacheLogFileNum();
     Collection<TaskWriter> coll = taskWriterMap.values();
     for (TaskWriter tw : coll) {
       tw.checkCacheFile(logFileNum);

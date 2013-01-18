@@ -15,7 +15,7 @@ public class PushServiceNodesInfo {
   private Map<String, Long> hostMap = Maps.newHashMap();
   private Map<String, Long> blackHostMap = Maps.newHashMap();
   // TODO add the gray hosts
-  private Map<String, Long> grayhostMap = Maps.newHashMap();  
+  private Map<String, Long> grayhostMap = Maps.newHashMap();
   private List<String> hosts = Lists.newArrayList();
   private boolean shouldPublishAllNodes;
 

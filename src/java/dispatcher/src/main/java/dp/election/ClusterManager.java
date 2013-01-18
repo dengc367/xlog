@@ -22,7 +22,8 @@ public abstract class ClusterManager<K, V> {
   protected WatcherManager watcherManager;
   protected NodeChooseAlgorithm chooseAlgorithm;
 
-  public void initialize() throws KeeperException, InterruptedException, IOException {
+  public void initialize() throws KeeperException, InterruptedException,
+      IOException {
     byte[] data = conn.get().getData(clusterpath, false, null);
     ClusterInfo clusterInfo = ClusterInfo.parseFrom(data);
     int size = clusterInfo.getSize();
@@ -60,5 +61,6 @@ public abstract class ClusterManager<K, V> {
     return valueBuilder.cast(config);
   }
 
-  public abstract void addWatchers(long delayTime) throws KeeperException, InterruptedException, IOException;
+  public abstract void addWatchers(long delayTime) throws KeeperException,
+      InterruptedException, IOException;
 }

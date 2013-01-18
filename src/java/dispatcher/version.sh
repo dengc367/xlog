@@ -26,7 +26,7 @@ else
   revision=????
 fi
 
-echo "@com.renren.dp.VersionAnnotation(
+echo "@com.renren.dp.xlog.VersionAnnotation(
   version=\"$version\",
   user=\"$user\",
   date=\"$date\",

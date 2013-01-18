@@ -17,8 +17,6 @@ import com.renren.dp.xlog.cache.CacheFileMeta;
 import com.renren.dp.xlog.handler.FileNameHandlerFactory;
 import com.renren.dp.xlog.logger.LogMeta;
 import com.renren.dp.xlog.storage.StorageAdapter;
-import com.renren.dp.xlog.util.Constants;
-import com.renren.dp.xlog.util.LogDataFormat;
 
 public abstract class HDFSAdapter implements StorageAdapter {
 
@@ -30,146 +28,149 @@ public abstract class HDFSAdapter implements StorageAdapter {
   private String currentFileNameNumber;
   private String uuid = null;
   private int bufferSize = 0;
+  private final int HDFS_BATCH_COMMIT_SIZE;
+  private final String RECREATED_FILE_SUFFIX=".recreated";
 
   private ConcurrentHashMap<String, FSDataOutputStream> categoryOfHdfsOS = new ConcurrentHashMap<String, FSDataOutputStream>();
 
   private static Logger logger = LoggerFactory.getLogger(HDFSAdapter.class);
 
-  public HDFSAdapter(String uuid, int bufferSize) {
-    this.uuid = uuid;
-    this.bufferSize = bufferSize;
-    this.hdfsURI = com.renren.dp.xlog.config.Configuration.getString("storage.uri");
-    this.dfsReplication = com.renren.dp.xlog.config.Configuration.getString("storage.replication", "3");
-    this.socketTimeOut = com.renren.dp.xlog.config.Configuration.getLong("dfs.socket.timeout", 180) * 1000;
+  public HDFSAdapter() {
+    this.uuid =com.renren.dp.xlog.config.Configuration
+        .getString("xlog.uuid");;
+    this.bufferSize =com.renren.dp.xlog.config.Configuration.getInt("hdfs.buffer.size", 4000);
+    this.hdfsURI = com.renren.dp.xlog.config.Configuration
+        .getString("storage.uri");
+    this.dfsReplication = com.renren.dp.xlog.config.Configuration.getString(
+        "storage.replication", "3");
+    this.socketTimeOut = com.renren.dp.xlog.config.Configuration.getLong(
+        "dfs.socket.timeout", 180) * 1000;
+    this.HDFS_BATCH_COMMIT_SIZE = com.renren.dp.xlog.config.Configuration
+        .getInt("batch.commit.size", 1000);
   }
 
   @Override
-  public boolean store(Object o) {
-    FSDataOutputStream hdfsOutput = null;
+  public synchronized boolean store(Object o) {
     if (o instanceof LogMeta) {
-      LogMeta logMeta = (LogMeta) o;
-      String strCategory = LogDataFormat.transformCategories(logMeta.getLogData().categories);
-      String logFileNum = FileNameHandlerFactory.getInstance().getHDFSLogFileNum(logMeta.getLogFileNum());
-      hdfsOutput = buildHDFSOutputStream(strCategory, logFileNum);
-      if (hdfsOutput == null) {
+      return processLogMeta((LogMeta) o);
+    } else if (o instanceof CacheFileMeta) {
+      return processCacheFileMeta((CacheFileMeta)o);
+    } else {
+      throw new UnsupportedOperationException(
+          "it dosen't support this object !");
+    }
+  }
+
+  private boolean processLogMeta(LogMeta logMeta) {
+    FSDataOutputStream hdfsOutput = null;
+    String strCategory = logMeta.getCategory();
+    String logFileNum = FileNameHandlerFactory.getInstance().getHDFSLogFileNum(
+        logMeta.getLogFileNum());
+    hdfsOutput = buildHDFSOutputStream(strCategory, logFileNum);
+    if (hdfsOutput == null) {
+      return false;
+    }
+    int i = 0;
+    String[] logs = logMeta.getLogData().logs;
+    int len = logs == null ? 0 : logs.length;
+    boolean res = true;
+    for (i = 0; i < len; i++) {
+      if (logs[i] == null) {
+        continue;
+      }
+      try {
+        hdfsOutput.write((logs[i] + "\n").getBytes());
+      } catch (IOException e) {
+        logger
+            .error("fail to write data to hdfs,and get hdfs ouputstream again! the exception is : "
+                + e.getMessage());
+        try {
+          hdfsOutput.close();
+        } catch (IOException e1) {
+          e1.printStackTrace();
+        }
+        categoryOfHdfsOS.remove(strCategory);
         return false;
       }
-      int i = 0;
-      String[] logs = logMeta.getLogData().logs;
-      int len = logs == null ? 0 : logs.length;
-      boolean res = true;
-      for (i = 0; i < len; i++) {
-        if (logs[i] == null) {
-          continue;
+      if (i % HDFS_BATCH_COMMIT_SIZE == 0) {
+        res = flush(hdfsOutput, strCategory + "/" + logFileNum);
+        if (!res) {
+          return false;
         }
+      }
+    }
+    if (i % HDFS_BATCH_COMMIT_SIZE > 0) {
+      res = flush(hdfsOutput, strCategory + "/" + logFileNum);
+    }
+    return res;
+  }
+
+  private boolean processCacheFileMeta(CacheFileMeta cacheFileMeta) {
+    FSDataOutputStream hdfsOutput = null;
+    String logFileNum = FileNameHandlerFactory.getInstance().getHDFSLogFileNum(
+        cacheFileMeta.getCacheFile().getName());
+    hdfsOutput = buildHDFSOutputStream(cacheFileMeta.getCategories(),
+        logFileNum);
+    FileReader fr = null;
+    try {
+      fr = new FileReader(cacheFileMeta.getCacheFile());
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+    BufferedReader br = new BufferedReader(fr);
+    String line = null;
+    int count = 0;
+    boolean res = true;
+    try {
+      while ((line = br.readLine()) != null) {
         try {
-          hdfsOutput.write((logs[i] + "\n").getBytes());
+          hdfsOutput.write((line + "\n").getBytes());
         } catch (IOException e) {
-          logger.error("fail to write data to hdfs,and get hdfs ouputstream again! the exception is : "
-              + e.getMessage());
+          logger
+              .error("fail to write data to hdfs,and get hdfs ouputstream again! the exception is : "
+                  + e.getMessage());
           try {
             hdfsOutput.close();
           } catch (IOException e1) {
             logger.error("fail to close hdfs outputstream", e1.getMessage());
           }
-          hdfsOutput = getHDFSOutputStream(strCategory + "/" + logFileNum);
-
-          try {
-            if (hdfsOutput != null) {
-              hdfsOutput.write((logs[i] + "\n").getBytes());
-              logger.info("success to rewrite data to hdfs! ");
-            } else {
-              logger.error("fail to rewrite data to hdfs,because it does not get hdfs outputstream!");
-              return false;
-            }
-          } catch (IOException e1) {
-            logger.error("fail to rewrite data to hdfs! the exception is : " + e.getMessage());
-            return false;
-          }
+          return false;
         }
-        if (i == Constants.HDFS_BATCH_COMMIT_SIZE) {
-          res = flush(hdfsOutput, strCategory + "/" + logFileNum);
+        count++;
+        if (count % HDFS_BATCH_COMMIT_SIZE == 0) {
+          res = flush(hdfsOutput, cacheFileMeta.getCategories() + "/"
+              + logFileNum);
           if (!res) {
-            return false;
+            break;
           }
         }
       }
-      if (i > 0) {
-        res = flush(hdfsOutput, strCategory + "/" + logFileNum);
-      }
-      return res;
-    } else if (o instanceof CacheFileMeta) {
-      CacheFileMeta cacheFileMeta = (CacheFileMeta) o;
-      String logFileNum = FileNameHandlerFactory.getInstance()
-          .getHDFSLogFileNum(cacheFileMeta.getCacheFile().getName());
-      hdfsOutput = buildHDFSOutputStream(cacheFileMeta.getCategories(), logFileNum);
-      FileReader fr = null;
-      try {
-        fr = new FileReader(cacheFileMeta.getCacheFile());
-      } catch (FileNotFoundException e) {
-        e.printStackTrace();
-      }
-      BufferedReader br = new BufferedReader(fr);
-      String line = null;
-      int count = 0;
-      boolean res = true;
-      try {
-        while ((line = br.readLine()) != null) {
-          try {
-            hdfsOutput.write((line + "\n").getBytes());
-          } catch (IOException e) {
-            logger.error("fail to write data to hdfs,and get hdfs ouputstream again! the exception is : "
-                + e.getMessage());
-            try {
-              hdfsOutput.close();
-            } catch (IOException e1) {
-              logger.error("fail to close hdfs outputstream", e1.getMessage());
-            }
-            hdfsOutput = getHDFSOutputStream(cacheFileMeta.getCategories() + "/" + logFileNum);
-            if (hdfsOutput != null) {
-              hdfsOutput.write((line + "\n").getBytes());
-              logger.info("success to rewrite data to hdfs !");
-            } else {
-              logger.error("fail to rewrite data to hdfs !");
-              res = false;
-              break;
-            }
-          }
-          count++;
-          if (count == Constants.HDFS_BATCH_COMMIT_SIZE) {
-            count = 0;
-            res = flush(hdfsOutput, cacheFileMeta.getCategories() + "/" + logFileNum);
-            if (!res) {
-              break;
-            }
-          }
-        }
-      } catch (IOException e) {
-        logger.error("fail to read cache file and wirte to hdfs! the exception is :" + e.getMessage());
-        res = false;
-      }
-
-      if (res && count > 0) {
-        res = flush(hdfsOutput, cacheFileMeta.getCategories() + "/" + logFileNum);
-      }
-
-      try {
-        br.close();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-      try {
-        fr.close();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-      return res;
-    } else {
-      throw new UnsupportedOperationException("it dosen't support this object !");
+    } catch (IOException e) {
+      logger
+          .error("fail to read cache file and write to hdfs! the exception is :"
+              + e.getMessage());
+      res = false;
     }
+
+    if (res && count % HDFS_BATCH_COMMIT_SIZE > 0) {
+      res = flush(hdfsOutput, cacheFileMeta.getCategories() + "/" + logFileNum);
+    }
+
+    try {
+      br.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    try {
+      fr.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return res;
   }
 
-  private FSDataOutputStream buildHDFSOutputStream(String strCategory, String logFileNum) {
+  private FSDataOutputStream buildHDFSOutputStream(String strCategory,
+      String logFileNum) {
     FSDataOutputStream hdfsOutput = null;
     if (categoryOfHdfsOS.containsKey(strCategory)) {
       hdfsOutput = categoryOfHdfsOS.get(strCategory);
@@ -182,7 +183,8 @@ public abstract class HDFSAdapter implements StorageAdapter {
         }
         hdfsOutput = getHDFSOutputStream(strCategory + "/" + logFileNum);
         if (hdfsOutput == null) {
-          logger.error("fail to get HDFSOutputStream,it can't store logdata to hdfs!");
+          logger
+              .error("fail to get HDFSOutputStream,it can't store logdata to hdfs!");
           return null;
         } else {
           logger.debug("success to get HDFSOutputStream!");
@@ -193,7 +195,8 @@ public abstract class HDFSAdapter implements StorageAdapter {
     } else {
       hdfsOutput = getHDFSOutputStream(strCategory + "/" + logFileNum);
       if (hdfsOutput == null) {
-        logger.error("fail to get HDFSOutputStream,it can't store logdata to hdfs!");
+        logger
+            .error("fail to get HDFSOutputStream,it can't store logdata to hdfs!");
         return null;
       } else {
         logger.debug("success to get HDFSOutputStream!");
@@ -210,29 +213,47 @@ public abstract class HDFSAdapter implements StorageAdapter {
   protected FSDataOutputStream getHDFSOutputStream(String path) {
     Path p = new Path(path + "." + uuid);
     try {
-      // 判断文件是否存在，因为有可能别的节点已经创建了该文件
+      /***
+       * 异常情况下重建文件一次，防止分布式锁的租期未到无法释放租期导致重复创建文件失败。
+       * 1.首先判断目标文件是否存在，如果不存在直接create
+       * 2.如果存在判断二次重建的那个文件是否存在，如果不存在那么就可以创建一个重建文件
+       * 3.如果重建文件存在，那么直接append原来的目标文件
+       */
       if (fs.exists(p)) {
-        p = new Path(path + "." + uuid + "." + System.currentTimeMillis());
-      } 
-      return fs.create(p, false, bufferSize);
+        Path recreatedPath=new Path(path + "." + uuid+RECREATED_FILE_SUFFIX);
+        if(fs.exists(recreatedPath)){
+          return fs.append(p);
+        }else{
+          return fs.create(recreatedPath,false, bufferSize);
+        }
+        
+      } else {
+        return fs.create(p,false, bufferSize);
+      }
     } catch (Exception e) {
-      logger.error("fail to create HDFSOutputstream,then reinitialize hdfs and recreate!the exception is "
-          + e.getMessage());
+      logger
+          .error("fail to create HDFSOutputstream,then reinitialize hdfs and recreate!the exception is "
+              + e.getMessage());
     }
+    try {
+      Thread.sleep(500);
+    } catch (InterruptedException e1) {}
     try {
       initialize();
     } catch (IOException e) {
-      logger.error("fail to reinitialize hdfs,the exception is " + e.getMessage());
+      logger.error("fail to reinitialize hdfs,the exception is "
+          + e.getMessage());
       return null;
     }
     try {
       if (fs.exists(p)) {
         return fs.append(p);
       } else {
-        return fs.create(p);
+        return fs.create(p,false, bufferSize);
       }
     } catch (IOException e) {
-      logger.error("fail to recreate HDFSOutputstream,the exception is ", e.getMessage());
+      logger.error("fail to recreate HDFSOutputstream,the exception is ",
+          e.getMessage());
       return null;
     }
   }
