@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <!--Default configuration.It does not update ,but you can do optimization -->
+  <property>
+    <name>cache.manager.impl</name>
+    <value>com.renren.dp.xlog.cache.impl.DefaultCacheManager</value>
+    <description>Inner cache manager,default DefaultCacheManager.The AyncCacheManager writes local disk asynchronous.</description>
+  </property>
+  <property>
+    <name>storage.adapter.impl</name>
+    <value>com.renren.dp.xlog.storage.impl.HDFSAdapter1_0_3</value>
+    <description>Storage adapter implements class.It can use this parameter to supports many storages.</description>
+  </property>
+  <property>
+    <name>storage.repository.mode</name>
+    <value>0</value>
+    <description>There is 3 mode.0 express memory storage and file storage,1 express file storage only,2 express some categories storage at file,and other storage at memory</description>
+  </property>
+  <property>
+    <name>memory.cache.categories</name>
+    <value></value>
+    <description>This paramter can be used by storage repository mode is 2</description>
+  </property>
+  <property>
+    <name>cache.file.name.format</name>
+    <value>0</value>
+    <description>There is 3 cache file name format.0 express 5 min generate one file,1 express 10 min generate one file,2 express one hour generate one file</description>
+  </property>
+  <property>
+    <name>hdfs.buffer.size</name>
+    <value>10240</value>
+    <description>The buffer size of HDFS client write file(KB).</description>
+  </property>
+  <property>
+    <name>batch.commit.size</name>
+    <value>1000</value>
+    <description>The count of HDFS client batch commit log.</description>
+  </property>
+  <property>
+    <name>storage.type</name>
+    <value>hdfs</value>
+    <description>The type of xlog storage system.</description>
+  </property>
+  <property>
+    <name>storage.replication</name>
+    <value>3</value>
+    <description>The replication of data storage,default is 3</description>
+  </property>
+  <property>
+    <name>storage.repository.queue.capacity</name>
+    <value>10000</value>
+    <description>The capacity of repository queue</description>
+  </property>
+  <property>
+    <name>ice.message.size.max</name>
+    <value>10480</value>
+    <description>ICE framework receiver message package max size(KB).</description>
+  </property>
+  <property>
+    <name>web.server.host</name>
+    <value>10.2.62.22</value>
+    <description>Web server ip,default automatic to get ip.</description>
+  </property>
+  <property>
+    <name>categories.list.file.check.interval</name>
+    <value>120</value>
+    <description>The number of seconds between two periodic check categories list file.</description>
+  </property>
+  <property>
+    <name>dfs.socket.timeout</name>
+    <value>60</value>
+    <description>The number of seconds for dfs client connect hdfs timeout.</description>
+  </property>
+  <property>
+    <name>error.data.sync.thread.count</name>
+    <value>10</value>
+    <description>Thread count dispatcher sync fail data.</description>
+  </property>
+  <!-- User must config this parameter -->
+  <property>
+    <name>slot.replication</name>
+    <value>1</value>
+    <description>The dispacher connection count at zookeeper dispatcher node</description>
+  </property>
+  <property>
+    <name>storage.version</name>
+    <value>1.0.3</value>
+    <description>The version of xlog storage system</description>
+  </property>
+  <property>
+    <name>storage.uri</name>
+    <value>hdfs://10.2.62.22</value>
+    <description>The address of xlog storage system.</description>
+  </property>
+  <property>
+    <name>zookeeper.connstr</name>
+    <value>10.2.62.22:2222</value>
+    <description>The address of zookeeper.eg,host:port,host2,port2,...</description>
+  </property>
+  <property>
+    <name>oplog.store.path</name>
+    <value>/home/xianquanzhang/data/oplog1</value>
+    <description>The path of xlog dispatcher local cache data</description>
+  </property>
+  <property>
+    <name>oplog.sync.interval</name>
+    <value>60</value>
+    <description>The number of seconds between two periodic synchronized fail data to storage</description>
+  </property>
+  <property>
+    <name>oplog.clear.interval</name>
+    <value>120</value>
+    <description>The number of seconds between two periodic clear data.</description>
+  </property>
+  <property>
+    <name>local.store.cache.time</name>
+    <value>60</value>
+    <description>The number of minutes for local store cache data.</description>
+  </property>
+  <property>
+    <name>error.data.cache.time</name>
+    <value>60</value>
+    <description>The number of minutes for fail data period of validity at local disk cache.</description>
+  </property>
+  <property>
+    <name>master.start.delay</name>
+    <value>60</value>
+    <description>The number of seconds for dispatcher master do balance when dispatcher start.</description>
+  </property>
+  <property>
+    <name>zk.session.timeout</name>
+    <value>10</value>
+    <description>The number of seconds for zookeeper session timeout.</description>
+  </property>
+  <property>
+    <name>web.server.port</name>
+    <value>20002</value>
+    <description>Dispatcher web server port</description>
+  </property>
+  <property>
+    <name>system.administrator</name>
+    <value>xianquan.zhang:CIAC008846,zhancheng.deng:CIAC005974</value>
+    <description>dispatcher administrator info.eg,username:id,username2:id2</description>
+  </property>
+  <property>
+    <name>xlog.uuid</name>
+    <value>x1</value>
+    <description>Dispatcher unique id</description>
+  </property>
+  <property>
+    <name>mobilepone.warning.number</name>
+    <value>13810089769</value>
+    <description>The comma of mobilephone number for warning.</description>
+  </property>
+   <property>
+    <name>queue.used.ration.warning.threshold</name>
+    <value>0.80</value>
+    <description>The ration threshold of storage queue which will be warning</description>
+  </property>
+  <property>
+    <name>request.failure.max.timeout</name>
+    <value>300</value>
+    <description>The number of seconds send request failure max timeout</description>
+  </property>
+</configuration>

@@ -24,11 +24,13 @@ public class PubSubService {
     pusher = new Pusher();
   }
 
-  public int subscribe(Subscription sub, Current __current) throws XLogException {
+  public int subscribe(Subscription sub, Current __current)
+      throws XLogException {
     String endpoint = sub.options.get(PUSH_SERVICE_ENDPOINT);
     if (endpoint != null) {
-      return pusher.subscribe(new PushSubscription(sub.categories, sub.options, endpoint.replace("<HOST>",
-          PubSubUtils.getRemoteClientIp(__current))));
+      return pusher
+          .subscribe(new PushSubscription(sub.categories, sub.options, endpoint
+              .replace("<HOST>", PubSubUtils.getRemoteClientIp(__current))));
     } else {
       return pullService.subscribe(sub);
     }
@@ -37,19 +39,21 @@ public class PubSubService {
   public int unsubscribe(Subscription sub, Current __current) {
     String endpoint = sub.options.get(PUSH_SERVICE_ENDPOINT);
     if (endpoint != null) {
-      return pusher.unsubscribe(new PushSubscription(sub.categories, sub.options, endpoint.replace("<HOST>",
-          PubSubUtils.getRemoteClientIp(__current))));
+      return pusher.unsubscribe(new PushSubscription(sub.categories,
+          sub.options, endpoint.replace("<HOST>",
+              PubSubUtils.getRemoteClientIp(__current))));
     } else {
       return pullService.unsubscribe(sub);
     }
   }
 
-  public String[] getData(int categoryId, Current __current) throws IOException, XLogException {
+  public String[] getData(int categoryId, Current __current)
+      throws IOException, XLogException {
     return pullService.getData(categoryId);
   }
 
   public boolean isSubscribed(String[] categories) {
-      return pusher.isSubscribed(categories);
+    return pusher.isSubscribed(categories);
   }
 
   public void publish(LogMeta logMeta) {

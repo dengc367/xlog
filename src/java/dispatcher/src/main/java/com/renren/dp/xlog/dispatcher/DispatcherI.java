@@ -1,15 +1,10 @@
 package com.renren.dp.xlog.dispatcher;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.KeeperException;
 
-import xlog.proto.Xlog.ItemInfo;
-import xlog.proto.Xlog.ItemInfo.Builder;
 import xlog.slice.DispatcherPrx;
 import xlog.slice.ErrorCode;
 import xlog.slice.LogData;
@@ -17,7 +12,6 @@ import xlog.slice.LoggerPrx;
 import xlog.slice.Subscription;
 import xlog.slice.XLogException;
 import xlog.slice._DispatcherDisp;
-import Ice.Connection;
 import Ice.Current;
 import Ice.Endpoint;
 import Ice.ObjectAdapter;
@@ -28,8 +22,6 @@ import com.renren.dp.xlog.config.DispatcherCluster;
 import com.renren.dp.xlog.logger.LoggerI;
 import com.renren.dp.xlog.pubsub.PubSubService;
 import com.renren.dp.xlog.pubsub.PubSubUtils;
-import com.renren.dp.xlog.pubsub.pull.PullService;
-import com.renren.dp.xlog.pubsub.push.Pusher;
 
 import dp.election.impl.DefaultWatcher;
 import dp.zk.ZkConn;
@@ -44,6 +36,8 @@ public class DispatcherI extends _DispatcherDisp {
   private ZkConn conn = null;
   boolean ispubSubStart = false;
 
+  private static Logger LOG = Logger.getLogger(DispatcherI.class);
+  
   protected boolean initialize(ObjectAdapter adapter) {
     myprx = adapter.add(this, adapter.getCommunicator().stringToIdentity("D"));
     logger = new LoggerI();
@@ -56,7 +50,8 @@ public class DispatcherI extends _DispatcherDisp {
     }
     long delayTime = Configuration.getLong("master.start.delay", 300) * 1000;
     int zkSessionTimeOut = Configuration.getInt("zk.session.timeout", 2) * 1000;
-    conn = new ZkConn(Configuration.getString("zookeeper.connstr"), zkSessionTimeOut, new DefaultWatcher(this));
+    conn = new ZkConn(Configuration.getString("zookeeper.connstr"),
+        zkSessionTimeOut, new DefaultWatcher(this));
     try {
       cfg = DispatcherCluster.create(conn, adapter.getCommunicator());
     } catch (IOException e) {
@@ -129,11 +124,13 @@ public class DispatcherI extends _DispatcherDisp {
   }
 
   @Override
-  public int subscribe(Subscription sub, Current __current) throws XLogException {
+  public int subscribe(Subscription sub, Current __current)
+      throws XLogException {
     if (!ispubSubStart) {
-      LOG.warn("the pubsub server is not started, but the client " + PubSubUtils.getRemoteClientIp(__current)
-          + " want to subscribe. ");
-      throw new XLogException(ErrorCode.PubSubNotStartedException, "the pubsub server is not started");
+      LOG.warn("the pubsub server is not started, but the client "
+          + PubSubUtils.getRemoteClientIp(__current) + " want to subscribe. ");
+      throw new XLogException(ErrorCode.PubSubNotStartedException,
+          "the pubsub server is not started");
     }
     return pubsub.subscribe(sub, __current);
   }
@@ -143,15 +140,15 @@ public class DispatcherI extends _DispatcherDisp {
     return pubsub.unsubscribe(sub, __current);
   }
 
-  private static Logger LOG = Logger.getLogger(DispatcherI.class);
-
   @Override
-  public String[] getData(int categoryId, Current __current) throws XLogException {
+  public String[] getData(int categoryId, Current __current)
+      throws XLogException {
     try {
       if (!ispubSubStart) {
-        LOG.warn("the pubsub server is not started, but the client " + PubSubUtils.getRemoteClientIp(__current)
-            + " want to getData. ");
-        throw new XLogException(ErrorCode.PubSubNotStartedException, "the pubsub server is not started");
+        LOG.warn("the pubsub server is not started, but the client "
+            + PubSubUtils.getRemoteClientIp(__current) + " want to getData. ");
+        throw new XLogException(ErrorCode.PubSubNotStartedException,
+            "the pubsub server is not started");
       }
       return pubsub.getData(categoryId, __current);
     } catch (IOException e) {

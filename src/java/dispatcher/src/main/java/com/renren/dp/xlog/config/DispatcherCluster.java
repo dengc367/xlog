@@ -17,10 +17,13 @@ import dp.zk.ZkConn;
 
 public class DispatcherCluster<T> {
 
-  private final static Logger logger = LoggerFactory.getLogger(DispatcherCluster.class);
+  private final static Logger logger = LoggerFactory
+      .getLogger(DispatcherCluster.class);
 
-  public static DispatcherCluster<DispatcherPrx> create(ZkConn conn, Ice.Communicator ic) throws IOException {
-    DispatcherCluster<DispatcherPrx> cfg = new DispatcherCluster<DispatcherPrx>(new DispatcherProxyFactory(ic));
+  public static DispatcherCluster<DispatcherPrx> create(ZkConn conn,
+      Ice.Communicator ic) throws IOException {
+    DispatcherCluster<DispatcherPrx> cfg = new DispatcherCluster<DispatcherPrx>(
+        new DispatcherProxyFactory(ic));
     cfg.initialize(conn);
     return cfg;
   }
@@ -39,15 +42,16 @@ public class DispatcherCluster<T> {
     boolean retry = false;
     do {
       retry = false;
-      haCluster = new HAClusterManager<String[], T>(conn, Constants.ZK_DISPATCHERS_PATH, new DispatcherHashKey(), proxy_factory);
+      haCluster = new HAClusterManager<String[], T>(conn,
+          Constants.ZK_DISPATCHERS_PATH, new DispatcherHashKey(), proxy_factory);
       try {
         haCluster.initialize();
       } catch (KeeperException e) {
         retry = true;
-        logger.error("fail to initialize hacluster,it will be retrying!",e);
+        logger.error("fail to initialize hacluster,it will be retrying!", e);
       } catch (InterruptedException e) {
         retry = true;
-        logger.error("fail to initialize hacluster,it will be retrying!",e);
+        logger.error("fail to initialize hacluster,it will be retrying!", e);
       }
     } while (retry);
   }
@@ -56,11 +60,11 @@ public class DispatcherCluster<T> {
     try {
       haCluster.add(obj.toString());
     } catch (KeeperException e) {
-      logger.error("fail to add znode and throw KeeperException!",e);
+      logger.error("fail to add znode and throw KeeperException!", e);
     } catch (InterruptedException e) {
-      logger.error("fail to add znode and throw InterruptedException!",e);
+      logger.error("fail to add znode and throw InterruptedException!", e);
     } catch (IOException e) {
-      logger.error("fail to add znode and throw IOException!",e);
+      logger.error("fail to add znode and throw IOException!", e);
     }
   }
 
@@ -68,15 +72,19 @@ public class DispatcherCluster<T> {
     try {
       haCluster.createZNode(slot);
     } catch (KeeperException e) {
-      logger.error("fail to create znode that is at slot "+slot+",throw KeeperException!",e);
+      logger.error("fail to create znode that is at slot " + slot
+          + ",throw KeeperException!", e);
     } catch (InterruptedException e) {
-      logger.error("fail to create znode that is at slot "+slot+",throw InterruptedException!",e);
+      logger.error("fail to create znode that is at slot " + slot
+          + ",throw InterruptedException!", e);
     } catch (IOException e) {
-      logger.error("fail to create znode that is at slot "+slot+",throw IOException!",e);
+      logger.error("fail to create znode that is at slot " + slot
+          + ",throw IOException!", e);
     }
   }
 
-  public void addWatcher(long delayTime) throws KeeperException, InterruptedException, IOException {
+  public void addWatcher(long delayTime) throws KeeperException,
+      InterruptedException, IOException {
     haCluster.addWatchers(delayTime);
   }
 }

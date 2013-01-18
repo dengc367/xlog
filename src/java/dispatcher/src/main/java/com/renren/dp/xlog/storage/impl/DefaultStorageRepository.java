@@ -3,107 +3,91 @@ package com.renren.dp.xlog.storage.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.renren.dp.xlog.config.CategoriesHashKey;
 import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.handler.FileNameHandlerFactory;
-import com.renren.dp.xlog.io.LogWriter;
-import com.renren.dp.xlog.io.impl.DefaultLogWriter;
 import com.renren.dp.xlog.logger.LogMeta;
+import com.renren.dp.xlog.metrics.MetricsInitialization;
 import com.renren.dp.xlog.storage.EventListener;
-import com.renren.dp.xlog.storage.NamespaceInfo;
+import com.renren.dp.xlog.storage.QueueCounter;
 import com.renren.dp.xlog.storage.StorageRepository;
 import com.renren.dp.xlog.util.FileUtil;
-import com.renren.dp.xlog.util.LogDataFormat;
 
-public class DefaultStorageRepository implements StorageRepository{
+public class DefaultStorageRepository implements StorageRepository {
 
-	private ConcurrentHashMap<String,EventListener> map=null;
-	private int queueCapacity;
-	
-	private String slaveRootDir=null;
-	
-	private final static Logger logger = LoggerFactory.getLogger(DefaultStorageRepository.class);
+  private int queueCapacity;
+  private int queueCount;
+  private String storageAdapterClassName = null;
+  private String slaveRootDir = null;
+  private EventListener[] eventListeners;
+  private CategoriesHashKey categoriesHash;
 
-	public DefaultStorageRepository(){
-		map=new ConcurrentHashMap<String,EventListener>();
-		queueCapacity=Configuration.getInt("storage.repository.queue.capacity", 1000);
-		slaveRootDir=Configuration.getString("oplog.store.path")+"/"+Configuration.getString("storage.type");
-	}
-	
-	public void addToRepository(LogMeta logMeta) {
-     String categories=LogDataFormat.transformCategories(logMeta.getLogData().categories);
-     if(map.containsKey(categories)){
-    	EventListener el=map.get(categories);
-		el.add(logMeta);
-	  }else{
-		LogWriter logWriter=new DefaultLogWriter();
-		String rootPath=slaveRootDir+"/"+categories;
-		logWriter.createFile(new File(rootPath+"/"+logMeta.getLogFileNum()));
-		
-		EventListener el=new EventListener(logWriter,queueCapacity,rootPath);
-		try {
-			el.initialize();
-			el.setDaemon(true);
-			el.start();
-		} catch (IOException e) {
-			logger.error("fail to initialize categories event listener,the category is : "+categories);
-			return ;
-		}
-		map.put(categories, el);
-		el.add(logMeta);
-	  }
+  public DefaultStorageRepository() {
+    queueCount = Configuration.getInt("storage.repository.queue.count", 20);
+    queueCapacity = Configuration.getInt("storage.repository.queue.capacity",
+        1000);
+    slaveRootDir = Configuration.getString("oplog.store.path") + "/"
+        + Configuration.getString("storage.type");
+    storageAdapterClassName = Configuration.getString("storage.adapter.impl");
+  }
+
+  public void initialize() throws IOException {
+    categoriesHash = new CategoriesHashKey();
+    eventListeners = new EventListener[queueCount];
+    MetricsInitialization metrics=new MetricsInitialization();
+    //初始化事件监听器
+    for (int i = 0; i < queueCount; i++) {
+      EventListener listener = new EventListener("StorageQueue" + i,
+          queueCapacity, slaveRootDir,metrics.getMetricsManager());
+      listener.initialize(storageAdapterClassName);
+      listener.setDaemon(true);
+      listener.start();
+      eventListeners[i] = listener;
     }
-	
-	public void checkRepository(){
-		String logFileNum=FileNameHandlerFactory.getInstance().getCacheLogFileNum();
-		Collection<EventListener> coll=map.values();
-		for(EventListener el:coll){
-			el.checkExpiredLogFile(logFileNum);
-		}
-	}
+    //初始化metrics
+    metrics.initialize();
+  }
 
-	@Override
-	public List<NamespaceInfo> getNamespaceInfo() {
-		List<NamespaceInfo> list=new ArrayList<NamespaceInfo>();
-		Collection<String> c=map.keySet();
-		Iterator<String> it=c.iterator();
-		String category=null;
-		EventListener el=null;
-		while(it.hasNext()){
-			category=it.next();
-			el=map.get(category);
-			list.add(new NamespaceInfo(category,el.getLogQueueSize(),el.getSuccessCount(),el.getFailureCount()));
-		}
-		
-		return list;
-	}
+  public void addToRepository(LogMeta logMeta) {
+    synchronized (eventListeners) {
+      int queueID = categoriesHash.hash(logMeta.getCategory(), queueCount);
+      eventListeners[queueID].add(logMeta);
+    }
+  }
 
-	@Override
-	public void close() {
-		Collection<String> c=map.keySet();
-		Iterator<String> it=c.iterator();
-		String category=null;
-		EventListener el=null;
-		while(it.hasNext()){
-			category=it.next();
-			el=map.get(category);
-			el.close();
-		}
-	}
+  public void checkRepository() {
+    String logFileNum = FileNameHandlerFactory.getInstance()
+        .getCacheLogFileNum();
+    for (EventListener el : eventListeners) {
+      el.checkExpiredLogFile(logFileNum);
+    }
+  }
 
-	@Override
-	public long getCacheFilesSize() {
-		File slaveFile=new File(slaveRootDir);
-		if(!slaveFile.exists()){
-			return 0;
-		}
-		return FileUtil.computeDirectorySize(slaveFile);
-	}
+  @Override
+  public List<QueueCounter> getQueueInfo() {
+    List<QueueCounter> list = new ArrayList<QueueCounter>();
+    for (EventListener el : eventListeners) {
+      list.add(el.getCount());
+    }
+
+    return list;
+  }
+
+  @Override
+  public void close() {
+    for (EventListener el : eventListeners){
+      el.close();
+    }
+  }
+
+  @Override
+  public long getCacheFilesSize() {
+    File slaveFile = new File(slaveRootDir);
+    if (!slaveFile.exists()) {
+      return 0;
+    }
+    return FileUtil.computeDirectorySize(slaveFile);
+  }
 }

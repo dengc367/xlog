@@ -38,8 +38,8 @@ public class PushAdapter {
   private PublisherServicePrx getPublisherServicePrx(String host) {
     PublisherServicePrx ps = psMap.get(host);
     if (ps == null) {
-      ps = PublisherServicePrxHelper.uncheckedCast(ic.stringToProxy(host).ice_locatorCacheTimeout(60)
-          .ice_compress(true));
+      ps = PublisherServicePrxHelper.uncheckedCast(ic.stringToProxy(host)
+          .ice_locatorCacheTimeout(60).ice_compress(true));
       psMap.put(host, ps);
     }
     return ps;

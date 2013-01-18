@@ -20,9 +20,11 @@ public class SlotWatcher implements Watcher {
   private int slot;
   private boolean isStartWatch = false;
 
-  private final static Logger logger = LoggerFactory.getLogger(SlotWatcher.class);
+  private final static Logger logger = LoggerFactory
+      .getLogger(SlotWatcher.class);
 
-  public SlotWatcher(ZkConn conn, String clusterPath, int slot, HABalancerI haBalancer, long startTime) {
+  public SlotWatcher(ZkConn conn, String clusterPath, int slot,
+      HABalancerI haBalancer, long startTime) {
     this.conn = conn;
     this.haBalancer = haBalancer;
     this.startTime = startTime;
@@ -38,24 +40,24 @@ public class SlotWatcher implements Watcher {
     }
     EventType type = event.getType();
     String znode = event.getPath();
-    if(znode == null){
-    	logger.info("slot watcher does not get the event path!");
-    	return ;
+    if (znode == null) {
+      logger.info("slot watcher does not get the event path!");
+      return;
     }
     synchronized (this) {
       if (type == EventType.NodeChildrenChanged) {
         try {
           if (!haBalancer.checkBalanceCondition(slot)) {
             haBalancer.doBalance(slot);
-            }
-         } catch (KeeperException e) {
-           logger.error("fail to rebalance of slot " + slot, e);
-         } catch (InterruptedException e) {
-           logger.error("fail to rebalance of slot " + slot, e);
-         } catch (IOException e) {
-           logger.error("fail to rebalance of slot " + slot, e);
           }
-       }
+        } catch (KeeperException e) {
+          logger.error("fail to rebalance of slot " + slot, e);
+        } catch (InterruptedException e) {
+          logger.error("fail to rebalance of slot " + slot, e);
+        } catch (IOException e) {
+          logger.error("fail to rebalance of slot " + slot, e);
+        }
+      }
       try {
         conn.get().getChildren(znode, this);
       } catch (KeeperException e) {
@@ -87,7 +89,8 @@ public class SlotWatcher implements Watcher {
         }
       }
       isStartWatch = true;
-      slotWatcher.process(new WatchedEvent(EventType.NodeChildrenChanged, null, clusterPath + "/" + slot));
+      slotWatcher.process(new WatchedEvent(EventType.NodeChildrenChanged, null,
+          clusterPath + "/" + slot));
     }
   }
 }

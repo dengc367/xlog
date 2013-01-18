@@ -24,7 +24,8 @@ public class LogFileStreamReader {
   int fetchLength; // fetch size from the client
   FSDataInputStream in;
 
-  public LogFileStreamReader(String[] categories, int fetchSize) throws IOException {
+  public LogFileStreamReader(String[] categories, int fetchSize)
+      throws IOException {
     org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
     conf.set("fs.default.name", Configuration.getString("storage.uri"));
     fs = DistributedFileSystem.get(conf);
@@ -78,10 +79,12 @@ public class LogFileStreamReader {
   }
 
   public String generatePathString(String[] categories, String fileName) {
-    return "/user/xlog/" + PubSubUtils.serializeCategories(categories, "/") + "/" + fileName;
+    return "/user/xlog/" + PubSubUtils.serializeCategories(categories, "/")
+        + "/" + fileName;
   }
 
-  public Path getPathIfExist(String[] categories, String fileName) throws IOException {
+  public Path getPathIfExist(String[] categories, String fileName)
+      throws IOException {
     String pathStr = generatePathString(categories, fileName);
     Path path = new Path(pathStr);
     if (fs.exists(path) && fs.isFile(path)) {
@@ -112,7 +115,8 @@ public class LogFileStreamReader {
 
   public static void main(String[] args) {
     try {
-      LogFileStreamReader r = new LogFileStreamReader(new String[] { "3g", "api", "access" }, 50);
+      LogFileStreamReader r = new LogFileStreamReader(new String[] { "3g",
+          "api", "access" }, 50);
       String[] arr = r.getLineStream();
       for (String s : arr) {
         System.out.println(s);

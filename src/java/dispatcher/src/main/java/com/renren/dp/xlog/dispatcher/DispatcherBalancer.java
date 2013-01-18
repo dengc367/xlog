@@ -12,13 +12,13 @@ import dp.zk.ZkConn;
 
 public class DispatcherBalancer {
 
-    public static void main(String[] args) throws KeeperException, InterruptedException,
-            IOException {
-        ZkConn conn = new ZkConn(Configuration.getString("zookeeper.connstr"),
-        		Configuration.getInt("zk.session.timeout",5),null);
-        HABalancer b = new HABalancer(conn, Constants.ZK_DISPATCHERS_PATH, 19);
-        b.initialize();
-        Thread.sleep(120 * 1000);
-    }
+  public static void main(String[] args) throws KeeperException,
+      InterruptedException, IOException {
+    ZkConn conn = new ZkConn(Configuration.getString("zookeeper.connstr"),
+        Configuration.getInt("zk.session.timeout", 5), null);
+    HABalancer b = new HABalancer(conn, Constants.ZK_DISPATCHERS_PATH, 19);
+    b.initialize();
+    Thread.sleep(120 * 1000);
+  }
 
 }

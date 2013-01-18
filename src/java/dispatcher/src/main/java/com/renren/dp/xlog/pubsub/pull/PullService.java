@@ -14,9 +14,9 @@ import xlog.slice.Subscription;
 import xlog.slice.XLogException;
 
 public class PullService {
-  
 
-  private static Map<Integer, LogFileStreamReader> readerMap = Maps.newHashMap();
+  private static Map<Integer, LogFileStreamReader> readerMap = Maps
+      .newHashMap();
   private static Map<String, Integer> idMap = Maps.newHashMap();
   private static Integer nextId = 1;
 
@@ -28,7 +28,8 @@ public class PullService {
     if (reader != null) {
       return reader.getLineStream();
     } else {
-      throw new XLogException(ErrorCode.NoSubscription, "no subscription of the client");
+      throw new XLogException(ErrorCode.NoSubscription,
+          "no subscription of the client");
     }
   }
 
@@ -38,12 +39,14 @@ public class PullService {
       throw new XLogException(ErrorCode.IllegalParameters, "illegal parameters");
     }
     String catStr = serializeCategories(sub.categories);
-    String fetchsize = StringUtils.defaultIfEmpty(sub.options.get(PubSubConstants.XLOG_FETCH_LENGTH), "50");
+    String fetchsize = StringUtils.defaultIfEmpty(
+        sub.options.get(PubSubConstants.XLOG_FETCH_LENGTH), "50");
     try {
       if (!idMap.containsKey(catStr)) { // check
         synchronized (idMap) {
           if (!idMap.containsKey(catStr)) { // double check
-            LogFileStreamReader reader = new LogFileStreamReader(sub.categories, Integer.parseInt(fetchsize));
+            LogFileStreamReader reader = new LogFileStreamReader(
+                sub.categories, Integer.parseInt(fetchsize));
             idMap.put(catStr, nextId);
             readerMap.put(nextId, reader);
             return nextId++;
@@ -51,9 +54,11 @@ public class PullService {
         }
       }
       int id = idMap.get(catStr);
-      String fromScratch = StringUtils.defaultIfEmpty(sub.options.get(PubSubConstants.XLOG_FETCH_FROM_SCRATCH), "false");
+      String fromScratch = StringUtils.defaultIfEmpty(
+          sub.options.get(PubSubConstants.XLOG_FETCH_FROM_SCRATCH), "false");
       if ("true".equals(fromScratch)) {
-        LogFileStreamReader reader = new LogFileStreamReader(sub.categories, Integer.parseInt(fetchsize));
+        LogFileStreamReader reader = new LogFileStreamReader(sub.categories,
+            Integer.parseInt(fetchsize));
         readerMap.put(id, reader);
       }
       return id;
