@@ -6,16 +6,16 @@ import java.util.Random;
 import dp.election.NodeChooseAlgorithm;
 import dp.election.ServingItem;
 
-public class RandomChooseAlgorithm implements NodeChooseAlgorithm{
+public class RandomChooseAlgorithm implements NodeChooseAlgorithm {
 
   @Override
   public ServingItem doChoose(List<ServingItem> list) {
-    if(list==null || list.isEmpty()){
+    if (list == null || list.isEmpty()) {
       return null;
     }
-    Random random=new Random();
-    int num=random.nextInt(list.size());
-    
+    Random random = new Random();
+    int num = random.nextInt(list.size());
+
     return list.get(num);
   }
 

@@ -10,33 +10,35 @@ import org.slf4j.LoggerFactory;
 
 import dp.election.HAClusterManager;
 
-public class DispatcherWatcher implements Watcher{
+public class DispatcherWatcher implements Watcher {
 
-  private HAClusterManager haCluster=null;
-  private String currentZNode=null;
-  
-  private final static Logger logger = LoggerFactory.getLogger(DispatcherWatcher.class);
+  private HAClusterManager haCluster = null;
+  private String currentZNode = null;
 
-  public DispatcherWatcher(HAClusterManager haCluster,String currentZNode){
-    this.haCluster=haCluster;
-    this.currentZNode=currentZNode;
+  private final static Logger logger = LoggerFactory
+      .getLogger(DispatcherWatcher.class);
+
+  public DispatcherWatcher(HAClusterManager haCluster, String currentZNode) {
+    this.haCluster = haCluster;
+    this.currentZNode = currentZNode;
   }
+
   @Override
   public void process(WatchedEvent arg0) {
     try {
-      if(haCluster.isMasterExists()){
-        haCluster.updateDispatcherWatcher(this,currentZNode);
-      }else{
-        haCluster.electMasterAndUpdateWatcher(this,currentZNode);
+      if (haCluster.isMasterExists()) {
+        haCluster.updateDispatcherWatcher(this, currentZNode);
+      } else {
+        haCluster.electMasterAndUpdateWatcher(this, currentZNode);
       }
     } catch (KeeperException e) {
-      logger.error("fail to process znode "+this.currentZNode,e);
+      logger.error("fail to process znode " + this.currentZNode, e);
     } catch (InterruptedException e) {
-      logger.error("fail to process znode "+this.currentZNode,e);
+      logger.error("fail to process znode " + this.currentZNode, e);
     } catch (IOException e) {
-      logger.error("fail to process znode "+this.currentZNode,e);
+      logger.error("fail to process znode " + this.currentZNode, e);
     }
-    
+
   }
 
 }

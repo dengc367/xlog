@@ -20,39 +20,39 @@ import com.sso.api.inter.SSOInterface;
 import com.sso.api.service.SSOService;
 
 public class LoginFilter extends HttpServlet implements Filter {
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private static SSOService service = new SSOService();
-	private static SSOInterface sso = new SSOImpl();
+  private static SSOService service = new SSOService();
+  private static SSOInterface sso = new SSOImpl();
 
-	public void init(FilterConfig filterConfig) throws ServletException {
-	}
+  public void init(FilterConfig filterConfig) throws ServletException {
+  }
 
-	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
-		HttpServletResponse resp = (HttpServletResponse) response;
-		HttpServletRequest req = (HttpServletRequest) request;
-		
-		req.setCharacterEncoding("UTF-8");
-		LogonBean bean=service.getLogonInfo(req, resp);
-		if (bean == null || bean.getLogonstatus() == null
-				|| !bean.getLogonstatus().equals("1")) {
-			bean = sso.ppLogin(req, resp);
-			if (bean == null) {
-				return;
-			}
-		}
+  public void doFilter(ServletRequest request, ServletResponse response,
+      FilterChain chain) throws IOException, ServletException {
+    HttpServletResponse resp = (HttpServletResponse) response;
+    HttpServletRequest req = (HttpServletRequest) request;
 
-		String result = sso.isLogin(bean.getLogonname(), bean.getSid());
-		if (bean != null && !result.equals("0")) {
-			String admin=Configuration.getString("system.administrator","");
-			if(admin.contains(bean.getLogonname())){
-				chain.doFilter(req, resp);
-			}else{
-				RequestDispatcher dispatcher = req.getRequestDispatcher("/noPermission.jsp");
-				dispatcher.forward(req, resp);
-			}
-		}
-	}
+    req.setCharacterEncoding("UTF-8");
+    LogonBean bean = service.getLogonInfo(req, resp);
+    if (bean == null || bean.getLogonstatus() == null
+        || !bean.getLogonstatus().equals("1")) {
+      bean = sso.ppLogin(req, resp);
+      if (bean == null) {
+        return;
+      }
+    }
+
+    String result = sso.isLogin(bean.getLogonname(), bean.getSid());
+    if (bean != null && !result.equals("0")) {
+      String admin = Configuration.getString("system.administrator", "");
+      if (admin.contains(bean.getLogonname())) {
+        chain.doFilter(req, resp);
+      } else {
+        RequestDispatcher dispatcher = req
+            .getRequestDispatcher("/noPermission.jsp");
+        dispatcher.forward(req, resp);
+      }
+    }
+  }
 }
-

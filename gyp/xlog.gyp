@@ -187,6 +187,8 @@
                 'xlog_generated', 
             ],
             'sources': [
+                #'<(ROOT)/src/example/xlog_appender_test.cpp',
+                '<(ROOT)/src/example/xlog_appender_test_for_multi_thread.cpp',
                 '<(ROOT)/src/client/xlog_appender.cpp',
                 '<(ROOT)/src/client/xlog_properties.cpp',
                 '<(ROOT)/src/client/client.cpp',

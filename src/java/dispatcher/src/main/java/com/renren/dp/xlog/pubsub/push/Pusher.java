@@ -24,10 +24,11 @@ public class Pusher {
   public static int SUBSCRIPTION_PARAM_ILLEGAL = 1000;
   Map<String, PushServiceNodesInfo> subMap;
 
-  private BlockingQueue<LogMeta> bq = new ArrayBlockingQueue<LogMeta>(MAX_BLOCKING_QUEUE_SIZE, false);
+  private BlockingQueue<LogMeta> bq = new ArrayBlockingQueue<LogMeta>(
+      MAX_BLOCKING_QUEUE_SIZE, false);
   private static int MAX_BLOCKING_QUEUE_SIZE = 100000;
   private Logger LOG = LoggerFactory.getLogger(this.getClass());
-  
+
   private PushAdapter pa;
   Thread pubThread;
 
@@ -50,7 +51,8 @@ public class Pusher {
      * @param data
      */
     public void sendLog(LogData data) {
-      PushServiceNodesInfo sub = subMap.get(PubSubUtils.serializeCategories(data.categories));
+      PushServiceNodesInfo sub = subMap.get(PubSubUtils
+          .serializeCategories(data.categories));
       if (null != sub) {
         List<String> hosts = sub.getSubScribeHosts();
         for (String h : hosts) {
@@ -88,12 +90,11 @@ public class Pusher {
 
   }
 
-  
-
   public void publish(LogMeta logMeta) {
 
     if (bq.size() >= MAX_BLOCKING_QUEUE_SIZE) {
-      LOG.warn("the log size is full(>=" + MAX_BLOCKING_QUEUE_SIZE + "), drop the new log");
+      LOG.warn("the log size is full(>=" + MAX_BLOCKING_QUEUE_SIZE
+          + "), drop the new log");
       logMeta.free();
       return;
     }
@@ -104,10 +105,13 @@ public class Pusher {
     int ret = checkSubscription(sub);
     if (ret == SUCCESS) {
       String catStr = PubSubUtils.serializeCategories(sub.categories);
-      boolean shouldPublishAllNodes = Configuration.getBoolean(catStr + ".shouldPublishAllNodes", false);
+      boolean shouldPublishAllNodes = Configuration.getBoolean(catStr
+          + ".shouldPublishAllNodes", false);
       PushServiceNodesInfo si = subMap.get(catStr);
       if (si == null) {
-        subMap.put(catStr, new PushServiceNodesInfo(Lists.newArrayList(sub.host), shouldPublishAllNodes));
+        subMap.put(catStr,
+            new PushServiceNodesInfo(Lists.newArrayList(sub.host),
+                shouldPublishAllNodes));
       } else {
         si.addHost(sub.host);
         si.setShouldPublishAllNodes(shouldPublishAllNodes);

@@ -7,19 +7,19 @@ import com.renren.dp.xlog.handler.impl.FileNameHandlerOfHour;
 
 public class FileNameHandlerFactory {
 
-	private static AbstractFileNameHandler fileNameHandler=null;
-	
-	public static AbstractFileNameHandler getInstance(){
-		if(fileNameHandler==null){
-			int fileNameFormat=Configuration.getInt("cache.file.name.format",0);
-			if(fileNameFormat == 0){
-				fileNameHandler=new FileNameHandlerOf5Min();
-			}else if(fileNameFormat == 1){
-				fileNameHandler=new FileNameHandlerOf10Min();
-			}else if(fileNameFormat == 2){
-				fileNameHandler=new FileNameHandlerOfHour();
-			}
-		}
-		return fileNameHandler;
-	}
+  private static AbstractFileNameHandler fileNameHandler = null;
+
+  public static AbstractFileNameHandler getInstance() {
+    if (fileNameHandler == null) {
+      int fileNameFormat = Configuration.getInt("cache.file.name.format", 0);
+      if (fileNameFormat == 0) {
+        fileNameHandler = new FileNameHandlerOf5Min();
+      } else if (fileNameFormat == 1) {
+        fileNameHandler = new FileNameHandlerOf10Min();
+      } else if (fileNameFormat == 2) {
+        fileNameHandler = new FileNameHandlerOfHour();
+      }
+    }
+    return fileNameHandler;
+  }
 }

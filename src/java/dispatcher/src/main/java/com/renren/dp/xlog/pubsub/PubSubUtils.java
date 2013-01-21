@@ -19,7 +19,8 @@ public class PubSubUtils {
 
   public static String getRemoteClientIp(Current __current) {
     String connStr = __current.con._toString();
-    connStr = connStr.substring(connStr.indexOf(REMOTE_ADDRESS_KEY) + REMOTE_ADDRESS_KEY.length());
+    connStr = connStr.substring(connStr.indexOf(REMOTE_ADDRESS_KEY)
+        + REMOTE_ADDRESS_KEY.length());
     return connStr.split(":")[0];
   }
 
