@@ -6,6 +6,7 @@ import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,6 @@ public class HDFSAdapter1_0_3 extends HDFSAdapter {
     if (fs != null) {
       fs.close();
     }
-    fs = FileSystem.get(URI.create(hdfsURI), conf);
+    fs = (DistributedFileSystem)FileSystem.get(URI.create(hdfsURI), conf);
   }
 }

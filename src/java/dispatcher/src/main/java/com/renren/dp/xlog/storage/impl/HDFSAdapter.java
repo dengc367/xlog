@@ -8,8 +8,8 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +20,7 @@ import com.renren.dp.xlog.storage.StorageAdapter;
 
 public abstract class HDFSAdapter implements StorageAdapter {
 
-  protected FileSystem fs = null;
+  protected DistributedFileSystem fs = null;
   protected String hdfsURI = null;
   protected String dfsReplication = null;
   protected Long socketTimeOut;
@@ -29,16 +29,17 @@ public abstract class HDFSAdapter implements StorageAdapter {
   private String uuid = null;
   private int bufferSize = 0;
   private final int HDFS_BATCH_COMMIT_SIZE;
-  private final String RECREATED_FILE_SUFFIX=".recreated";
+  private final String RECREATED_FILE_SUFFIX = ".recreated";
 
   private ConcurrentHashMap<String, FSDataOutputStream> categoryOfHdfsOS = new ConcurrentHashMap<String, FSDataOutputStream>();
 
   private static Logger logger = LoggerFactory.getLogger(HDFSAdapter.class);
 
   public HDFSAdapter() {
-    this.uuid =com.renren.dp.xlog.config.Configuration
-        .getString("xlog.uuid");;
-    this.bufferSize =com.renren.dp.xlog.config.Configuration.getInt("hdfs.buffer.size", 4000);
+    this.uuid = com.renren.dp.xlog.config.Configuration.getString("xlog.uuid");
+    ;
+    this.bufferSize = com.renren.dp.xlog.config.Configuration.getInt(
+        "hdfs.buffer.size", 4000);
     this.hdfsURI = com.renren.dp.xlog.config.Configuration
         .getString("storage.uri");
     this.dfsReplication = com.renren.dp.xlog.config.Configuration.getString(
@@ -54,7 +55,7 @@ public abstract class HDFSAdapter implements StorageAdapter {
     if (o instanceof LogMeta) {
       return processLogMeta((LogMeta) o);
     } else if (o instanceof CacheFileMeta) {
-      return processCacheFileMeta((CacheFileMeta)o);
+      return processCacheFileMeta((CacheFileMeta) o);
     } else {
       throw new UnsupportedOperationException(
           "it dosen't support this object !");
@@ -213,31 +214,25 @@ public abstract class HDFSAdapter implements StorageAdapter {
   protected FSDataOutputStream getHDFSOutputStream(String path) {
     Path p = new Path(path + "." + uuid);
     try {
-      /***
-       * 异常情况下重建文件一次，防止分布式锁的租期未到无法释放租期导致重复创建文件失败。
-       * 1.首先判断目标文件是否存在，如果不存在直接create
-       * 2.如果存在判断二次重建的那个文件是否存在，如果不存在那么就可以创建一个重建文件
-       * 3.如果重建文件存在，那么直接append原来的目标文件
-       */
       if (fs.exists(p)) {
-        Path recreatedPath=new Path(path + "." + uuid+RECREATED_FILE_SUFFIX);
-        if(fs.exists(recreatedPath)){
-          return fs.append(p);
-        }else{
-          return fs.create(recreatedPath,false, bufferSize);
-        }
-        
+        return fs.append(p);
       } else {
-        return fs.create(p,false, bufferSize);
+        return fs.create(p, false, bufferSize);
       }
     } catch (Exception e) {
+      try {
+        fs.recoverLease(p);
+      } catch (IOException e1) {
+        logger.error("fail to recover lease!" + e.getMessage());
+      }
       logger
           .error("fail to create HDFSOutputstream,then reinitialize hdfs and recreate!the exception is "
               + e.getMessage());
     }
     try {
       Thread.sleep(500);
-    } catch (InterruptedException e1) {}
+    } catch (InterruptedException e1) {
+    }
     try {
       initialize();
     } catch (IOException e) {
@@ -249,7 +244,7 @@ public abstract class HDFSAdapter implements StorageAdapter {
       if (fs.exists(p)) {
         return fs.append(p);
       } else {
-        return fs.create(p,false, bufferSize);
+        return fs.create(p, false, bufferSize);
       }
     } catch (IOException e) {
       logger.error("fail to recreate HDFSOutputstream,the exception is ",

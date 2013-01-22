@@ -64,6 +64,6 @@ public class HDFSAdapter0_21 extends HDFSAdapter {
       fs.close();
     }
     /** compile 1.0.3 */
-    // fs=FileSystem.newInstance(URI.create(hdfsURI),conf);
+    // fs=(DistributedFileSystem)FileSystem.newInstance(URI.create(hdfsURI),conf);
   }
 }
