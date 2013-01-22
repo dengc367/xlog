@@ -123,6 +123,9 @@ public class EventListener extends Thread {
         boolean res = sa.store(logMeta);
         String category = logMeta.getCategory();
         if (res) {
+          /**
+           * 判断上次存储数据是否失败，如果失败，则需要将记录的错误信息清除
+           */
           if(lastRequestFailureTimestamp>0){
             lastRequestFailureTimestamp=0;
             deltaRequestFailureTime=0;
@@ -143,12 +146,20 @@ public class EventListener extends Thread {
             lastRequestFailureTimestamp=currentTime;  
           }else{
             deltaRequestFailureTime=currentTime-lastRequestFailureTimestamp;
+             /**
+             * 判断写失败是否达到阈值，如果达到则睡眠一段时间再执行。
+             */
             if(deltaRequestFailureTime > REQUEST_FAILURE_MAX_TIMEOUT){
               lastRequestFailureTimestamp=currentTime;
               LOG.info("Fail to send request,try sleep "+REQUEST_FAILURE_MAX_TIMEOUT+"ms");
               try {
                 Thread.sleep(REQUEST_FAILURE_MAX_TIMEOUT);
               } catch (InterruptedException e) {}
+               /**
+               * 睡眠完后需要将记录的错误信息清除，否则下次如果出现一次失败的话，将直接进入睡眠，应该写一段时间一直没有成功才进入睡眠
+               */
+              lastRequestFailureTimestamp=0;
+              deltaRequestFailureTime=0;
               }
            }
         }
