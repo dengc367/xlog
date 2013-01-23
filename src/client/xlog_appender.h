@@ -25,7 +25,8 @@ namespace xlog{
              int _strlen;
              ::IceUtil::Monitor<IceUtil::Mutex> _mutex;
     };
-    typedef IceUtil::Handle<XLogAppender> XLogAppenderPtr;
+    //typedef IceUtil::Handle<XLogAppender> XLogAppenderPtr;
+    typedef XLogAppender* XLogAppenderPtr;
 }
 
 

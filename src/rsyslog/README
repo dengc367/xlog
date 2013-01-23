@@ -2,7 +2,7 @@ Config in the /etc/rsyslog.conf file:
 
     $ModLoad /path/to/the/so/file/libomxlog.so
     $template xlogfmt,"%msg%"
-    *.*   :omstdout:;xlogfmt
+    *.*   :omxlog:som.rsyslog;xlogfmt
 
 The XLog parameters config in the /etc/rsyslog_xlog.conf file,
-the example can reference the src/example/xlog.conf.example file.
+the example file can reference the src/example/c++/xlog.conf.example file.
