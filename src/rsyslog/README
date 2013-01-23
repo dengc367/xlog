@@ -1,0 +1,8 @@
+Config in the /etc/rsyslog.conf file: 
+
+    $ModLoad /path/to/the/so/file/libomxlog.so
+    $template xlogfmt,"%msg%"
+    *.*   :omstdout:;xlogfmt
+
+The XLog parameters config in the /etc/rsyslog_xlog.conf file,
+the example can reference the src/example/xlog.conf.example file.
