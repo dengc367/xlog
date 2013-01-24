@@ -63,7 +63,7 @@ namespace xlog
         return 0;
     }
 
-    int XLogAppender::close()
+    void XLogAppender::close()
     {
         _client->close();
     }
