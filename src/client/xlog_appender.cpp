@@ -63,6 +63,11 @@ namespace xlog
         return 0;
     }
 
+    int XLogAppender::close()
+    {
+        _client->close();
+    }
+
     template<typename P> inline string vector2String(vector<P> v){
         stringstream ss;
         ss << "["; 

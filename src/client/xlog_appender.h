@@ -16,6 +16,7 @@ namespace xlog{
             XLogAppender(const vector<string>& categories, const bool is_udp_protocol = true, const int maxSendSize = 0, int maxQueueSize = 100000 , string& hosts = xlog::XLogProperties::DEFAULT_HOSTS);
             int append(const string& msg);
             int append(const char* msg, int const len);
+            void close();
         private:
             void init(const XLogProperties& properties);
              xlog::Client* _client;

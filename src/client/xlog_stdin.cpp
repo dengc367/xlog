@@ -68,7 +68,7 @@ int main(int argc , char** argv)
             batchClient->append(input_line);
         }
     };
-    sleep(10); // s
+    batchClient->close();
     cout << "xlog cli end" << endl;
 }
 
