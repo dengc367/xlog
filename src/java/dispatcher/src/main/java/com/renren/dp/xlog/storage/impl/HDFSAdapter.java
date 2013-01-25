@@ -29,7 +29,6 @@ public abstract class HDFSAdapter implements StorageAdapter {
   private String uuid = null;
   private int bufferSize = 0;
   private final int HDFS_BATCH_COMMIT_SIZE;
-  private final String RECREATED_FILE_SUFFIX = ".recreated";
 
   private ConcurrentHashMap<String, FSDataOutputStream> categoryOfHdfsOS = new ConcurrentHashMap<String, FSDataOutputStream>();
 
@@ -219,7 +218,7 @@ public abstract class HDFSAdapter implements StorageAdapter {
       } else {
         return fs.create(p, false, bufferSize);
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       try {
         fs.recoverLease(p);
       } catch (IOException e1) {
