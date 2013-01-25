@@ -82,8 +82,8 @@ public class EventListener extends Thread {
         logMeta = null;
       } else {
         logBQ.add(logMeta);
-        logBQ.notify();
       }
+      logBQ.notify();
     }
   }
 
