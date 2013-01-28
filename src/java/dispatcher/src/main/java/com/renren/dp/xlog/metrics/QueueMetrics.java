@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.storage.EventListener;
-import com.renren.dp.xlog.storage.QueueCounter;
 import com.renren.monitor.alarm.AlarmMessage;
 import com.renren.monitor.metrics.MetricsContext;
 import com.renren.monitor.metrics.MetricsRecord;

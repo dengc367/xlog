@@ -3,15 +3,18 @@ package com.renren.dp.xlog.storage.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.renren.dp.xlog.config.CategoriesHashKey;
 import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.handler.FileNameHandlerFactory;
 import com.renren.dp.xlog.logger.LogMeta;
+import com.renren.dp.xlog.metrics.CategoriesCounter;
+import com.renren.dp.xlog.metrics.CategoriesInfo;
 import com.renren.dp.xlog.metrics.MetricsInitialization;
+import com.renren.dp.xlog.metrics.QueueCounter;
 import com.renren.dp.xlog.storage.EventListener;
-import com.renren.dp.xlog.storage.QueueCounter;
 import com.renren.dp.xlog.storage.StorageRepository;
 import com.renren.dp.xlog.util.FileUtil;
 
@@ -23,6 +26,7 @@ public class DefaultStorageRepository implements StorageRepository {
   private String slaveRootDir = null;
   private EventListener[] eventListeners;
   private CategoriesHashKey categoriesHash;
+  private CategoriesCounter categoriesCounter;
 
   public DefaultStorageRepository() {
     queueCount = Configuration.getInt("storage.repository.queue.count", 20);
@@ -33,7 +37,8 @@ public class DefaultStorageRepository implements StorageRepository {
     storageAdapterClassName = Configuration.getString("storage.adapter.impl");
   }
 
-  public void initialize() throws IOException {
+  public void initialize(CategoriesCounter categoriesCounter) throws IOException {
+    this.categoriesCounter=categoriesCounter;
     categoriesHash = new CategoriesHashKey();
     eventListeners = new EventListener[queueCount];
     MetricsInitialization metrics=new MetricsInitialization();
@@ -74,7 +79,11 @@ public class DefaultStorageRepository implements StorageRepository {
 
     return list;
   }
-
+  @Override
+  public Collection<CategoriesInfo> getCategoryInfos(){
+    return categoriesCounter.getCategoryInfos();
+  }
+  
   @Override
   public void close() {
     for (EventListener el : eventListeners){

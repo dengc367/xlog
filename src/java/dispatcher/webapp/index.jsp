@@ -1,6 +1,7 @@
 <%@page language="java" import="com.renren.dp.xlog.dispatcher.SystemManager" contentType="text/html; charset=utf-8" %>
-<%@page import="java.util.List" %>
-<%@page import="com.renren.dp.xlog.storage.QueueCounter" %>
+<%@page import="java.util.*" %>
+<%@page import="com.renren.dp.xlog.metrics.QueueCounter" %>
+<%@page import="com.renren.dp.xlog.metrics.CategoriesInfo" %>
 <%@page import="com.renren.dp.xlog.dispatcher.SystemManager.ParameterMode" %>
 <html>
 <head>
@@ -33,6 +34,7 @@
 		displayStartDate=sm.getStartDate();
 	}
 	List<QueueCounter> queueCounters=sm.getQueueInfo();
+	Collection<CategoriesInfo> catetoriesInfos=sm.getCategoryInfos();
 	List<ParameterMode> params=sm.getParameters();
 %>
 <br/>
@@ -47,21 +49,6 @@
 	<tr>
 		<td nowrap="nowrap">系统状态:</td>
 		<td nowrap="nowrap"><%=displayStatus %></td>
-		<%
-			if(status==0){
-		%>
-		<td nowrap="nowrap"><input type="button" id="start" name="start" onClick="operate('start');" value="启动"/></td>	
-		<td nowrap="nowrap"><input type="button" id="stop" name="stop" value="停止" disabled="true"/></td>
-		<td nowrap="nowrap"><input type="button" id="logout" name="logout" onClick="operate('logout');" value="退出"/></td>
-		<%
-			}else{
-		%>
-		<td nowrap="nowrap"><input type="button" id="start" name="start" value="启动"  disabled="true"/></td>	
-		<td nowrap="nowrap"><input type="button" id="stop" name="stop" onClick="operate('stop');" value="停止"/></td>
-		<td nowrap="nowrap"><input type="button" id="logout" name="logout" onClick="operate('logout');" value="退出"/></td>
-		<%
-			}
-		%>
 	</tr>
 	<tr>
 		<td nowrap="nowrap">启动时间:</td>
@@ -102,6 +89,37 @@
 		<td nowrap="nowrap">内存信息:</td>
 		<td nowrap="nowrap"><%=sm.getMemoryInfo() %></td>
 		<td nowrap="nowrap" colspan="2">&nbsp;</td>
+	</tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td>&nbsp;</td></tr>
+<tr><td><div class="title1" /></td></tr>
+<tr><td>&nbsp;</td></tr>
+</table>
+<p align="left"><font size="3"><b>&nbsp;Categories信息</b></font></p>
+<table width="100%" class="tabinfo1" border="1" cellspacing="3" cellpadding="0">
+	<tr>
+		<td align="left" width="40%">Category名称</td>
+		<td align="left" width="30%">总请求数</td>
+		<td align="left" width="30%">Category RPS</td>
+	</tr>
+<%
+    long totoalCategoriesCount=0;
+    long totoalCatetoryRPS=0;
+    for(CategoriesInfo ci: catetoriesInfos){
+       totoalCategoriesCount+=ci.getSuccessCount();
+       totoalCatetoryRPS+=ci.getCategoryRPS();
+%>
+		<tr>
+			<td align="left"><%=ci.getCategory() %></td>
+			<td align="left"><%=ci.getSuccessCount() %></td>
+			<td align="left"><%=ci.getCategoryRPS() %></td>
+		</tr>
+<%   } %>
+    <tr>
+		<td align="left"><font size="2"><b>汇总信息:</b></font></td>
+		<td align="left"><font size="2"><b><%=totoalCategoriesCount %></b></font></td>
+		<td align="left"><font size="2"><b><%=totoalCatetoryRPS %></b></font></td>
 	</tr>
 </table>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">

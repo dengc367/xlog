@@ -17,6 +17,7 @@ import com.renren.dp.xlog.exception.ReflectionException;
 import com.renren.dp.xlog.io.LogWriter;
 import com.renren.dp.xlog.io.impl.DefaultLogWriter;
 import com.renren.dp.xlog.logger.LogMeta;
+import com.renren.dp.xlog.metrics.QueueCounter;
 import com.renren.dp.xlog.metrics.QueueMetrics;
 import com.renren.dp.xlog.util.Constants;
 import com.renren.dp.xlog.util.ReflectionUtil;
@@ -44,6 +45,9 @@ public class EventListener extends Thread {
 
   public EventListener(String queueName, int queueCapacity, String slaveRootDir,MetricsManager metricsManager) {
     counter = new QueueCounter(queueName,queueCapacity);
+    counter.setDaemon(true);
+    counter.start();
+    
     metricsManager.addMetricsContext(new QueueMetrics(queueName,this));
     this.queueCapacity = queueCapacity;
     this.slaveRootDir = slaveRootDir;

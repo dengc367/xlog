@@ -1,6 +1,6 @@
 <%@page language="java" contentType="text/html; charset=utf-8" %>
-<%@page import="com.renren.dp.xlog.storage.QueueCounter" %>
-<%@page import="com.renren.dp.xlog.storage.QueueCounter.CategoriesCounter" %>
+<%@page import="com.renren.dp.xlog.metrics.QueueCounter" %>
+<%@page import="com.renren.dp.xlog.metrics.CategoriesInfo" %>
 <%@page import="java.util.Collection" %>
 <html>
 <head>
@@ -12,7 +12,7 @@
 <%
   String queueName=request.getParameter("queueName");
   QueueCounter queueCounter=(QueueCounter)session.getAttribute(queueName);
-  Collection<CategoriesCounter> categoriesList=queueCounter.getCategoriesCounters();
+  Collection<CategoriesInfo> categoriesList=queueCounter.getCategoriesInfos();
 %>
 <br/>
 <p align="left"><font size="3"><b>队列<%=queueName %>&nbsp;Categories信息</b></font></p>
@@ -24,13 +24,13 @@
     <td align="left" width="20%">Category RPS</td>
   </tr>
 <%
-   for(CategoriesCounter cc : categoriesList){
+   for(CategoriesInfo ci : categoriesList){
 %>
 <tr>
-    <td align="left" width="40%"><%=cc.getCategory() %></td>
-    <td align="left" width="20%"><%=cc.getSuccessCount() %></td>
-    <td align="left" width="20%"><%=cc.getFailCount() %></td>
-    <td align="left" width="20%"><%=cc.getCategoryRPS() %></td>
+    <td align="left" width="40%"><%=ci.getCategory() %></td>
+    <td align="left" width="20%"><%=ci.getSuccessCount() %></td>
+    <td align="left" width="20%"><%=ci.getFailCount() %></td>
+    <td align="left" width="20%"><%=ci.getCategoryRPS() %></td>
   </tr>
 <% } %>
 </table>

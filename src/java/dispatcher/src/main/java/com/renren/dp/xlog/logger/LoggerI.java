@@ -10,6 +10,7 @@ import com.renren.dp.xlog.cache.WriteLocalOnlyCategoriesCache;
 import com.renren.dp.xlog.exception.ReflectionException;
 import com.renren.dp.xlog.handler.AbstractFileNameHandler;
 import com.renren.dp.xlog.handler.FileNameHandlerFactory;
+import com.renren.dp.xlog.metrics.CategoriesCounter;
 import com.renren.dp.xlog.pubsub.PubSubService;
 import com.renren.dp.xlog.storage.StorageRepository;
 import com.renren.dp.xlog.storage.StorageRepositoryFactory;
@@ -28,6 +29,7 @@ public class LoggerI extends _LoggerDisp {
   private AbstractFileNameHandler fileNameHandler = null;
   private WriteLocalOnlyCategoriesCache wlcc = null;
   private StorageRepository storageRepository=null;
+  private CategoriesCounter categoriesCounter=null;
 
   private PubSubService pubsub = null;
 
@@ -42,9 +44,12 @@ public class LoggerI extends _LoggerDisp {
       LOG.error("Fail to get CacheManager instance!",e);
       return false;
     }
+    categoriesCounter=new CategoriesCounter();
+    categoriesCounter.setDaemon(true);
+    
     storageRepository=StorageRepositoryFactory.getInstance();
     try {
-      storageRepository.initialize();
+      storageRepository.initialize(categoriesCounter);
     } catch (IOException e) {
       LOG.error("Fail to initialize Storage Repository",e);
       return false;
@@ -62,7 +67,9 @@ public class LoggerI extends _LoggerDisp {
     }
     LogSyncInitialization logSync = new LogSyncInitialization();
     logSync.initialise(wlcc);
-
+    
+    categoriesCounter.start();
+    
     return true;
   }
 
@@ -81,18 +88,30 @@ public class LoggerI extends _LoggerDisp {
     if (data == null || data.categories == null || data.categories.length==0) {
       return;
     }
-    String logFileNum = fileNameHandler.getCacheLogFileNum();
-    LogMeta logMeta = null;
     String category = LogDataFormat
         .transformCategories(data.categories);
-    if (pubsub == null) {
-      logMeta = new LogMeta(logFileNum, data,category, 2);
-    } else if (pubsub.isSubscribed(data.categories)) {
+    /**
+     * category计数器
+     */
+    categoriesCounter.incCategoryCount(category);
+    
+    String logFileNum = fileNameHandler.getCacheLogFileNum();
+    LogMeta logMeta = null;
+    /**
+     * 判断是否有订阅
+     */
+    if (pubsub != null && pubsub.isSubscribed(data.categories)) {
       logMeta = new LogMeta(logFileNum, data,category, 3);
       pubsub.publish(logMeta);
+    } else {
+      logMeta = new LogMeta(logFileNum, data,category, 2);
     }
+    /**
+     * 写本地缓存
+     */
     boolean res = cacheManager.writeCache(logMeta);
     if(!res){
+      LOG.error("Fail to write data to local cache.Category:"+category);
       return ;
     }
     if (wlcc.isWriteLocalOnly(category)) {

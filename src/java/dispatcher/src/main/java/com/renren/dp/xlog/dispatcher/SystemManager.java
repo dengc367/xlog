@@ -3,18 +3,19 @@ package com.renren.dp.xlog.dispatcher;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 
 import com.renren.dp.xlog.VersionAnnotation;
 import com.renren.dp.xlog.cache.CacheManagerFactory;
 import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.dispatcher.DispatcherApp;
 import com.renren.dp.xlog.exception.ReflectionException;
-import com.renren.dp.xlog.storage.QueueCounter;
+import com.renren.dp.xlog.metrics.CategoriesInfo;
+import com.renren.dp.xlog.metrics.QueueCounter;
 import com.renren.dp.xlog.storage.StorageRepositoryFactory;
 import com.renren.monitor.metrics.impl.JVMMetrics;
 
@@ -45,20 +46,13 @@ public class SystemManager {
   }
 
   public List<QueueCounter> getQueueInfo() {
-    List<QueueCounter> list= StorageRepositoryFactory.getInstance().getQueueInfo();
-    CountDownLatch cdLatch=new CountDownLatch(list.size());
-    for(QueueCounter qc:list){
-      new RPCCollectDataThread(cdLatch,qc).start();
-    }
-    try {
-      cdLatch.await();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-      return null;
-    }
-    return list;
+    return StorageRepositoryFactory.getInstance().getQueueInfo();
   }
 
+  public Collection<CategoriesInfo> getCategoryInfos(){
+    return StorageRepositoryFactory.getInstance().getCategoryInfos();
+  }
+  
   public boolean start() {
     try {
       DispatcherApp.getInstance().start();
@@ -115,20 +109,6 @@ public class SystemManager {
     } else {
       data = data /1048576d;
       return df.format(data) + "GB";
-    }
-  }
-  private class RPCCollectDataThread extends Thread{
-    private CountDownLatch cdLatch=null;
-    private QueueCounter qc=null;
-    
-    RPCCollectDataThread(CountDownLatch cdLatch,QueueCounter qc){
-      this.cdLatch=cdLatch;
-      this.qc=qc;
-    }
-    
-    public void run(){
-      this.qc.collecteRPSData();
-      cdLatch.countDown();
     }
   }
   public class ParameterMode implements Comparable<Object>{

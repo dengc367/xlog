@@ -45,14 +45,7 @@ public class LoginFilter extends HttpServlet implements Filter {
 
     String result = sso.isLogin(bean.getLogonname(), bean.getSid());
     if (bean != null && !result.equals("0")) {
-      String admin = Configuration.getString("system.administrator", "");
-      if (admin.contains(bean.getLogonname())) {
-        chain.doFilter(req, resp);
-      } else {
-        RequestDispatcher dispatcher = req
-            .getRequestDispatcher("/noPermission.jsp");
-        dispatcher.forward(req, resp);
-      }
+      chain.doFilter(req, resp);
     }
   }
 }
