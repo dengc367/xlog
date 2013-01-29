@@ -10,6 +10,6 @@
 	String errTip=request.getParameter("errTip");
 %>
 <br><br>
-<p align="center"><font color="red" size="4">对不起，<%=errTip %></font></p>
+<p align="center"><font color="red" size="4">sorry，<%=errTip %></font></p>
 </body>
 </html>

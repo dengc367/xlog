@@ -3,9 +3,10 @@ package com.renren.dp.xlog.dispatcher;
 import java.util.Date;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.renren.dp.xlog.config.Configuration;
-import com.renren.dp.xlog.storage.StorageRepositoryFactory;
 
 public class DispatcherApp {
 
@@ -13,8 +14,12 @@ public class DispatcherApp {
   private DispatcherI dispatcher = null;
   private int status = 0;
   private Date startDate;
+  private Ice.ObjectAdapter adapter=null;
 
   private static DispatcherApp da = null;
+  
+  private final static Logger LOG = LoggerFactory
+      .getLogger(DispatcherApp.class);
 
   private DispatcherApp() {
   }
@@ -33,11 +38,17 @@ public class DispatcherApp {
   public Date getStartDate() {
     return startDate;
   }
-
   public void start() {
     if (status == 1) {
       return;
     }
+    Runtime.getRuntime().addShutdownHook(new Thread(){
+      public void run(){
+        LOG.info("Dispacher shutdown ice server....");
+        stopDispatcher();
+        LOG.info("Dispacher shutdown ice server end!");
+      }
+    });
     startDate = new Date();
     status = 1;
     initLog4j();
@@ -48,19 +59,19 @@ public class DispatcherApp {
     initData.properties = prop;
     ic = Ice.Util.initialize(initData);
 
-    Ice.ObjectAdapter adapter = ic.createObjectAdapterWithEndpoints(
+    adapter = ic.createObjectAdapterWithEndpoints(
         "XlogDispatcher", "default");
     dispatcher = new DispatcherI();
     dispatcher.initialize(adapter);
+    LOG.info("Dispacher start successful!");
     adapter.activate();
   }
 
-  public void stop() {
+  public void stopDispatcher() {
     status = 0;
+    adapter.destroy();
+    ic.destroy();
     dispatcher.close();
-    StorageRepositoryFactory.getInstance().close();
-    ic.shutdown();
-    System.exit(0);
   }
 
   private void initLog4j() {

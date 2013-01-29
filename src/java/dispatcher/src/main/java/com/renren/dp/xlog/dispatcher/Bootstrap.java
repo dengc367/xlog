@@ -13,6 +13,7 @@ public class Bootstrap {
   public static void main(String[] args) {
     int port = Configuration.getInt("web.server.port", 10000);
     String ip = Configuration.getString("web.server.host", "");
+    SystemManager sm=null;
     if ("".equals(ip)) {
       try {
         ip = InetAddress.getLocalHost().getHostAddress();
@@ -31,9 +32,11 @@ public class Bootstrap {
         System.err.println("Fail to start webserver!exception is "+e.getMessage());
       }
     } else if (args[0].equals("dispatcher")) {
-      new SystemManager().start();
+      sm=new SystemManager();
+      sm.start();
     } else if (args[0].equals("all")) {
-      new SystemManager().start();
+      sm=new SystemManager();
+      sm.start();
       try {
         new WebServer(ip, port).start();
       } catch (Exception e) {

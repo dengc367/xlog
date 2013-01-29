@@ -65,7 +65,7 @@ public class SystemManager {
 
   public boolean stop() {
     try {
-      DispatcherApp.getInstance().stop();
+      DispatcherApp.getInstance().stopDispatcher();
     } catch (Exception e) {
       e.printStackTrace();
       return false;

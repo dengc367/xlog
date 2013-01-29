@@ -14,6 +14,7 @@ public abstract class CacheManager {
 
   public abstract void initialize();
 
+  public abstract void close();
   // public boolean writeCache(LogData[] logDatas,String logFileNum);
   public CacheManager() {
     cacheRootDir = Configuration.getString("oplog.store.path") + "/"

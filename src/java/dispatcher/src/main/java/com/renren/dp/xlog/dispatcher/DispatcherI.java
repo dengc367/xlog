@@ -35,6 +35,7 @@ public class DispatcherI extends _DispatcherDisp {
   private PubSubService pubsub = null;
   private ZkConn conn = null;
   boolean ispubSubStart = false;
+  private volatile boolean isRunning=true; 
 
   private static Logger LOG = Logger.getLogger(DispatcherI.class);
   
@@ -62,7 +63,9 @@ public class DispatcherI extends _DispatcherDisp {
   }
 
   public void close() {
+    this.isRunning=false;
     conn.close();
+    logger.close();
   }
 
   private boolean initCluster(long delayTime) {
@@ -84,13 +87,16 @@ public class DispatcherI extends _DispatcherDisp {
   }
 
   public boolean reinitialize() {
-    try {
-      conn.reconnect();
-    } catch (IOException e) {
-      e.printStackTrace();
-      return false;
+    if(isRunning){
+      try {
+        conn.reconnect();
+      } catch (IOException e) {
+        e.printStackTrace();
+        return false;
+      }
+      return initCluster(0);
     }
-    return initCluster(0);
+    return false;
   }
 
   @Override

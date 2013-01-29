@@ -126,6 +126,9 @@ public class AsyncCacheManager extends CacheManager {
         }
       }
     }
+    public void close(){
+      logWriter.close();
+    }
   }
 
   public void checkCache() {
@@ -134,6 +137,15 @@ public class AsyncCacheManager extends CacheManager {
     Collection<TaskWriter> coll = taskWriterMap.values();
     for (TaskWriter tw : coll) {
       tw.checkCacheFile(logFileNum);
+    }
+  }
+
+  @Override
+  public void close() {
+    // TODO Auto-generated method stub
+    Collection<TaskWriter> coll = taskWriterMap.values();
+    for (TaskWriter tw : coll) {
+      tw.close();
     }
   }
 }

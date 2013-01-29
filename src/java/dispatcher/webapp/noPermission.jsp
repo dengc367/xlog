@@ -6,10 +6,7 @@
 <title>xlog dispatcher后台管理</title>
 </head>
 <body style="text-align: center">
-<%
-	String errTip=request.getParameter("errTip");
-%>
 <br><br>
-<p align="center"><font color="blue" size="4">对不起，您没有权限访问Xlog Dispatcher管理控制台</font></p>
+<p align="center"><font color="blue" size="4">对不起，您没有权限访问Xlog Dispatcher管理控制台,执行管理员命令.</font></p>
 </body>
 </html>

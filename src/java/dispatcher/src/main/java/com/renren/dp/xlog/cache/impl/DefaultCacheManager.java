@@ -1,6 +1,7 @@
 package com.renren.dp.xlog.cache.impl;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -66,6 +67,7 @@ public class DefaultCacheManager extends CacheManager {
 
   @Override
   public void checkCache() {
+    synchronized(categoriesMap){
     String logFileNum = FileNameHandlerFactory.getInstance()
         .getCacheLogFileNum();
     Set<Map.Entry<String, LogWriter>> set = categoriesMap.entrySet();
@@ -80,6 +82,17 @@ public class DefaultCacheManager extends CacheManager {
         if (!res) {
           logger.error("fail to create log file!");
         }
+      }
+    }
+    }
+  }
+
+  @Override
+  public void close() {
+    synchronized(categoriesMap){
+      Collection<LogWriter> coll=categoriesMap.values();
+      for(LogWriter o:coll){
+        o.close();
       }
     }
   }

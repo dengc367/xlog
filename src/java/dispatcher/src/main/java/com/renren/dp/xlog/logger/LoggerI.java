@@ -73,6 +73,11 @@ public class LoggerI extends _LoggerDisp {
     return true;
   }
 
+  public void close(){
+    cacheManager.close();
+    storageRepository.close();
+    categoriesCounter.close();
+  }
   @Override
   public void add(LogData[] data, Current __current) {
     if (data == null) {

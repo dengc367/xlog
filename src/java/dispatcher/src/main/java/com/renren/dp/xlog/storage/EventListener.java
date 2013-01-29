@@ -115,11 +115,15 @@ public class EventListener extends Thread {
 
   public void run() {
     LogMeta logMeta = null;
-    while (true) {
+    while (!isClosed) {
       try {
         synchronized (logBQ) {
           if (logBQ.isEmpty()) {
-            logBQ.wait();
+            try {
+              logBQ.wait();
+            } catch (InterruptedException e) {
+              continue;
+              }
           }
           logMeta = logBQ.remove(0);
         }
@@ -167,16 +171,10 @@ public class EventListener extends Thread {
               }
            }
         }
-
         logMeta.free();
         logMeta = null;
-      } catch (InterruptedException e) {
-        LOG.error("fail to store logdata!");
-        e.printStackTrace();
-        continue;
-      } catch (IOException e) {
-        LOG.error("fail to store logdata!");
-        e.printStackTrace();
+      }  catch (IOException e) {
+        LOG.warn("fail to store logdata!",e);
         continue;
       }
     }
@@ -212,6 +210,7 @@ public class EventListener extends Thread {
 
   public void close() {
     this.isClosed = true;
+    counter.close();
     while (logBQ.size() > 0) {
       try {
         Thread.sleep(1000);
@@ -220,12 +219,13 @@ public class EventListener extends Thread {
       }
     }
 
+    sa.destory();
     Collection<LogWriter> c = logWriters.values();
     for (LogWriter logWriter : c) {
       logWriter.close();
       logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
     }
-    Thread.interrupted();
+    this.interrupt();
   }
 
   public long getDeltaRequestFailureTime(){
