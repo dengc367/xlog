@@ -35,10 +35,10 @@ public class DispatcherI extends _DispatcherDisp {
   private PubSubService pubsub = null;
   private ZkConn conn = null;
   boolean ispubSubStart = false;
-  private volatile boolean isRunning=true; 
+  private volatile boolean isRunning = true;
 
   private static Logger LOG = Logger.getLogger(DispatcherI.class);
-  
+
   protected boolean initialize(ObjectAdapter adapter) {
     myprx = adapter.add(this, adapter.getCommunicator().stringToIdentity("D"));
     logger = new LoggerI();
@@ -51,8 +51,7 @@ public class DispatcherI extends _DispatcherDisp {
     }
     long delayTime = Configuration.getLong("master.start.delay", 300) * 1000;
     int zkSessionTimeOut = Configuration.getInt("zk.session.timeout", 2) * 1000;
-    conn = new ZkConn(Configuration.getString("zookeeper.connstr"),
-        zkSessionTimeOut, new DefaultWatcher(this));
+    conn = new ZkConn(Configuration.getString("zookeeper.connstr"), zkSessionTimeOut, new DefaultWatcher(this));
     try {
       cfg = DispatcherCluster.create(conn, adapter.getCommunicator());
     } catch (IOException e) {
@@ -63,8 +62,9 @@ public class DispatcherI extends _DispatcherDisp {
   }
 
   public void close() {
-    this.isRunning=false;
-    conn.close();
+    this.isRunning = false;
+    conn.destroy();
+    conn = null;
     logger.close();
   }
 
@@ -87,7 +87,7 @@ public class DispatcherI extends _DispatcherDisp {
   }
 
   public boolean reinitialize() {
-    if(isRunning){
+    if (isRunning) {
       try {
         conn.reconnect();
       } catch (IOException e) {
@@ -130,13 +130,11 @@ public class DispatcherI extends _DispatcherDisp {
   }
 
   @Override
-  public int subscribe(Subscription sub, Current __current)
-      throws XLogException {
+  public int subscribe(Subscription sub, Current __current) throws XLogException {
     if (!ispubSubStart) {
-      LOG.warn("the pubsub server is not started, but the client "
-          + PubSubUtils.getRemoteClientIp(__current) + " want to subscribe. ");
-      throw new XLogException(ErrorCode.PubSubNotStartedException,
-          "the pubsub server is not started");
+      LOG.warn("the pubsub server is not started, but the client " + PubSubUtils.getRemoteClientIp(__current)
+          + " want to subscribe. ");
+      throw new XLogException(ErrorCode.PubSubNotStartedException, "the pubsub server is not started");
     }
     return pubsub.subscribe(sub, __current);
   }
@@ -147,14 +145,12 @@ public class DispatcherI extends _DispatcherDisp {
   }
 
   @Override
-  public String[] getData(int categoryId, Current __current)
-      throws XLogException {
+  public String[] getData(int categoryId, Current __current) throws XLogException {
     try {
       if (!ispubSubStart) {
-        LOG.warn("the pubsub server is not started, but the client "
-            + PubSubUtils.getRemoteClientIp(__current) + " want to getData. ");
-        throw new XLogException(ErrorCode.PubSubNotStartedException,
-            "the pubsub server is not started");
+        LOG.warn("the pubsub server is not started, but the client " + PubSubUtils.getRemoteClientIp(__current)
+            + " want to getData. ");
+        throw new XLogException(ErrorCode.PubSubNotStartedException, "the pubsub server is not started");
       }
       return pubsub.getData(categoryId, __current);
     } catch (IOException e) {

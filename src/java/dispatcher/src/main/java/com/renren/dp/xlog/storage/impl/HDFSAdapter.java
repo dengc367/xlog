@@ -7,46 +7,32 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.renren.dp.xlog.cache.CacheFileMeta;
 import com.renren.dp.xlog.handler.FileNameHandlerFactory;
 import com.renren.dp.xlog.logger.LogMeta;
+import com.renren.dp.xlog.storage.RecoverableOutputStream;
 import com.renren.dp.xlog.storage.StorageAdapter;
+import com.renren.dp.xlog.util.FileSystemUtil;
 
-public abstract class HDFSAdapter implements StorageAdapter {
+public class HDFSAdapter implements StorageAdapter {
 
-  protected DistributedFileSystem fs = null;
-  protected String hdfsURI = null;
-  protected String dfsReplication = null;
-  protected Long socketTimeOut;
+  protected FileSystem fs;
 
   private String currentFileNameNumber;
   private String uuid = null;
-  private int bufferSize = 0;
   private final int HDFS_BATCH_COMMIT_SIZE;
+  private ConcurrentHashMap<String, RecoverableOutputStream> outputStreamMap = new ConcurrentHashMap<String, RecoverableOutputStream>();
 
-  private ConcurrentHashMap<String, FSDataOutputStream> categoryOfHdfsOS = new ConcurrentHashMap<String, FSDataOutputStream>();
-
-  private static Logger logger = LoggerFactory.getLogger(HDFSAdapter.class);
+  protected static Logger LOG = LoggerFactory.getLogger(HDFSAdapter.class);
 
   public HDFSAdapter() {
     this.uuid = com.renren.dp.xlog.config.Configuration.getString("xlog.uuid");
-    ;
-    this.bufferSize = com.renren.dp.xlog.config.Configuration.getInt(
-        "hdfs.buffer.size", 4000);
-    this.hdfsURI = com.renren.dp.xlog.config.Configuration
-        .getString("storage.uri");
-    this.dfsReplication = com.renren.dp.xlog.config.Configuration.getString(
-        "storage.replication", "3");
-    this.socketTimeOut = com.renren.dp.xlog.config.Configuration.getLong(
-        "dfs.socket.timeout", 180) * 1000;
-    this.HDFS_BATCH_COMMIT_SIZE = com.renren.dp.xlog.config.Configuration
-        .getInt("batch.commit.size", 1000);
+    this.HDFS_BATCH_COMMIT_SIZE = com.renren.dp.xlog.config.Configuration.getInt("batch.commit.size", 1000);
   }
 
   @Override
@@ -56,18 +42,16 @@ public abstract class HDFSAdapter implements StorageAdapter {
     } else if (o instanceof CacheFileMeta) {
       return processCacheFileMeta((CacheFileMeta) o);
     } else {
-      throw new UnsupportedOperationException(
-          "it dosen't support this object !");
+      throw new UnsupportedOperationException("it dosen't support this object !");
     }
   }
 
   private boolean processLogMeta(LogMeta logMeta) {
-    FSDataOutputStream hdfsOutput = null;
+    RecoverableOutputStream categoryOutputStream = null;
     String strCategory = logMeta.getCategory();
-    String logFileNum = FileNameHandlerFactory.getInstance().getHDFSLogFileNum(
-        logMeta.getLogFileNum());
-    hdfsOutput = buildHDFSOutputStream(strCategory, logFileNum);
-    if (hdfsOutput == null) {
+    String logFileNum = FileNameHandlerFactory.getInstance().getHDFSLogFileNum(logMeta.getLogFileNum());
+    categoryOutputStream = buildHDFSOutputStream(strCategory, logFileNum);
+    if (categoryOutputStream == null) {
       return false;
     }
     int i = 0;
@@ -79,38 +63,43 @@ public abstract class HDFSAdapter implements StorageAdapter {
         continue;
       }
       try {
-        hdfsOutput.write((logs[i] + "\n").getBytes());
+        categoryOutputStream.write((logs[i] + "\n").getBytes());
       } catch (IOException e) {
-        logger
-            .error("fail to write data to hdfs,and get hdfs ouputstream again! the exception is : "
-                + e.getMessage());
-        try {
-          hdfsOutput.close();
-        } catch (IOException e1) {
-          e1.printStackTrace();
-        }
-        categoryOfHdfsOS.remove(strCategory);
+        LOG.error("fail to write data to hdfs,and get hdfs ouputstream again! the exception is : " + e.getMessage());
+        closeOutputStream(categoryOutputStream, strCategory);
         return false;
       }
       if (i % HDFS_BATCH_COMMIT_SIZE == 0) {
-        res = flush(hdfsOutput, strCategory + "/" + logFileNum);
-        if (!res) {
+        try {
+          categoryOutputStream.flush();
+        } catch (IOException e) {
           return false;
         }
       }
     }
     if (i % HDFS_BATCH_COMMIT_SIZE > 0) {
-      res = flush(hdfsOutput, strCategory + "/" + logFileNum);
+      try {
+        categoryOutputStream.flush();
+      } catch (IOException e) {
+        res = false;
+      }
     }
     return res;
   }
 
+  private void closeOutputStream(RecoverableOutputStream categoryOutputStream, String strCategory) {
+    try {
+      categoryOutputStream.close();
+    } catch (IOException e) {
+    } finally {
+      categoryOutputStream = null;
+    }
+    outputStreamMap.remove(strCategory);
+  }
+
   private boolean processCacheFileMeta(CacheFileMeta cacheFileMeta) {
-    FSDataOutputStream hdfsOutput = null;
-    String logFileNum = FileNameHandlerFactory.getInstance().getHDFSLogFileNum(
-        cacheFileMeta.getCacheFile().getName());
-    hdfsOutput = buildHDFSOutputStream(cacheFileMeta.getCategories(),
-        logFileNum);
+    String logFileNum = FileNameHandlerFactory.getInstance().getHDFSLogFileNum(cacheFileMeta.getCacheFile().getName());
+    RecoverableOutputStream categoryOutputStream = buildHDFSOutputStream(cacheFileMeta.getCategories(), logFileNum);
     FileReader fr = null;
     try {
       fr = new FileReader(cacheFileMeta.getCacheFile());
@@ -124,36 +113,29 @@ public abstract class HDFSAdapter implements StorageAdapter {
     try {
       while ((line = br.readLine()) != null) {
         try {
-          hdfsOutput.write((line + "\n").getBytes());
+          categoryOutputStream.write((line + "\n").getBytes());
         } catch (IOException e) {
-          logger
-              .error("fail to write data to hdfs,and get hdfs ouputstream again! the exception is : "
-                  + e.getMessage());
-          try {
-            hdfsOutput.close();
-          } catch (IOException e1) {
-            logger.error("fail to close hdfs outputstream", e1.getMessage());
-          }
+          LOG.error("fail to write data to hdfs,and get hdfs ouputstream again! the exception is : " + e.getMessage());
+          closeOutputStream(categoryOutputStream, cacheFileMeta.getCategories());
           return false;
         }
         count++;
         if (count % HDFS_BATCH_COMMIT_SIZE == 0) {
-          res = flush(hdfsOutput, cacheFileMeta.getCategories() + "/"
-              + logFileNum);
-          if (!res) {
-            break;
-          }
+          categoryOutputStream.flush();
         }
       }
     } catch (IOException e) {
-      logger
-          .error("fail to read cache file and write to hdfs! the exception is :"
-              + e.getMessage());
+      LOG.warn("fail to read cache file and write to hdfs! the exception is :", e.getMessage());
       res = false;
     }
 
     if (res && count % HDFS_BATCH_COMMIT_SIZE > 0) {
-      res = flush(hdfsOutput, cacheFileMeta.getCategories() + "/" + logFileNum);
+      try {
+        categoryOutputStream.flush();
+      } catch (IOException e) {
+        LOG.error("fail to flush logdata! ", e.getMessage());
+        res = false;
+      }
     }
 
     try {
@@ -169,93 +151,56 @@ public abstract class HDFSAdapter implements StorageAdapter {
     return res;
   }
 
-  private FSDataOutputStream buildHDFSOutputStream(String strCategory,
-      String logFileNum) {
-    FSDataOutputStream hdfsOutput = null;
-    if (categoryOfHdfsOS.containsKey(strCategory)) {
-      hdfsOutput = categoryOfHdfsOS.get(strCategory);
-      if (!logFileNum.equals(currentFileNameNumber)) {
-        flush(hdfsOutput, strCategory + "/" + logFileNum);
+  private RecoverableOutputStream buildHDFSOutputStream(String strCategory, String logFileNum) {
+    RecoverableOutputStream os = outputStreamMap.get(strCategory);
+    if (os != null && logFileNum.equals(currentFileNameNumber)) {
+      return os;
+    } else if (os != null) {
+      try {
+        os.flush();
+      } catch (IOException e) {
+        LOG.error("fail to flush the logdata", e.getMessage());
+      } finally {
         try {
-          hdfsOutput.close();
+          os.close();
         } catch (IOException e) {
-          logger.error("fail to close hdfs outputstream", e.getMessage());
+          LOG.error("fail to close hdfs outputstream", e.getMessage());
         }
-        hdfsOutput = getHDFSOutputStream(strCategory + "/" + logFileNum);
-        if (hdfsOutput == null) {
-          logger
-              .error("fail to get HDFSOutputStream,it can't store logdata to hdfs!");
-          return null;
-        } else {
-          logger.debug("success to get HDFSOutputStream!");
-        }
-        currentFileNameNumber = logFileNum;
-        categoryOfHdfsOS.put(strCategory, hdfsOutput);
       }
-    } else {
-      hdfsOutput = getHDFSOutputStream(strCategory + "/" + logFileNum);
-      if (hdfsOutput == null) {
-        logger
-            .error("fail to get HDFSOutputStream,it can't store logdata to hdfs!");
-        return null;
-      } else {
-        logger.debug("success to get HDFSOutputStream!");
-      }
-      currentFileNameNumber = logFileNum;
-      categoryOfHdfsOS.put(strCategory, hdfsOutput);
     }
-
-    return hdfsOutput;
+    Path categoryPath = new Path(fs.getWorkingDirectory(), strCategory + "/" + logFileNum + "." + uuid);
+    os = getHDFSOutputStream(strCategory, categoryPath);
+    currentFileNameNumber = logFileNum;
+    return os;
   }
 
-  public abstract boolean flush(FSDataOutputStream hdfsOutput, String path);
+  protected RecoverableOutputStream getHDFSOutputStream(String strCategory, Path path) {
+    RecoverableOutputStream os;
+    try {
+      os = new RecoverableOutputStream(fs, path);
+      outputStreamMap.put(strCategory, os);
+    } catch (Exception e) {
+      LOG.error("fail to get HDFSOutputStream,it can't store logdata to hdfs!", e);
+      return null;
+    }
+    LOG.info("success to get HDFSOutputStream for category " + strCategory + ": " + os.toString());
+    return os;
+  }
 
-  protected FSDataOutputStream getHDFSOutputStream(String path) {
-    Path p = new Path(path + "." + uuid);
+  @Override
+  public void initialize() throws IOException {
     try {
-      if (fs.exists(p)) {
-        return fs.append(p);
-      } else {
-        return fs.create(p, false, bufferSize);
-      }
+      fs = FileSystemUtil.createFileSystem();
     } catch (IOException e) {
-      try {
-        fs.recoverLease(p);
-      } catch (IOException e1) {
-        logger.error("fail to recover lease!" + e.getMessage());
-      }
-      logger
-          .error("fail to create HDFSOutputstream,then reinitialize hdfs and recreate!the exception is "
-              + e.getMessage());
-    }
-    try {
-      Thread.sleep(500);
-    } catch (InterruptedException e1) {
-    }
-    try {
-      initialize();
-    } catch (IOException e) {
-      logger.error("fail to reinitialize hdfs,the exception is "
-          + e.getMessage());
-      return null;
-    }
-    try {
-      if (fs.exists(p)) {
-        return fs.append(p);
-      } else {
-        return fs.create(p, false, bufferSize);
-      }
-    } catch (IOException e) {
-      logger.error("fail to recreate HDFSOutputstream,the exception is ",
-          e.getMessage());
-      return null;
+      LOG.error("FileSystem create failed. " + e);
     }
   }
 
   @Override
-  public void destory() {
-    Collection<FSDataOutputStream> c = categoryOfHdfsOS.values();
-    for (FSDataOutputStream o : c) {
+  public synchronized void destory() {
+    LOG.info("close all hdfs clients." + outputStreamMap);
+    Collection<RecoverableOutputStream> c = outputStreamMap.values();
+    for (RecoverableOutputStream o : c) {
       try {
         o.close();
       } catch (IOException e) {
@@ -263,13 +208,14 @@ public abstract class HDFSAdapter implements StorageAdapter {
         continue;
       }
     }
-    categoryOfHdfsOS.clear();
-    categoryOfHdfsOS = null;
-
+    outputStreamMap.clear();
     try {
       fs.close();
+      LOG.info("close FileSystem success. " + fs);
     } catch (IOException e) {
-      e.printStackTrace();
+      LOG.error("close FileSystem error. " + e);
+    } finally {
+      fs = null;
     }
   }
 }

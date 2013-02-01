@@ -30,28 +30,26 @@ public class DefaultStorageRepository implements StorageRepository {
 
   public DefaultStorageRepository() {
     queueCount = Configuration.getInt("storage.repository.queue.count", 20);
-    queueCapacity = Configuration.getInt("storage.repository.queue.capacity",
-        1000);
-    slaveRootDir = Configuration.getString("oplog.store.path") + "/"
-        + Configuration.getString("storage.type");
+    queueCapacity = Configuration.getInt("storage.repository.queue.capacity", 1000);
+    slaveRootDir = Configuration.getString("oplog.store.path") + "/" + Configuration.getString("storage.type");
     storageAdapterClassName = Configuration.getString("storage.adapter.impl");
   }
 
   public void initialize(CategoriesCounter categoriesCounter) throws IOException {
-    this.categoriesCounter=categoriesCounter;
+    this.categoriesCounter = categoriesCounter;
     categoriesHash = new CategoriesHashKey();
     eventListeners = new EventListener[queueCount];
-    MetricsInitialization metrics=new MetricsInitialization();
-    //初始化事件监听器
+    MetricsInitialization metrics = new MetricsInitialization();
+    // 初始化事件监听器
     for (int i = 0; i < queueCount; i++) {
-      EventListener listener = new EventListener("StorageQueue" + i,
-          queueCapacity, slaveRootDir,metrics.getMetricsManager());
+      EventListener listener = new EventListener("StorageQueue" + i, queueCapacity, slaveRootDir,
+          metrics.getMetricsManager());
       listener.initialize(storageAdapterClassName);
       listener.setDaemon(true);
       listener.start();
       eventListeners[i] = listener;
     }
-    //初始化metrics
+    // 初始化metrics
     metrics.initialize();
   }
 
@@ -63,8 +61,7 @@ public class DefaultStorageRepository implements StorageRepository {
   }
 
   public void checkRepository() {
-    String logFileNum = FileNameHandlerFactory.getInstance()
-        .getCacheLogFileNum();
+    String logFileNum = FileNameHandlerFactory.getInstance().getCacheLogFileNum();
     for (EventListener el : eventListeners) {
       el.checkExpiredLogFile(logFileNum);
     }
@@ -79,16 +76,18 @@ public class DefaultStorageRepository implements StorageRepository {
 
     return list;
   }
+
   @Override
-  public Collection<CategoriesInfo> getCategoryInfos(){
+  public Collection<CategoriesInfo> getCategoryInfos() {
     return categoriesCounter.getCategoryInfos();
   }
-  
+
   @Override
   public void close() {
-    for (EventListener el : eventListeners){
+    for (EventListener el : eventListeners) {
       el.close();
     }
+    eventListeners = null;
   }
 
   @Override

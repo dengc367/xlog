@@ -78,7 +78,7 @@ public class SyncTimer extends TimerTask {
     for (File logFile : logFiles) {
       if (logFile.isFile() && logFile.length() > 0) {
         if (storageType.equalsIgnoreCase("hdfs")) {
-          threadPool.execute(HDFSSyncTaskFactory.getInstance(logFile,slaveLogRootDirLen));
+          threadPool.execute(new HDFSSyncTask(logFile,slaveLogRootDirLen));
         } else {
           threadPool.execute(new SyncTask(cm, cacheLogDir, logFile,
               slaveLogRootDirLen, batchCommitSize));

@@ -36,6 +36,11 @@ public class ZkConn {
     connect();
   }
 
+  public void destroy() {
+    close();
+    watcher = null;
+  }
+
   public void close() {
     try {
       _conn.close();

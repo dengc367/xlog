@@ -1,6 +1,7 @@
 #!/bin/bash
 
-pid=$1
+PID=`ps xu | grep com.renren.dp.xlog.dispatcher.Bootstrap | grep -v grep | awk '{print$2}'`
+pid=${1:-$PID}
 if kill -0 $pid > /dev/null 2>&1; then
   echo -n stopping $command
   kill $pid > /dev/null 2>&1

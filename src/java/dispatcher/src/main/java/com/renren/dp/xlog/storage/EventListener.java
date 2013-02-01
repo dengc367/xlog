@@ -25,7 +25,7 @@ import com.renren.monitor.MetricsManager;
 
 public class EventListener extends Thread {
   private ConcurrentHashMap<String, LogWriter> logWriters = null;
-  private static final long COUNT_THRESHOLD=10000;
+  private static final long COUNT_THRESHOLD = 10000;
   private List<LogMeta> logBQ = null;
   private int queueCapacity;
   private StorageAdapter sa = null;
@@ -34,32 +34,30 @@ public class EventListener extends Thread {
 
   private QueueCounter counter = null;
   private boolean isClosed = false;
-  private long lastRequestFailureTimestamp=0;
-  private long deltaRequestFailureTime=0;
+  private long lastRequestFailureTimestamp = 0;
+  private long deltaRequestFailureTime = 0;
   private final long REQUEST_FAILURE_MAX_TIMEOUT;
-  /**队列满时发送数据的计数器*/
-  private long bqFullCount=0;
+  /** 队列满时发送数据的计数器 */
+  private long bqFullCount = 0;
 
-  private final static Logger LOG = LoggerFactory
-      .getLogger(EventListener.class);
+  private final static Logger LOG = LoggerFactory.getLogger(EventListener.class);
 
-  public EventListener(String queueName, int queueCapacity, String slaveRootDir,MetricsManager metricsManager) {
-    counter = new QueueCounter(queueName,queueCapacity);
+  public EventListener(String queueName, int queueCapacity, String slaveRootDir, MetricsManager metricsManager) {
+    counter = new QueueCounter(queueName, queueCapacity);
     counter.setDaemon(true);
     counter.start();
-    
-    metricsManager.addMetricsContext(new QueueMetrics(queueName,this));
+
+    metricsManager.addMetricsContext(new QueueMetrics(queueName, this));
     this.queueCapacity = queueCapacity;
     this.slaveRootDir = slaveRootDir;
-    this.REQUEST_FAILURE_MAX_TIMEOUT=Configuration.getLong("request.failure.max.timeout",300)*1000;
+    this.REQUEST_FAILURE_MAX_TIMEOUT = Configuration.getLong("request.failure.max.timeout", 300) * 1000;
   }
 
   public void initialize(String storageAdapterClassName) throws IOException {
     this.logWriters = new ConcurrentHashMap<String, LogWriter>();
     logBQ = new LinkedList<LogMeta>();
     try {
-      this.sa = (StorageAdapter) ReflectionUtil
-          .newInstance(storageAdapterClassName);
+      this.sa = (StorageAdapter) ReflectionUtil.newInstance(storageAdapterClassName);
     } catch (ReflectionException e1) {
       LOG.error("Fail to reflection StorageAdapter instance", e1);
       throw new IOException(e1);
@@ -73,15 +71,15 @@ public class EventListener extends Thread {
         LOG.info("EventListener is closed ,can't receive log data!");
         return;
       }
-      String category= logMeta.getCategory();
-      if(category!=null){
+      String category = logMeta.getCategory();
+      if (category != null) {
         this.counter.incQueueCount(category);
       }
       if (logBQ.size() >= queueCapacity) {
         bqFullCount++;
-        if (bqFullCount%COUNT_THRESHOLD==0) {
-          LOG.warn("Queue :" + this.counter.getQueueName() + " is full.bqFullCount : "+bqFullCount);
-         }
+        if (bqFullCount % COUNT_THRESHOLD == 0) {
+          LOG.warn("Queue :" + this.counter.getQueueName() + " is full.bqFullCount : " + bqFullCount);
+        }
         logMeta.free();
         logMeta = null;
       } else {
@@ -123,7 +121,7 @@ public class EventListener extends Thread {
               logBQ.wait();
             } catch (InterruptedException e) {
               continue;
-              }
+            }
           }
           logMeta = logBQ.remove(0);
         }
@@ -134,10 +132,10 @@ public class EventListener extends Thread {
           /**
            * 判断上次存储数据是否失败，如果失败，则需要将记录的错误信息清除
            */
-          if(lastRequestFailureTimestamp>0){
-            lastRequestFailureTimestamp=0;
-            deltaRequestFailureTime=0;
-           }
+          if (lastRequestFailureTimestamp > 0) {
+            lastRequestFailureTimestamp = 0;
+            deltaRequestFailureTime = 0;
+          }
           this.counter.incCategorySuccessCount(category);
           if (!currentLogFileNum.equals(logMeta.getLogFileNum())) {
             if (logWriters.contains(category)) {
@@ -148,61 +146,58 @@ public class EventListener extends Thread {
             }
           }
         } else {
-          processError(category,logMeta);
-          long currentTime=System.currentTimeMillis();
-          if(lastRequestFailureTimestamp==0){
-            lastRequestFailureTimestamp=currentTime;  
-          }else{
-            deltaRequestFailureTime=currentTime-lastRequestFailureTimestamp;
-             /**
+          processError(category, logMeta);
+          long currentTime = System.currentTimeMillis();
+          if (lastRequestFailureTimestamp == 0) {
+            lastRequestFailureTimestamp = currentTime;
+          } else {
+            deltaRequestFailureTime = currentTime - lastRequestFailureTimestamp;
+            /**
              * 判断写失败是否达到阈值，如果达到则睡眠一段时间再执行。
              */
-            if(deltaRequestFailureTime > REQUEST_FAILURE_MAX_TIMEOUT){
-              lastRequestFailureTimestamp=currentTime;
-              LOG.info("Fail to send request,try sleep "+REQUEST_FAILURE_MAX_TIMEOUT+"ms");
+            if (deltaRequestFailureTime > REQUEST_FAILURE_MAX_TIMEOUT) {
+              lastRequestFailureTimestamp = currentTime;
+              LOG.info("Fail to send request,try sleep " + REQUEST_FAILURE_MAX_TIMEOUT + "ms");
               try {
                 Thread.sleep(REQUEST_FAILURE_MAX_TIMEOUT);
-              } catch (InterruptedException e) {}
-               /**
+              } catch (InterruptedException e) {
+              }
+              /**
                * 睡眠完后需要将记录的错误信息清除，否则下次如果出现一次失败的话，将直接进入睡眠，应该写一段时间一直没有成功才进入睡眠
                */
-              lastRequestFailureTimestamp=0;
-              deltaRequestFailureTime=0;
-              }
-           }
+              lastRequestFailureTimestamp = 0;
+              deltaRequestFailureTime = 0;
+            }
+          }
         }
         logMeta.free();
         logMeta = null;
-      }  catch (IOException e) {
-        LOG.warn("fail to store logdata!",e);
+      } catch (IOException e) {
+        LOG.warn("fail to store logdata!", e);
         continue;
       }
     }
   }
 
-  private void processError(String category,LogMeta logMeta) {
+  private void processError(String category, LogMeta logMeta) {
     this.counter.incCategoryFailureCount(category);
     LogWriter logWriter;
     if (logWriters.contains(category)) {
       logWriter = logWriters.get(category);
       if (currentLogFileNum.equals(logMeta.getLogFileNum())) {
-        logWriter.write(logMeta.getLogFileNum(), logMeta.getLogData().logs,
-            true);
+        logWriter.write(logMeta.getLogFileNum(), logMeta.getLogData().logs, true);
       } else {
         logWriter.close();
         logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
 
         logWriter = new DefaultLogWriter();
-        logWriter.createFile(new File(slaveRootDir + "/" + category+"/"
-            + logMeta.getLogFileNum()));
+        logWriter.createFile(new File(slaveRootDir + "/" + category + "/" + logMeta.getLogFileNum()));
         logWriters.put(category, logWriter);
-        logWriter.write(logMeta.getLogFileNum(), logMeta.getLogData().logs,
-            true);
+        logWriter.write(logMeta.getLogFileNum(), logMeta.getLogData().logs, true);
       }
     } else {
       logWriter = new DefaultLogWriter();
-      logWriter.createFile(new File(slaveRootDir + "/" + category+"/"
-          + logMeta.getLogFileNum()));
+      logWriter.createFile(new File(slaveRootDir + "/" + category + "/" + logMeta.getLogFileNum()));
       logWriters.put(category, logWriter);
       logWriter.write(logMeta.getLogFileNum(), logMeta.getLogData().logs, true);
     }
@@ -211,6 +206,7 @@ public class EventListener extends Thread {
   public void close() {
     this.isClosed = true;
     counter.close();
+    counter = null;
     while (logBQ.size() > 0) {
       try {
         Thread.sleep(1000);
@@ -225,10 +221,12 @@ public class EventListener extends Thread {
       logWriter.close();
       logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
     }
-    this.interrupt();
+    logWriters.clear();
+    logWriters = null;
+    // this.interrupt();
   }
 
-  public long getDeltaRequestFailureTime(){
+  public long getDeltaRequestFailureTime() {
     return this.deltaRequestFailureTime;
   }
 }
