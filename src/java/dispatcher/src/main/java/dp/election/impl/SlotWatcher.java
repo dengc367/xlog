@@ -19,6 +19,7 @@ public class SlotWatcher implements Watcher {
   private final HABalancerI haBalancer;
   private int slot;
   private boolean isStartWatch = false;
+  private Thread delayThread;
 
   private final static Logger logger = LoggerFactory
       .getLogger(SlotWatcher.class);
@@ -30,7 +31,8 @@ public class SlotWatcher implements Watcher {
     this.startTime = startTime;
     this.slot = slot;
 
-    new DelayThead(this, clusterPath).start();
+    delayThread = new DelayThead(this, clusterPath);
+    delayThread.start();
   }
 
   @Override

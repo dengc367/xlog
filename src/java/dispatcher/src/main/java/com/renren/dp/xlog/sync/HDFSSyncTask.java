@@ -39,7 +39,7 @@ public class HDFSSyncTask extends Thread {
     }
     FileSystem remoteFs = null;
     try {
-      remoteFs = FileSystemUtil.createFileSystem(conf);
+      remoteFs = FileSystemUtil.createFileSystem();
     } catch (IOException e) {
       LOG.error(
           "Fail to remote FileSystem  instance,then it dose not sync slave log : " + slaveLogFile.getAbsolutePath(), e);

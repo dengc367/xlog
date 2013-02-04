@@ -86,6 +86,7 @@ public class DefaultStorageRepository implements StorageRepository {
   public void close() {
     for (EventListener el : eventListeners) {
       el.close();
+      el.interrupt();
     }
     eventListeners = null;
   }
