@@ -28,33 +28,33 @@ public class LoggerI extends _LoggerDisp {
   private CacheManager cacheManager = null;
   private AbstractFileNameHandler fileNameHandler = null;
   private WriteLocalOnlyCategoriesCache wlcc = null;
-  private StorageRepository storageRepository=null;
-  private CategoriesCounter categoriesCounter=null;
+  private StorageRepository storageRepository = null;
+  private CategoriesCounter categoriesCounter = null;
 
   private PubSubService pubsub = null;
 
   private static Logger LOG = Logger.getLogger(LoggerI.class);
-  
+
   public boolean initialize(ObjectAdapter adapter) {
     adapter.add(this, adapter.getCommunicator().stringToIdentity("L"));
 
     try {
       cacheManager = CacheManagerFactory.getInstance();
     } catch (ReflectionException e) {
-      LOG.error("Fail to get CacheManager instance!",e);
+      LOG.error("Fail to get CacheManager instance!", e);
       return false;
     }
-    categoriesCounter=new CategoriesCounter();
+    categoriesCounter = new CategoriesCounter();
     categoriesCounter.setDaemon(true);
-    
-    storageRepository=StorageRepositoryFactory.getInstance();
+
+    storageRepository = StorageRepositoryFactory.getInstance();
     try {
       storageRepository.initialize(categoriesCounter);
     } catch (IOException e) {
-      LOG.error("Fail to initialize Storage Repository",e);
+      LOG.error("Fail to initialize Storage Repository", e);
       return false;
     }
-    
+
     cacheManager.initialize();
     fileNameHandler = FileNameHandlerFactory.getInstance();
 
@@ -62,22 +62,23 @@ public class LoggerI extends _LoggerDisp {
     try {
       wlcc.initialize();
     } catch (IOException e) {
-      LOG.error("Fail to initialize WriteLocalOnlyCategoriesCache!",e);
+      LOG.error("Fail to initialize WriteLocalOnlyCategoriesCache!", e);
       return false;
     }
     LogSyncInitialization logSync = new LogSyncInitialization();
     logSync.initialise(wlcc);
-    
+
     categoriesCounter.start();
-    
+
     return true;
   }
 
-  public void close(){
+  public void close() {
     cacheManager.close();
     storageRepository.close();
     categoriesCounter.close();
   }
+
   @Override
   public void add(LogData[] data, Current __current) {
     if (data == null) {
@@ -90,38 +91,38 @@ public class LoggerI extends _LoggerDisp {
 
   @Override
   public void addLogData(LogData data, Current __current) {
-    if (data == null || data.categories == null || data.categories.length==0) {
+    if (data == null || data.categories == null || data.categories.length == 0) {
       return;
     }
-    String category = LogDataFormat
-        .transformCategories(data.categories);
+    String category = LogDataFormat.transformCategories(data.categories);
     /**
      * category计数器
      */
     categoriesCounter.incCategoryCount(category);
-    
+
     String logFileNum = fileNameHandler.getCacheLogFileNum();
     LogMeta logMeta = null;
     /**
      * 判断是否有订阅
      */
     if (pubsub != null && pubsub.isSubscribed(data.categories)) {
-      logMeta = new LogMeta(logFileNum, data,category, 3);
+      logMeta = new LogMeta(logFileNum, data, category, 3);
       pubsub.publish(logMeta);
     } else {
-      logMeta = new LogMeta(logFileNum, data,category, 2);
+      logMeta = new LogMeta(logFileNum, data, category, 2);
     }
     /**
      * 写本地缓存
      */
     boolean res = cacheManager.writeCache(logMeta);
-    if(!res){
-      LOG.error("Fail to write data to local cache.Category:"+category);
-      return ;
+    if (!res) {
+      LOG.error("Fail to write data to local cache.Category:" + category);
+      return;
     }
     if (wlcc.isWriteLocalOnly(category)) {
       logMeta.free();
       logMeta = null;
+      return;
     }
     storageRepository.addToRepository(logMeta);
   }

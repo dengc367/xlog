@@ -10,7 +10,7 @@ public class HDFSSyncTask1_0_3Test extends TestCase{
   
   public void setUp(){
     String slaveRootPath="/home/xianquanzhang/data/oplog1/hdfs";
-    syncTask=new HDFSSyncTask1_0_3(new File("/home/xianquanzhang/data/oplog1/hdfs/3g/access/2013-01-06-10.x1"),slaveRootPath.length());
+    syncTask=new HDFSSyncTask(new File("/home/xianquanzhang/data/oplog1/hdfs/3g/access/2013-01-06-10.x1"),slaveRootPath.length());
   }
   
   public void testRun(){

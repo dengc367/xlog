@@ -139,10 +139,9 @@ public class EventListener extends Thread {
           this.counter.incCategorySuccessCount(category);
           if (!currentLogFileNum.equals(logMeta.getLogFileNum())) {
             if (logWriters.contains(category)) {
-              LogWriter logWriter = logWriters.get(category);
+              LogWriter logWriter = logWriters.remove(category);
               logWriter.close();
               logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
-              logWriters.remove(category);
             }
           }
         } else {
@@ -206,15 +205,15 @@ public class EventListener extends Thread {
   public void close() {
     this.isClosed = true;
     counter.close();
+//    counter.interrupt();
     counter = null;
     while (logBQ.size() > 0) {
       try {
         Thread.sleep(1000);
       } catch (InterruptedException e) {
-        e.printStackTrace();
       }
     }
-
+    logBQ = null;
     sa.destory();
     Collection<LogWriter> c = logWriters.values();
     for (LogWriter logWriter : c) {
@@ -223,7 +222,7 @@ public class EventListener extends Thread {
     }
     logWriters.clear();
     logWriters = null;
-    // this.interrupt();
+//    this.interrupt();
   }
 
   public long getDeltaRequestFailureTime() {

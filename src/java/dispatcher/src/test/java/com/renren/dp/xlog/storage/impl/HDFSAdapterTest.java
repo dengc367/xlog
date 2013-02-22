@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import xlog.slice.LogData;
 
-import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.logger.LogMeta;
 import com.renren.dp.xlog.storage.StorageAdapter;
 
@@ -16,7 +15,7 @@ public class HDFSAdapterTest extends TestCase {
   private LogData logData = null;
 
   public void setUp() {
-    sa = new HDFSAdapter0_21();
+    sa = new HDFSAdapter();
     try {
       sa.initialize();
     } catch (IOException e) {

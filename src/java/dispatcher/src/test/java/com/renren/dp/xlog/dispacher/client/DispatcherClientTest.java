@@ -3,6 +3,10 @@ package com.renren.dp.xlog.dispacher.client;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import org.apache.mahout.common.RandomUtils;
+import org.uncommons.maths.random.MersenneTwisterRNG;
 
 import junit.framework.TestCase;
 
@@ -46,12 +50,14 @@ public class DispatcherClientTest extends TestCase {
     }
   }
 
+  Random RANDOM = RandomUtils.getRandom();
   public void testAddLogData() {
+    RANDOM.setSeed(20);
     try {
       int count=0;
       while (true) {
         LogData logData = new LogData();
-        logData.categories = LOG_DATA_CATEGORIES.get(0);
+        logData.categories = LOG_DATA_CATEGORIES.get(RANDOM.nextInt());
         logData.checkSum = "123";
         logData.logs = new String[] {
             "here is 3 cache file name format.0 express 5 min generate one file,1 express 10 min generate one file,2 express one hour generate one file",
@@ -60,7 +66,7 @@ public class DispatcherClientTest extends TestCase {
 
         prx.addLogData(logData);
         count++;
-        Thread.sleep(10);
+//        Thread.sleep(10);
       }
     } catch (Exception e) {
       e.printStackTrace();

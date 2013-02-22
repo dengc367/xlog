@@ -114,14 +114,25 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-	      <configuration>
-	        <archive>
-	          <addMavenDescriptor>false</addMavenDescriptor>
-	        </archive>
-	        <excludes>
-	          <exclude>conf/*</exclude>
-	        </excludes>
-	      </configuration>
+        <version>2.2</version>
+        <!--
+        <executions>
+            <execution>
+                <phase>package</phase>
+                <goals>
+                    <goal>test-jar</goal>
+                </goals>
+            </execution>
+        </executions>
+        -->
+	    <configuration>
+	      <archive>
+	        <addMavenDescriptor>false</addMavenDescriptor>
+	      </archive>
+	      <excludes>
+	        <exclude>conf/*</exclude>
+	      </excludes>
+	    </configuration>
 	   </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -253,6 +264,20 @@
   <artifactId>hbase</artifactId>
   <version>0.94.1</version>
 </dependency>
+<dependency>
+    <groupId>org.apache.mahout</groupId>
+    <artifactId>mahout-math</artifactId>
+    <version>0.7</version>
+</dependency>
+
+<!--
+<dependency>
+    <groupId>org.uncommons.maths</groupId>
+    <artifactId>uncommons-maths</artifactId>
+    <version>1.2.1</version>
+</dependency>
+-->
+
 <dependency>
   <groupId>com.renren</groupId>
   <artifactId>monitor-core</artifactId>
