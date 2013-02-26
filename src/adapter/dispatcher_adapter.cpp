@@ -1,6 +1,7 @@
 #include "src/config/dispatcher_config.h"
 #include "src/adapter/dispatcher_adapter.h"
 #include "build/generated/xlog.h"
+#include "src/common/logger.h"
 
 namespace xlog
 {
@@ -25,7 +26,7 @@ bool DispatcherAdapter::sendNormal(const slice::LogData& data)
         _prx_version = version;
       }else
       {
-        std::cout << __FILE__ << ":" << __LINE__ << " fail to rebuild prx! " << std::endl;
+        XLOG_WARN("Fail to rebuild prx! ");
         return false;
       }
     }
@@ -35,7 +36,7 @@ bool DispatcherAdapter::sendNormal(const slice::LogData& data)
       slice::DispatcherPrx dp=nca->doChoose(data.categories,_prx);
       dp->addLogData(data);
     } catch(...){
-      std::cout << __FILE__ << ":" << __LINE__ << " fail to send log to dispatcher nodes,may be disconnect dispatcher!" << std::endl;
+      XLOG_ERROR("Fail to send log to dispatcher nodes, may be disconnect dispatcher!" );
       return false;
     }
     return true;
@@ -68,7 +69,7 @@ bool DispatcherAdapter::rebuild_prx()
         for(int j=0;j<size;j++)
         {
            std::string addr=iter->second.at(j);
-           std::cout << __FILE__ << ":" << __LINE__ << " constructing endpoint : " << addr << std::endl;
+           XLOG_DEBUG(" constructing endpoint : " << addr );
            DispatcherNode dn;
            //dn.dispatcher_prx = slice::DispatcherPrx::uncheckedCast(_ic->stringToProxy(addr)->ice_compress(true)); 
            dn.dispatcher_prx = slice::DispatcherPrx::uncheckedCast(_ic->stringToProxy(addr)); 

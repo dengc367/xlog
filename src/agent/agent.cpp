@@ -2,8 +2,9 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
-#include "src/agent/AgentI.h"
+#include "src/common/logger.h"
 #include "src/common/zk_manager.h"
+#include "src/agent/AgentI.h"
 #include "src/config/agent_config_manager.h"
 #include "src/config/client_config_manager.h"
 #include "src/config/dispatcher_config.h"
@@ -17,10 +18,14 @@ class AgentApp: virtual public Ice::Application
 public:
     virtual int run(int argc , char* argv[])
     {
+
+        INIT_LOG4CPLUS_PROPERTIES("log4cplus.properties"); // init the log4cplus configurator.
+
+        XLOG_DEBUG("Checking the args valid.");
         if(argc==1)
         {
-            cout << "Usage:zk_host:zk_port [-udp|-tcp] agent_host:agent_port while_list_file_name"<<endl;
-            return 0;
+            XLOG_ERROR( "Usage:zk_host:zk_port [-udp|-tcp] agent_host:agent_port while_list_file_name" );
+            return 1;
         }
         *argv++;
 
@@ -29,10 +34,10 @@ public:
         ZKConnectionPtr conn = ZKConnectionPtr(new ZKConnection);
         if (!conn->init(*argv++))
         {
-            cerr << appName() << ": can not init zk, exit" << endl;
-            return 0;
+            XLOG_ERROR(appName() << ": can not init zk, exit");
+            return 2;
         }
-        std::cout << "ZooKeeper inited. Now initializing ICE. " << std::endl;
+        XLOG_INFO( "ZooKeeper inited. Now initializing ICE. ");
         std::vector < std::string > parts;
         std::string udp("-udp");
         bool is_udp=udp.compare(*argv++)==0?true:false;
@@ -40,10 +45,14 @@ public:
         boost::algorithm::split(parts, *argv++, boost::algorithm::is_any_of(":"));
         if (parts.size() != 2)
         {
-            std::cerr << "agent host:port is " << *argv 
-                    << ",does not match the format : <host>:<port>!" << std::endl;
-            return 0;
+            XLOG_ERROR("agent host:port is " << *argv 
+                    << ",does not match the format : <host>:<port>!" );
+            return 3;
         }
+
+        // start the agent now.
+        XLOG_DEBUG("The args are valid, Start the agent now.");
+
         std::ostringstream os;
         Ice::PropertiesPtr props=Ice::createProperties();
         if(is_udp)
@@ -60,20 +69,19 @@ public:
         Ice::CommunicatorPtr ic=Ice::initialize(id);
         Ice::ObjectAdapterPtr adapter = ic->createObjectAdapterWithEndpoints(appName(),
                 os.str());
-        std::cout << "new AgentI. ";
+        XLOG_INFO( "initializing agent. ");
         AgentIPtr agent = new AgentI;
         agent->init(ic, conn, *argv);
-        std::cout << "done." << endl;
+        XLOG_INFO(std::cout << "Agent started." );
         Ice::ObjectPrx prx = adapter->add(agent, ic->stringToIdentity("A"));
-        std::cout << "Activating ";
+        XLOG_INFO( "Activating agent");
         adapter->activate();
-        std::cout << "done." << endl;
+        XLOG_INFO( "Agent activated.") ;
         communicator()->waitForShutdown();
         if (interrupted())
         {
-            cerr << appName() << ": received signal, shutting down" << endl;
+            XLOG_ERROR("Agent " << appName() << ": received signal, shutting down" );
         }
-
         return 0;
     }
     ;

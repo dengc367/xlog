@@ -10,6 +10,7 @@ Introduction
 2 install library
 install boost
 install Ice (version 3.3 +)
+install log4cplus(version 1.0 +)
 install protobuff (version 2.2 +)
 install zookeeper (version 3.4.3+)
 install maven (version 2.2+)

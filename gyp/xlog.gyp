@@ -154,6 +154,7 @@
                     'include_dirs': [
                         '<(ZOOKEEPER_HOME)/include', 
                         '<(PROTOBUF_HOME)/include', 
+                        '<(LOG4CPLUS_HOME)/include', 
                         '<(ICE_HOME)/include', 
                         '<(GEN_PATH)',
                     ],
@@ -165,6 +166,8 @@
                         '-lzookeeper_mt', 
                         '-L<(PROTOBUF_HOME)/lib', 
                         '-lprotobuf', 
+                        '-L<(LOG4CPLUS_HOME)/lib', 
+                        '-llog4cplus', 
                     ]
                 }],
             ],
@@ -338,6 +341,46 @@
                         '-L<(ICE_HOME)/lib', 
                         '-lIce', 
                         '-lIceUtil', 
+                    ]
+                }],
+            ],
+        },
+
+        ##### xlog test target
+        {
+            'target_name': 'xlog_test',
+            'type': 'executable',
+            'defines': [
+                'OS_LINUX',
+                'POSIX',
+                'NEWARCH',
+            ],
+            'include_dirs': [
+                '<(ROOT)',
+            ],
+            'dependencies': [
+                'xlog_generated', 
+            ],
+            'sources': [
+                '<(ROOT)/src/common/logger.cpp',
+            ],
+            'conditions': [
+                ['OS=="linux"', {
+                    'include_dirs': [
+                        '<(ZOOKEEPER_HOME)/include', 
+                        '<(PROTOBUF_HOME)/include', 
+                        '<(RSYSLOG_HOME)/runtime', 
+                        '<(RSYSLOG_HOME)/', 
+                        '<(ICE_HOME)/include', 
+                        '<(LOG4CPLUS_HOME)/include', 
+                        '<(GEN_PATH)',
+                    ],
+                    'libraries': [
+                        '-L<(ICE_HOME)/lib', 
+                        '-lIce', 
+                        '-lIceUtil', 
+                        '-L<(LOG4CPLUS_HOME)/lib', 
+                        '-llog4cplus', 
                     ]
                 }],
             ],

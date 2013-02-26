@@ -1,5 +1,6 @@
 #include "src/common/zookeeper_listener.h"
 #include "src/common/zk_manager.h"
+#include "src/common/logger.h"
 
 namespace xlog
 {
@@ -177,7 +178,7 @@ std::vector<std::string> ZkManager::getChildren(const std::string& path)
 
         if (rc != ZOK)
         {
-            std::cerr << "ZkManager::getChildren failed for path " << path << "!" << std::endl;
+            XLOG_ERROR( "ZkManager::getChildren failed for path " << path << "!") ;
             return res;
         }
 
@@ -194,7 +195,7 @@ bool ZkManager::init(const std::string& zkAddress)
 {
     if (zkAddress == "")
     {
-        std::cerr << "ZkManager::init failed, because the zk address is null!" << std::endl;
+        XLOG_ERROR("ZkManager::init failed, because the zk address is null!" );
         return false;
     }
 
@@ -206,8 +207,7 @@ bool ZkManager::init(const std::string& zkAddress)
 
     if (!_zh)
     {
-        std::cerr << "ZkManager::init failed, because zookeeper_init return a null pointer!"
-                << std::endl;
+        XLOG_ERROR( "ZkManager::init failed, because zookeeper_init return a null pointer!");
         return false;
     }
 
@@ -240,7 +240,7 @@ void ZkManager::reInit()
             if (!_zh)
             {
                 //如果创建失败，则过5秒再进行创建，不重复连接是为了降低性能开销，防止出现恶性循环
-                std::cerr << "ZkManager::reInit failed, we will try after 5 seconds!" << std::endl;
+                XLOG_WARN( "ZkManager::reInit failed, we will try after 5 seconds!");
                 sleep(5);
                 continue;
             }
