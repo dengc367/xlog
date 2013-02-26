@@ -171,8 +171,9 @@ public class EventListener extends Thread {
         }
         logMeta.free();
         logMeta = null;
-      } catch (IOException e) {
-        LOG.warn("fail to store logdata!", e);
+      } catch (Exception e) {
+        LOG.warn("Fail to store logdata. CurrentThread: " + Thread.currentThread().getName() + ", QueueName: "
+            + counter.getQueueName(), e);
         continue;
       }
     }
@@ -205,7 +206,7 @@ public class EventListener extends Thread {
   public void close() {
     this.isClosed = true;
     counter.close();
-//    counter.interrupt();
+    // counter.interrupt();
     counter = null;
     while (logBQ.size() > 0) {
       try {
@@ -222,7 +223,7 @@ public class EventListener extends Thread {
     }
     logWriters.clear();
     logWriters = null;
-//    this.interrupt();
+    // this.interrupt();
   }
 
   public long getDeltaRequestFailureTime() {
