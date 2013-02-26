@@ -6,7 +6,6 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.util.FSUtils;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +57,11 @@ public class RecoverableOutputStream implements Closeable {
 
   public void write(byte[] bytes) throws IOException {
     os.write(bytes);
+  }
+
+  @Override
+  public String toString() {
+    return "RecoverableOutputStream. path: " + path.toString() + ",outputStream: " + os;
   }
 
 }

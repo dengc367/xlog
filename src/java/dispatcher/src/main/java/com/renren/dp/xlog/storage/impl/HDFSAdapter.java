@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.hadoop.fs.FileSystem;
@@ -23,9 +24,10 @@ public class HDFSAdapter implements StorageAdapter {
 
   protected FileSystem fs;
 
-  private String currentFileNameNumber;
   private String uuid = null;
   private final int HDFS_BATCH_COMMIT_SIZE;
+
+  private Map<String, String> currentFileNumberMap = new ConcurrentHashMap<String, String>();
   private ConcurrentHashMap<String, RecoverableOutputStream> outputStreamMap = new ConcurrentHashMap<String, RecoverableOutputStream>();
 
   protected static Logger LOG = LoggerFactory.getLogger(HDFSAdapter.class);
@@ -153,7 +155,7 @@ public class HDFSAdapter implements StorageAdapter {
 
   private RecoverableOutputStream buildHDFSOutputStream(String strCategory, String logFileNum) {
     RecoverableOutputStream os = outputStreamMap.get(strCategory);
-    if (os != null && logFileNum.equals(currentFileNameNumber)) {
+    if (os != null && logFileNum.equals(currentFileNumberMap.get(strCategory))) {
       return os;
     } else if (os != null) {
       try {
@@ -170,8 +172,8 @@ public class HDFSAdapter implements StorageAdapter {
     }
     Path categoryPath = new Path(fs.getWorkingDirectory(), strCategory + "/" + logFileNum + "." + uuid);
     os = getHDFSOutputStream(categoryPath);
-    currentFileNameNumber = logFileNum;
-    if(os!=null){
+    if (os != null) {
+      currentFileNumberMap.put(strCategory, logFileNum);
       outputStreamMap.put(strCategory, os);
       LOG.info("Success to get HDFSOutputStream for category " + strCategory + ": " + os.toString());
     }
@@ -211,6 +213,7 @@ public class HDFSAdapter implements StorageAdapter {
       }
     }
     outputStreamMap.clear();
+    currentFileNumberMap.clear();
     try {
       fs.close();
       LOG.info("Close FileSystem success. " + fs);
