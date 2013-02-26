@@ -65,7 +65,7 @@ public class HDFSAdapter implements StorageAdapter {
       try {
         categoryOutputStream.write((logs[i] + "\n").getBytes());
       } catch (IOException e) {
-        LOG.error("fail to write data to hdfs,and get hdfs ouputstream again! the exception is : " + e.getMessage());
+        LOG.error("Fail to write data to hdfs,and get hdfs ouputstream again! the exception is : " + e.getMessage());
         closeOutputStream(categoryOutputStream, strCategory);
         return false;
       }
@@ -115,7 +115,7 @@ public class HDFSAdapter implements StorageAdapter {
         try {
           categoryOutputStream.write((line + "\n").getBytes());
         } catch (IOException e) {
-          LOG.error("fail to write data to hdfs,and get hdfs ouputstream again! the exception is : " + e.getMessage());
+          LOG.error("Fail to write data to hdfs,and get hdfs ouputstream again! the exception is : " + e.getMessage());
           closeOutputStream(categoryOutputStream, cacheFileMeta.getCategories());
           return false;
         }
@@ -125,7 +125,7 @@ public class HDFSAdapter implements StorageAdapter {
         }
       }
     } catch (IOException e) {
-      LOG.warn("fail to read cache file and write to hdfs! the exception is :", e.getMessage());
+      LOG.warn("Fail to read cache file and write to hdfs! the exception is :", e.getMessage());
       res = false;
     }
 
@@ -133,7 +133,7 @@ public class HDFSAdapter implements StorageAdapter {
       try {
         categoryOutputStream.flush();
       } catch (IOException e) {
-        LOG.error("fail to flush logdata! ", e.getMessage());
+        LOG.error("Fail to flush logdata! ", e.getMessage());
         res = false;
       }
     }
@@ -159,31 +159,33 @@ public class HDFSAdapter implements StorageAdapter {
       try {
         os.flush();
       } catch (IOException e) {
-        LOG.error("fail to flush the logdata", e.getMessage());
+        LOG.error("Fail to flush the logdata", e.getMessage());
       } finally {
         try {
           os.close();
         } catch (IOException e) {
-          LOG.error("fail to close hdfs outputstream", e.getMessage());
+          LOG.error("Fail to close hdfs outputstream", e.getMessage());
         }
       }
     }
     Path categoryPath = new Path(fs.getWorkingDirectory(), strCategory + "/" + logFileNum + "." + uuid);
-    os = getHDFSOutputStream(strCategory, categoryPath);
+    os = getHDFSOutputStream(categoryPath);
     currentFileNameNumber = logFileNum;
+    if(os!=null){
+      outputStreamMap.put(strCategory, os);
+      LOG.info("Success to get HDFSOutputStream for category " + strCategory + ": " + os.toString());
+    }
     return os;
   }
 
-  protected RecoverableOutputStream getHDFSOutputStream(String strCategory, Path path) {
+  protected RecoverableOutputStream getHDFSOutputStream(Path path) {
     RecoverableOutputStream os;
     try {
       os = new RecoverableOutputStream(fs, path);
-      outputStreamMap.put(strCategory, os);
     } catch (Exception e) {
-      LOG.error("fail to get HDFSOutputStream,it can't store logdata to hdfs!", e);
+      LOG.error("Fail to get HDFSOutputStream,it can't store logdata to hdfs!", e);
       return null;
     }
-    LOG.info("success to get HDFSOutputStream for category " + strCategory + ": " + os.toString());
     return os;
   }
 
@@ -192,13 +194,13 @@ public class HDFSAdapter implements StorageAdapter {
     try {
       fs = FileSystemUtil.createFileSystem();
     } catch (IOException e) {
-      LOG.error("FileSystem create failed. " + e);
+      LOG.error("FileSystem create Failed. " + e);
     }
   }
 
   @Override
   public synchronized void destory() {
-    LOG.info("close all hdfs clients." + outputStreamMap);
+    LOG.info("Close all hdfs clients." + outputStreamMap);
     Collection<RecoverableOutputStream> c = outputStreamMap.values();
     for (RecoverableOutputStream o : c) {
       try {
@@ -211,9 +213,9 @@ public class HDFSAdapter implements StorageAdapter {
     outputStreamMap.clear();
     try {
       fs.close();
-      LOG.info("close FileSystem success. " + fs);
+      LOG.info("Close FileSystem success. " + fs);
     } catch (IOException e) {
-      LOG.error("close FileSystem error. " + e);
+      LOG.error("Close FileSystem error. " + e);
     } finally {
       fs = null;
     }
