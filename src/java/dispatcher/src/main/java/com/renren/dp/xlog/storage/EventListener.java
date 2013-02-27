@@ -116,13 +116,19 @@ public class EventListener extends Thread {
     while (!isClosed) {
       try {
         synchronized (logBQ) {
+           /**
+            * 在高并发的情况下，需要double check队列是否为空，否则从队列中取数据会抛出异常
+            */
           if (logBQ.isEmpty()) {
             try {
               logBQ.wait();
             } catch (InterruptedException e) {
               continue;
-            }
-          }
+              }
+            if(logBQ.isEmpty()){
+              continue;
+              }
+           }
           logMeta = logBQ.remove(0);
         }
         currentLogFileNum = logMeta.getLogFileNum();
