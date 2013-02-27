@@ -190,8 +190,8 @@
                 'xlog_generated', 
             ],
             'sources': [
-                #'<(ROOT)/src/example/xlog_appender_test.cpp',
-                '<(ROOT)/src/example/xlog_appender_test_for_multi_thread.cpp',
+                #'<(ROOT)/src/example/c++/xlog_appender_test.cpp',
+                '<(ROOT)/src/example/c++/xlog_appender_test_for_multi_thread.cpp',
                 '<(ROOT)/src/client/xlog_appender.cpp',
                 '<(ROOT)/src/client/xlog_properties.cpp',
                 '<(ROOT)/src/client/client.cpp',
@@ -204,6 +204,7 @@
                         '<(ZOOKEEPER_HOME)/include', 
                         '<(PROTOBUF_HOME)/include', 
                         '<(RSYSLOG_HOME)/runtime', 
+                        '<(LOG4CPLUS_HOME)/include', 
                         '<(RSYSLOG_HOME)/', 
                         '<(ICE_HOME)/include', 
                         '<(GEN_PATH)',
@@ -212,6 +213,8 @@
                         '-L<(ICE_HOME)/lib', 
                         '-lIce', 
                         '-lIceUtil', 
+                        '-L<(LOG4CPLUS_HOME)/lib', 
+                        '-llog4cplus', 
                     ]
                 }],
             ],
@@ -248,6 +251,9 @@
                     'include_dirs': [
                         '<(ZOOKEEPER_HOME)/include', 
                         '<(PROTOBUF_HOME)/include', 
+                        '<(RSYSLOG_HOME)/runtime', 
+                        '<(LOG4CPLUS_HOME)/include', 
+                        '<(RSYSLOG_HOME)/', 
                         '<(ICE_HOME)/include', 
                         '<(GEN_PATH)',
                     ],
@@ -255,7 +261,8 @@
                         '-L<(ICE_HOME)/lib', 
                         '-lIce', 
                         '-lIceUtil', 
-                        #'-L<(GYP_HOME)/out/Default/lib.target',
+                        '-L<(LOG4CPLUS_HOME)/lib', 
+                        '-llog4cplus', 
                     ]
                 }],
             ],

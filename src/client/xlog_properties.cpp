@@ -32,7 +32,8 @@ namespace xlog{
     XLogProperties::XLogProperties(const char* path){
         string hostsStr = DEFAULT_HOSTS ;
         int is_udp_protocol = true;
-        int maxSendSize= 0;
+        int is_compress= true;
+        int maxSendSize= 10000;
         int maxQueueSize= 100000;
 
         ifstream conf_file(path);
@@ -63,6 +64,8 @@ namespace xlog{
                     hostsStr = value;
                 }else if("isUdpProtocol" == key){
                     is_udp_protocol =  boost::lexical_cast<xlog::LocaleBool>(value);
+                }else if("isCompress" == key){
+                    is_compress =  boost::lexical_cast<xlog::LocaleBool>(value);
                 }else if("maxSendSize" == key){
                     maxSendSize = boost::lexical_cast<int>(value);
                 }else if("maxQueueSize" == key){
@@ -76,18 +79,18 @@ namespace xlog{
         }
 
         _is_udp_protocol = is_udp_protocol;
+        _is_compress= is_compress;
         _maxSendSize = maxSendSize;
         _maxQueueSize = maxQueueSize;
         _hosts = xlog::getAgentHosts(hostsStr);
     }
 
-    XLogProperties::XLogProperties(const string& hostsStr, const bool is_udp_protocol, const int maxSendSize, int maxQueueSize):_is_udp_protocol(is_udp_protocol), _maxSendSize(maxSendSize), _maxQueueSize(maxQueueSize){
+    XLogProperties::XLogProperties(const string& hostsStr, const bool is_udp_protocol, const int maxSendSize, int maxQueueSize, const bool isCompress):_is_udp_protocol(is_udp_protocol), _maxSendSize(maxSendSize), _maxQueueSize(maxQueueSize), _is_compress(isCompress){
         _hosts = xlog::getAgentHosts(hostsStr);
     }
 
     int XLogProperties::getMaxQueueSize() const {
         return (_maxQueueSize > 0 && _maxQueueSize < MAX_QUEUE_SIZE) ? _maxQueueSize : MAX_QUEUE_SIZE;
-        //return (_maxQueueSize > MAX_QUEUE_SIZE) ? MAX_QUEUE_SIZE : (_maxQueueSize < 0) ? MAX_QUEUE_SIZE : _maxQueueSize;
     }
 
     int XLogProperties::getMaxSendSize() const {
@@ -99,6 +102,10 @@ namespace xlog{
 
     bool XLogProperties::isUdpProtocol() const{
         return _is_udp_protocol;
+    }
+
+    bool XLogProperties::isCompress() const{
+        return _is_compress;
     }
 
     vector<string>* getAgentHosts(const string& hostsStr){

@@ -8,7 +8,7 @@
   </property>
   <property>
     <name>storage.adapter.impl</name>
-    <value>com.renren.dp.xlog.storage.impl.HDFSAdapter1_0_3</value>
+    <value>com.renren.dp.xlog.storage.impl.HDFSAdapter</value>
     <description>Storage adapter implements class.It can use this parameter to supports many storages.</description>
   </property>
   <property>
@@ -58,7 +58,7 @@
   </property>
   <property>
     <name>web.server.host</name>
-    <value>10.2.62.22</value>
+    <value>127.0.0.1</value>
     <description>Web server ip,default automatic to get ip.</description>
   </property>
   <property>
@@ -84,12 +84,12 @@
   </property>
   <property>
     <name>storage.version</name>
-    <value>1.0.3</value>
+    <value>0.21.0</value>
     <description>The version of xlog storage system</description>
   </property>
   <property>
     <name>storage.uri</name>
-    <value>hdfs://10.2.62.22</value>
+    <value>hdfs://zwdx256-20.opi.com</value>
     <description>The address of xlog storage system.</description>
   </property>
   <property>
@@ -99,7 +99,7 @@
   </property>
   <property>
     <name>oplog.store.path</name>
-    <value>/home/xianquanzhang/data/oplog1</value>
+    <value>/tmp/oplog1</value>
     <description>The path of xlog dispatcher local cache data</description>
   </property>
   <property>

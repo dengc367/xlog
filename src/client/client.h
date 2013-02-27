@@ -18,7 +18,7 @@ class Client : public ::IceUtil::Thread
 public:
 
     Client(const ::Ice::StringSeq& defaultAgents,
-            const bool is_udp_protocol = true, const int maxQueueSize = 100000);
+            const bool is_udp_protocol, const int maxQueueSize, const bool isCompress);
     bool doSend(const slice::LogDataSeq& data);
     void close();
 protected:
@@ -33,6 +33,8 @@ protected:
     int _maxQueueSize;
      
     bool _is_udp_protocol;
+
+    bool _is_compress;
 
     ::IceUtil::Mutex _agentMutex;
 

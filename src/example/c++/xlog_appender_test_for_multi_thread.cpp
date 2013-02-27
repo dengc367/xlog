@@ -1,5 +1,5 @@
 #include "src/client/xlog_appender.h"
-#include "src/client/client.h"
+#include "src/common/logger.h"
 #include <boost/lexical_cast.hpp>
 #include <Ice/BuiltinSequences.h>
 #include <IceUtil/Thread.h>
@@ -29,7 +29,7 @@ void TestThread::run(){
     xlog::XLogAppender batchClient(categories, "xlog.conf"); 
 
     for(int i = 0; i < _count; i++){
-        std::cout << "thread: " << _name << ", count: " << i << " " << string(_name) + boost::lexical_cast<std::string>(i)<< std::endl;
+        XLOG_DEBUG("thread: " << _name << ", count: " << i << " " << string(_name) + boost::lexical_cast<std::string>(i));
         int ret = batchClient.append(string(_name) + boost::lexical_cast<std::string>(i));
         //cout << "the ret is " << ret << endl;
     }
@@ -37,6 +37,8 @@ void TestThread::run(){
 
 
 int main(int argc, char** argv){
+
+    INIT_LOG4CPLUS_PROPERTIES("log4cplus.properties"); // init the log4cplus configurator.
     int count = 10;
     ++argv;
     if(argc > 1 ){

@@ -5,6 +5,7 @@
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include "src/common/logger.h"
 
 namespace xlog
 {
@@ -12,15 +13,15 @@ class Util
 {
 public:
     template<class T>
-    static T getPrx(const ::Ice::CommunicatorPtr& ic, const std::string& prxStr, bool udp = true,
-            const int timeout = 300)
+    static T getPrx(const ::Ice::CommunicatorPtr& ic, const std::string& prxStr, bool udp,
+            const int timeout, const bool compress)
     {
         std::vector < std::string > parts;
         boost::algorithm::split(parts, prxStr, boost::algorithm::is_any_of(":"));
         if (parts.size() != 2)
         {
-            std::cerr << "Util::getPrx prx string " << prxStr
-                    << " does not match the format : <host>:<port>!" << std::endl;
+            XLOG_ERROR("Util::getPrx prx string " << prxStr
+                    << " does not match the format : <host>:<port>!");
             return NULL;
         }
         std::string host = parts[0];
@@ -29,7 +30,7 @@ public:
         if(udp)
         {
 	   os << "A:udp -h " << host << " -p " << port;
-           return T::uncheckedCast(ic->stringToProxy(os.str())->ice_locatorCacheTimeout(60)->ice_compress(true)->ice_datagram());
+           return T::uncheckedCast(ic->stringToProxy(os.str())->ice_locatorCacheTimeout(60)->ice_compress(compress)->ice_datagram());
 	}else
         {
 	   os << "A:tcp -h " << host << " -p " << port;

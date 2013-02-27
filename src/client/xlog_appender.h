@@ -13,7 +13,7 @@ namespace xlog{
     {
         public:
             XLogAppender(const vector<string>& categories, const char* properties_file_path);
-            XLogAppender(const vector<string>& categories, const bool is_udp_protocol = true, const int maxSendSize = 0, int maxQueueSize = 100000 , string& hosts = xlog::XLogProperties::DEFAULT_HOSTS);
+            XLogAppender(const vector<string>& categories, const bool is_udp_protocol = true, const int maxSendSize = 10000, int maxQueueSize = 100000, const bool isCompress = true, string& hosts = xlog::XLogProperties::DEFAULT_HOSTS);
             int append(const string& msg);
             int append(const char* msg, int const len);
             void close();

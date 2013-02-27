@@ -2,15 +2,16 @@
 
 #include "src/common/util.h"
 #include "src/adapter/agent_adapter.h"
+#include "src/common/logger.h"
 
 namespace xlog
 {
 
-bool AgentAdapter::init(const ::Ice::StringSeq& defaultAgents,bool is_udp_protocol)
+bool AgentAdapter::init(const ::Ice::StringSeq& defaultAgents,const bool is_udp_protocol, const bool is_compress)
 {  
     if (defaultAgents.empty())
     {
-        std::cerr << "AgentAdapter::init defaultAgent is empty!" << std::endl;
+        XLOG_ERROR("AgentAdapter::init defaultAgent is empty!");
         return false;
     }
 
@@ -25,7 +26,7 @@ bool AgentAdapter::init(const ::Ice::StringSeq& defaultAgents,bool is_udp_protoc
     for (::Ice::StringSeq::const_iterator it = defaultAgents.begin(); it != defaultAgents.end();
             ++it)
     {
-        slice::AgentPrx prx = Util::getPrx<slice::AgentPrx>(_ic, *it, is_udp_protocol, 300);
+        slice::AgentPrx prx = Util::getPrx<slice::AgentPrx>(_ic, *it, is_udp_protocol, 300, is_compress);
 	_prxs.push_back(prx);
     }
     agent_prxs.swap(_prxs);
@@ -55,7 +56,7 @@ bool AgentAdapter::send(const slice::LogDataSeq& data)
            return true;
        } catch (::Ice::Exception& e)
        {
-           std::cerr << "AgentAdapter::send failed for " << i+1  << " time, will send again!" << std::endl;
+           XLOG_ERROR("AgentAdapter::send failed for " << i+1  << " time, will send again! The Exception: " << e);
        }
     }
     return false;

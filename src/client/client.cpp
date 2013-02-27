@@ -1,23 +1,25 @@
 #include "src/adapter/agent_adapter.h"
 #include "src/client/client.h"
+#include "src/common/logger.h"
 
 namespace xlog
 {
 
 Client::Client(const ::Ice::StringSeq& defaultAgents,
-        const bool is_udp_protocol, const int maxQueueSize) :
-         _defaultAgents(defaultAgents), _is_udp_protocol(is_udp_protocol), _maxQueueSize(maxQueueSize)
+        const bool is_udp_protocol, const int maxQueueSize, const bool isCompress) :
+         _defaultAgents(defaultAgents), _is_udp_protocol(is_udp_protocol), _maxQueueSize(maxQueueSize),
+         _is_compress(isCompress)
 {
    _agentAdapter = new AgentAdapter;
 
-   bool flag=_agentAdapter->init(_defaultAgents,_is_udp_protocol);
+   bool flag=_agentAdapter->init(_defaultAgents,_is_udp_protocol, _is_compress);
    if (flag)
    { 
-      std::cout << "success to init agent adapter!" << std::endl;
+      XLOG_INFO("success to init agent adapter!");
       start().detach(); 
    } else
    {
-      std::cerr << "failt to init agent adapter!" << std::endl;
+      XLOG_ERROR("failt to init agent adapter!");
    }
 }
 
@@ -26,7 +28,7 @@ bool Client::doSend(const slice::LogDataSeq& data)
     ::IceUtil::Monitor<IceUtil::Mutex>::Lock lock(_dataMutex);
     if (_data.size() >= _maxQueueSize)
     {
-        std::cerr << "Client::append queue is full, maxQueueSize is " << _maxQueueSize << std::endl;
+        XLOG_ERROR("Client::append queue is full, maxQueueSize is " << _maxQueueSize);
         return false;
     }
 
@@ -61,7 +63,7 @@ void Client::run()
             _dataMutex.notify();
         }
         if(!_agentAdapter->send(data)) {
-           std::cerr << "Fail to send data to agent,data count:"<< data.size()<< std::endl;
+           XLOG_ERROR("Fail to send data to agent,data count:"<< data.size());
         } 
     }
 }

@@ -18,7 +18,7 @@ namespace xlog
 class AgentAdapter : public Ice::Object
 {
 public:
-    bool init(const ::Ice::StringSeq& defaultAgents,bool is_udp_protocol);
+    bool init(const ::Ice::StringSeq& defaultAgents, const bool is_udp_protocol, const bool is_compress);
     bool send(const slice::LogDataSeq& data);
     //virtual void notify(const ::Ice::StringSeq& agentConfig, const ::Ice::Current& current);
 

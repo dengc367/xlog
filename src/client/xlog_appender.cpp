@@ -4,6 +4,7 @@
 #include "xlog.h"
 #include "src/client/xlog_appender.h"
 #include "src/client/xlog_properties.h"
+#include "src/common/logger.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <string>
@@ -24,18 +25,23 @@ namespace xlog
     }
 
     XLogAppender::XLogAppender(const vector<string>& categories,
-    const bool is_udp_protocol, const int maxSendSize, int maxQueueSize, string& hosts):_categories(categories),_strlen(0)
+    const bool is_udp_protocol, const int maxSendSize, int maxQueueSize, const bool isCompress, string& hosts):_categories(categories),_strlen(0)
     {
-        XLogProperties properties(hosts, is_udp_protocol, maxSendSize, maxQueueSize);
+        XLogProperties properties(hosts, is_udp_protocol, maxSendSize, maxQueueSize, isCompress);
         init(properties);
     }
 
     void XLogAppender::init(const XLogProperties& properties){
          vector<string> temp =properties.getHosts();
-        _client = new Client(temp, properties.isUdpProtocol(), properties.getMaxQueueSize());
-        cout << "xlog client configuration parameters: " << endl;
-        cout << "hosts: " << xlog::vector2String(temp) << ", isUdpProtocol: "<< properties.isUdpProtocol() << ", maxSendSize:" << properties.getMaxSendSize() << ", maxQueueSize: "<< properties.getMaxQueueSize() << endl;
+        _client = new Client(temp, properties.isUdpProtocol(), properties.getMaxQueueSize(), properties.isCompress());
         _maxSendSize = properties.getMaxSendSize();
+
+        XLOG_INFO( "Xlog client configuration parameters: " );
+        XLOG_INFO( "hosts: " << xlog::vector2String(temp) 
+                << ", isUdpProtocol: "<< properties.isUdpProtocol() 
+                << ", maxSendSize:" << properties.getMaxSendSize() 
+                << ", maxQueueSize: "<< properties.getMaxQueueSize() 
+                << ", isCompress: " << properties.isCompress() );
     }
 
 
