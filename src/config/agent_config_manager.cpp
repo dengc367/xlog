@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "src/common/zk_manager.h"
+#include "src/common/logger.h"
 #include "src/adapter/client_adapter.h"
 #include "src/config/agent_config_manager.h"
 
@@ -22,13 +23,13 @@ bool AgentConfig::handle()
 {
     if (!_zm)
     {
-        std::cerr << "AgentConfig::handle failed, because zkmananager is null!" << std::endl;
+        XLOG_ERROR( "AgentConfig::handle failed, because zkmananager is null!" );
         return false;
     }
 
     if (_prx == "")
     {
-        std::cerr << "AgentConfig::handle failed, because _prx is null!" << std::endl;
+        XLOG_ERROR( "AgentConfig::handle failed, because _prx is null!") ;
         return false;
     }
 
@@ -36,7 +37,7 @@ bool AgentConfig::handle()
 
     if (newConfig.empty())
     {
-        std::cerr << "AgentConfig::handle can not get agents config from zk!" << std::endl;
+        XLOG_ERROR( "AgentConfig::handle can not get agents config from zk!" );
         return false;
     }
 
@@ -66,13 +67,12 @@ bool AgentConfig::subscribe()
 {
     if (!_zm)
     {
-        std::cerr << "AgentConfig::subscribe failed, because zkmanager is null!"
-                << std::endl;
+        XLOG_ERROR("AgentConfig::subscribe failed, because zkmanager is null!");
     }
 
     if (_prx == "")
     {
-        std::cerr << "AgentConfig::subscribe failed, because _prx is null!" << std::endl;
+        XLOG_ERROR( "AgentConfig::subscribe failed, because _prx is null!" );
     }
 
     return _zm->createEphemeralNode(AGENTS_PATH + _prx);
@@ -82,7 +82,7 @@ std::vector<std::string> AgentConfig::update()
 {
     if (!_zm)
     {
-        std::cerr << "AgentConfig::update failed, because zkmanager is null!" << std::endl;
+        XLOG_ERROR( "AgentConfig::update failed, because zkmanager is null!" );
     }
 
     return _zm->getChildren(AGENTS_PATH);

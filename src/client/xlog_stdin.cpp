@@ -55,7 +55,8 @@ int main(int argc , char** argv)
             int mqs = (parser.getOption("mqs") == "") ? xlog::XLogProperties::MAX_QUEUE_SIZE : boost::lexical_cast<int>(parser.getOption("mqs"));
             string hosts = (parser.getOption("hosts") == "" ) ? xlog::XLogProperties::DEFAULT_HOSTS : parser.getOption("hosts");
             bool is_udp_protocol = (parser.getOption("protocol") != "" && parser.getOption("protocol") == "tcp") ? false : true;
-            batchClient = new XLogAppender(categories, is_udp_protocol, mss, mqs, hosts); 
+            bool is_compress = (parser.getOption("compress") == "" || parser.getOption("compress") == "false") ? false : true;
+            batchClient = new XLogAppender(categories, is_udp_protocol, mss, mqs, is_compress, hosts); 
         }
     }else{
         batchClient = new XLogAppender(categories, "/etc/xlog_client.conf"); 
@@ -80,6 +81,7 @@ void help(int exitcode ){
     cout << "   --mss:              the maxSendSize, the default diable the batch send size(0)" << endl;
     cout << "   --mqs:              the maxQueueSize, the default is (100000)" << endl;
     cout << "   --tcp|--udp:        the communication protocol, the default is (udp)" << endl;
+    cout << "   --compress|--c:     compressed protocol transmission, the default is (false)" << endl;
     cout << "   --file|-f:          the config_file, execlude other options, the default is (/etc/xlog_client.conf)" << endl;
     cout << "   --help|-h:          help manual" << endl;
     exit(exitcode);
@@ -116,6 +118,9 @@ int CliParser::parse(){
             string value(*(++cursor));
             configMap.insert(pair<string, string>("mqs", value));
             cnt = cnt -2;
+        }else if(key.compare("--compress")== 0 || key.compare("-c")==0){
+            configMap.insert(pair<string, string>("compress", "true"));
+            cnt--;
         }else if(key.compare("--udp")== 0 || key.compare("-u") ==0 || key.compare("--tcp")== 0 || key.compare("-t") ==0){
             if(configMap.find("protocol") != configMap.end()){
                 help(100);

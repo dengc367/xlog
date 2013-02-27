@@ -20,7 +20,7 @@ void ClientAdapter::notify(const std::vector<std::string>& agentConfig)
 
     for (std::vector<std::string>::const_iterator it = prxVec.begin(); it != prxVec.end(); ++it)
     {
-        slice::SubscriberPrx prx = Util::getPrx<slice::SubscriberPrx>(_ic, *it);
+        slice::SubscriberPrx prx = Util::getPrx<slice::SubscriberPrx>(_ic, *it, true, 300, true);
 
         try
         {
@@ -28,12 +28,10 @@ void ClientAdapter::notify(const std::vector<std::string>& agentConfig)
             continue;
         } catch (Ice::Exception& e)
         {
-            std::cerr << "ClientAdapter::notify Ice::Exception of prx " << prx->ice_toString()
-                    << std::endl;
+            XLOG_ERROR("ClientAdapter::notify Ice::Exception of prx " << prx->ice_toString());
         } catch (...)
         {
-            std::cerr << "ClientAdapter::notify UnknownException of prx " << prx->ice_toString()
-                    << std::endl;
+            XLOG_ERROR("ClientAdapter::notify UnknownException of prx " << prx->ice_toString());
         }
 
         _clientCM->remove(*it);

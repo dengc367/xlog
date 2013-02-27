@@ -105,6 +105,7 @@
                     'include_dirs': [
                         '<(ZOOKEEPER_HOME)/include', 
                         '<(PROTOBUF_HOME)/include', 
+                        '<(LOG4CPLUS_HOME)/include', 
                         '<(ICE_HOME)/include', 
                         '<(GEN_PATH)',
                     ],
@@ -116,6 +117,8 @@
                         '-lzookeeper_mt', 
                         '-L<(PROTOBUF_HOME)/lib', 
                         '-lprotobuf', 
+                        '-L<(LOG4CPLUS_HOME)/lib', 
+                        '-llog4cplus', 
                     ]
                 }],
             ],
@@ -297,6 +300,9 @@
                     'include_dirs': [
                         '<(ZOOKEEPER_HOME)/include', 
                         '<(PROTOBUF_HOME)/include', 
+                        '<(RSYSLOG_HOME)/runtime', 
+                        '<(LOG4CPLUS_HOME)/include', 
+                        '<(RSYSLOG_HOME)/', 
                         '<(ICE_HOME)/include', 
                         '<(GEN_PATH)',
                     ],
@@ -304,6 +310,8 @@
                         '-L<(ICE_HOME)/lib', 
                         '-lIce', 
                         '-lIceUtil', 
+                        '-L<(LOG4CPLUS_HOME)/lib', 
+                        '-llog4cplus', 
                     ]
                 }],
             ],
@@ -340,6 +348,7 @@
                         '<(ZOOKEEPER_HOME)/include', 
                         '<(PROTOBUF_HOME)/include', 
                         '<(RSYSLOG_HOME)/runtime', 
+                        '<(LOG4CPLUS_HOME)/include', 
                         '<(RSYSLOG_HOME)/', 
                         '<(ICE_HOME)/include', 
                         '<(GEN_PATH)',
@@ -348,6 +357,8 @@
                         '-L<(ICE_HOME)/lib', 
                         '-lIce', 
                         '-lIceUtil', 
+                        '-L<(LOG4CPLUS_HOME)/lib', 
+                        '-llog4cplus', 
                     ]
                 }],
             ],
