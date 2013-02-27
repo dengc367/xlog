@@ -5,6 +5,7 @@
 #include "src/client/client.h"
 #include "src/client/xlog_properties.h"
 #include <IceUtil/IceUtil.h>
+#include "src/common/logger.h"
 
 
 using namespace std;

@@ -4,7 +4,6 @@
 #include "xlog.h"
 #include "src/client/xlog_appender.h"
 #include "src/client/xlog_properties.h"
-#include "src/common/logger.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <string>
