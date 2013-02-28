@@ -62,7 +62,7 @@ bool AgentAdapter::send(const slice::LogDataSeq& data)
            XLOG_WARN("AgentAdapter::send failed in " << i+1  << " times, repeat again! The Exception: " << e);
        }
     }
-    XLOG_ERROR("AgentAdapter::send failed after " << size  << " times. The data size: " << data.size() + "." );
+    XLOG_ERROR("AgentAdapter::send failed after " << size  << " times. The data size: " << data.size() << "." );
     return false;
 }
 
