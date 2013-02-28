@@ -62,8 +62,9 @@ void Client::run()
             }
             _dataMutex.notify();
         }
-        if(!_agentAdapter->send(data)) {
-           XLOG_ERROR("Fail to send data to agent,data count:"<< data.size());
+        if!_agentAdapter->send(data)) {
+           //XLOG_ERROR("Fail to send data to agent,data count:"<< data.size());
+           //TODO failed data local cached.
         } 
     }
 }

@@ -26,7 +26,7 @@ bool AgentAdapter::init(const ::Ice::StringSeq& defaultAgents,const bool is_udp_
     for (::Ice::StringSeq::const_iterator it = defaultAgents.begin(); it != defaultAgents.end();
             ++it)
     {
-        slice::AgentPrx prx = Util::getPrx<slice::AgentPrx>(_ic, *it, is_udp_protocol, 300, is_compress);
+        slice::AgentPrx prx = Util::getPrx<slice::AgentPrx>(_ic, *it, is_udp_protocol, 1000, is_compress);
 	_prxs.push_back(prx);
     }
     agent_prxs.swap(_prxs);
@@ -54,11 +54,15 @@ bool AgentAdapter::send(const slice::LogDataSeq& data)
        {
            getAgentPrx()->add(data);
            return true;
+       } catch (::Ice::TimeoutException& e)
+       {
+           XLOG_WARN("AgentAdapter::send failed timeout in " << i+1  << " times, repeat again! The Exception: " << e);
        } catch (::Ice::Exception& e)
        {
-           XLOG_ERROR("AgentAdapter::send failed for " << i+1  << " time, will send again! The Exception: " << e);
+           XLOG_WARN("AgentAdapter::send failed in " << i+1  << " times, repeat again! The Exception: " << e);
        }
     }
+    XLOG_ERROR("AgentAdapter::send failed after " << i+1  << " times. The data size: " << data.size() + "." );
     return false;
 }
 
