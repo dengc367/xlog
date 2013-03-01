@@ -35,11 +35,15 @@ bool DispatcherAdapter::sendNormal(const slice::LogData& data)
     try{
       slice::DispatcherPrx dp=nca->doChoose(data.categories,_prx);
       dp->addLogData(data);
+      return true;
+    } catch(Ice::Exception& e){
+      XLOG_ERROR("Fail to send log to dispatcher nodes, the Ice::Exception: " << e );
+    } catch(std::exception & e ){
+      XLOG_ERROR("Fail to send log to dispatcher nodes, the std::exception: " << e.what() );
     } catch(...){
-      XLOG_ERROR("Fail to send log to dispatcher nodes, may be disconnect dispatcher!" );
-      return false;
+      XLOG_ERROR("Fail to send log to dispatcher nodes, unknown exception!" );
     }
-    return true;
+    return false;
 }
 
 bool DispatcherAdapter::sendFailed(const slice::LogDataSeq& data)
