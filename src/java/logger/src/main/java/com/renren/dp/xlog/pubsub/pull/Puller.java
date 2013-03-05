@@ -18,6 +18,11 @@ import com.renren.dp.xlog.logger.XLogLogger;
 import com.renren.dp.xlog.pubsub.DispatcherAdapter;
 import com.renren.dp.xlog.pubsub.zookeeper.client.ClientZooKeeperAdapter;
 
+/**
+ * Pull method to get the Pub/Sub data
+ * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
+ * @since 3:57:11 PM Mar 5, 2013
+ */
 public class Puller {
 
   private static final Logger LOG = LoggerFactory.getLogger(Puller.class);
@@ -27,6 +32,8 @@ public class Puller {
   private String[] categories;
   private ExecutorService executor;
   private int numPerIp = 1;
+
+  private BlockingQueue<String> bq = new ArrayBlockingQueue<String>(MAX_BLOCKING_QUEUE_SIZE);
 
   public Puller(String[] categories, XLogLogger logger) {
     sa = DispatcherAdapter.getInstance();
@@ -57,6 +64,7 @@ public class Puller {
     for (int i = 0; i < ips.length; i++) {
       LOG.debug("the subscription: " + ips[i]);
     }
+    executor.shutdown();
     // TODO
   }
 
@@ -117,8 +125,8 @@ public class Puller {
           }
           i = 1;
         } else {
-           ThreadUtils.sleep(100  * i++);
-//          ThreadUtils.sleep(100);
+          ThreadUtils.sleep(100 * i++);
+          // ThreadUtils.sleep(100);
         }
       }
     }
@@ -149,10 +157,6 @@ public class Puller {
       }
     }
   }
-
-  // private ArrayList<String> bq = new
-  // ArrayList<String>(MAX_BLOCKING_QUEUE_SIZE);
-  private BlockingQueue<String> bq = new ArrayBlockingQueue<String>(MAX_BLOCKING_QUEUE_SIZE);
 }
 
 class ThreadUtils {

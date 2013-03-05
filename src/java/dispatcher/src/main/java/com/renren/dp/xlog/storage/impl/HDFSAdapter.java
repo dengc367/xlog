@@ -160,8 +160,8 @@ public class HDFSAdapter implements StorageAdapter {
     } else if (os != null) {
       try {
         os.flush();
-      } catch (IOException e) {
-        LOG.error("Fail to flush the logdata", e.getMessage());
+      } catch (Exception e) {
+        LOG.error("Flush error with other exception:" + e);
       } finally {
         try {
           os.close();

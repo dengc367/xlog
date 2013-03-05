@@ -1,5 +1,9 @@
 package com.renren.dp.xlog.logger;
 
+/**
+ * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
+ * @since 3:56:56 PM Mar 5, 2013
+ */
 public interface XLogLoggerServer {
 
   /**

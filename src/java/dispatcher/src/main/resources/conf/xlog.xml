@@ -162,4 +162,10 @@
     <value>300</value>
     <description>The number of seconds send request failure max timeout</description>
   </property>
+  <property>
+      <name>xlog.pubsub.start</name>
+      <value>true</value>
+      <description>pubsub function</description>
+  </property>
+
 </configuration>

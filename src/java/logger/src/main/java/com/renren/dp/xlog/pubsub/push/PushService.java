@@ -11,6 +11,11 @@ import Ice.Endpoint;
 import xlog.slice.LogData;
 import xlog.slice._PublisherServiceDisp;
 
+/**
+ * Push Method 
+ * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
+ * @since 3:58:23 PM Mar 5, 2013
+ */
 public class PushService extends _PublisherServiceDisp {
 
   private static final Logger LOG = LoggerFactory.getLogger(PushService.class);

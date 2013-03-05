@@ -16,8 +16,8 @@ import xlog.slice.XLogException;
 
 public class PubSubService {
 
-  PullService pullService;
-  Pusher pusher;
+  private PullService pullService;
+  private Pusher pusher;
 
   public PubSubService() {
     pullService = new PullService();

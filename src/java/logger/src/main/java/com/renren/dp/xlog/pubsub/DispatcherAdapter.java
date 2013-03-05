@@ -8,6 +8,11 @@ import xlog.slice.DispatcherPrxHelper;
 import xlog.slice.Subscription;
 import xlog.slice.XLogException;
 
+/**
+ * A DispatcherI Adapter
+ * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
+ * @since 3:57:56 PM Mar 5, 2013
+ */
 public class DispatcherAdapter {
 
   private static Ice.Communicator ic;

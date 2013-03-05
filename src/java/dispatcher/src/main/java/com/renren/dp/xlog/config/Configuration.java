@@ -74,7 +74,7 @@ public class Configuration {
     if (strValue == null || "".equals(strValue)) {
       return defaultValue;
     }
-    return Boolean.parseBoolean(paramName);
+    return Boolean.parseBoolean(strValue);
   }
 
   public static Set<?> getParameterNames(){

@@ -4,6 +4,11 @@ import com.renren.dp.xlog.logger.XLogLogger;
 import com.renren.dp.xlog.logger.XLogLoggerServer;
 
 
+/**
+ * Push Server
+ * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
+ * @since 3:58:46 PM Mar 5, 2013
+ */
 public class PushXLogLoggerServer implements XLogLoggerServer {
 
   public int port;

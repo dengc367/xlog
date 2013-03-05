@@ -19,8 +19,7 @@ public class PubSubUtils {
 
   public static String getRemoteClientIp(Current __current) {
     String connStr = __current.con._toString();
-    connStr = connStr.substring(connStr.indexOf(REMOTE_ADDRESS_KEY)
-        + REMOTE_ADDRESS_KEY.length());
+    connStr = connStr.substring(connStr.indexOf(REMOTE_ADDRESS_KEY) + REMOTE_ADDRESS_KEY.length());
     return connStr.split(":")[0];
   }
 
@@ -50,12 +49,12 @@ public class PubSubUtils {
     return serializeCategories(categories, "/");
   }
 
-  public static String serializeCategories(String[] categories, String string) {
+  public static String serializeCategories(String[] categories, String separator) {
     StringBuilder catStr = new StringBuilder();
     for (int i = 0; i < categories.length; i++) {
       catStr.append(categories[i]);
       if (i < categories.length - 1) {
-        catStr.append(string);
+        catStr.append(separator);
       }
     }
     return catStr.toString();

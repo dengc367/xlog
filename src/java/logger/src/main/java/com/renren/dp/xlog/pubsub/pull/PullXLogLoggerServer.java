@@ -7,6 +7,12 @@ import com.renren.dp.xlog.logger.XLogLogger;
 import com.renren.dp.xlog.logger.XLogLoggerServer;
 import com.renren.dp.xlog.pubsub.pull.Puller;
 
+/**
+ * Pull Server
+ * 
+ * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
+ * @since 3:57:40 PM Mar 5, 2013
+ */
 public class PullXLogLoggerServer implements XLogLoggerServer {
 
   private static final Logger LOG = LoggerFactory.getLogger(PullXLogLoggerServer.class);
@@ -21,6 +27,11 @@ public class PullXLogLoggerServer implements XLogLoggerServer {
     } catch (IllegalAccessException e) {
       LOG.error("the XLogLogger implementation is illegal accessed, please check it.", e);
     }
+  }
+
+  public PullXLogLoggerServer(String[] categories, XLogLogger logger) {
+    puller = new Puller(categories, logger);
+    inited = true;
   }
 
   private Puller puller;

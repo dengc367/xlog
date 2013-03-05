@@ -1,20 +1,25 @@
 package com.renren.dp.xlog.logger;
 
-import org.apache.log4j.xml.DOMConfigurator;
-
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.renren.dp.xlog.pubsub.pull.PullXLogLoggerServer;
 
 public class TestXLogLogger {
   public static void main(String[] args) {
-    DOMConfigurator.configure(TestXLogLogger.class.getClassLoader().getResource("log4j.xml"));
-    Class<ConsoleXLogLogger> clazz = ConsoleXLogLogger.class;
-    // String[] categories = new String[] { "test", "3g", "access" };
-    String[] categories = new String[] { "3g", "api", "access" };
-    // String[] categories = new String[] { "ugc", "basic", "access_action" };
-    // String[] categories = new String[] { "wap", "lbs", "cell-json-location"
-    // };
-    XLogLoggerServer xs = new PullXLogLoggerServer(categories, clazz);
-    xs.start();
+    if (args.length < 1) {
+      System.err.println("Usage: $0 api.rest.invoke test.3g.access");
+      System.exit(1);
+    }
+    System.out.println("The args: " + Joiner.on(' ').join(args));
+    String[] categories;
+    for (int i = 0; i < args.length; i++) {
+      categories = Lists.newArrayList(Splitter.on(CharMatcher.anyOf("./")).split(args[i])).toArray(new String[0]);
+      FileXLogLogger logger = new FileXLogLogger(categories);
+      XLogLoggerServer xs = new PullXLogLoggerServer(categories, logger);
+      xs.start();
+    }
 
   }
 }

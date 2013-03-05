@@ -24,8 +24,7 @@ public class LogFileStreamReader {
   int fetchLength; // fetch size from the client
   FSDataInputStream in;
 
-  public LogFileStreamReader(String[] categories, int fetchSize)
-      throws IOException {
+  public LogFileStreamReader(String[] categories, int fetchSize) throws IOException {
     org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
     conf.set("fs.default.name", Configuration.getString("storage.uri"));
     fs = DistributedFileSystem.get(conf);
@@ -37,8 +36,8 @@ public class LogFileStreamReader {
   @SuppressWarnings("deprecation")
   private boolean initDataInputStream(int begin_point) throws IOException {
     if (!pathExists) {
-      currentFileName = getFileName();
-      Path currentPath = getPathIfExist(categories, currentFileName);
+      currentFileName = getHDFSFileName();
+      Path currentPath = getAbsolutePathIfExist(categories, currentFileName);
       if (currentPath != null) {
         long fileSize = fs.getFileStatus(currentPath).getLen();
         if (fileSize > begin_point) {
@@ -58,8 +57,8 @@ public class LogFileStreamReader {
 
   private boolean reinitDataInputStream(int begin_point) throws IOException {
     if (!pathExists) {
-      String tempPathName = getFileName();
-      Path tempPath = getPathIfExist(categories, tempPathName);
+      String tempPathName = getHDFSFileName();
+      Path tempPath = getAbsolutePathIfExist(categories, tempPathName);
       if (tempPath != null) {
         in = fs.open(tempPath);
         if (!currentFileName.equals(tempPathName)) {
@@ -74,18 +73,16 @@ public class LogFileStreamReader {
     return pathExists;
   }
 
-  public String getFileName() {
-    return FileNameHandlerFactory.getInstance().getCacheLogFileNum() + ".d1";
+  public String getHDFSFileName() {
+    return FileNameHandlerFactory.getInstance().getCacheLogFileNum() + "." + Configuration.getString("xlog.uuid");
   }
 
-  public String generatePathString(String[] categories, String fileName) {
-    return "/user/xlog/" + PubSubUtils.serializeCategories(categories, "/")
-        + "/" + fileName;
+  public String generateAbsolutePath(String[] categories, String fileName) {
+    return fs.getWorkingDirectory() + "/" + PubSubUtils.serializeCategories(categories, "/") + "/" + fileName;
   }
 
-  public Path getPathIfExist(String[] categories, String fileName)
-      throws IOException {
-    String pathStr = generatePathString(categories, fileName);
+  public Path getAbsolutePathIfExist(String[] categories, String fileName) throws IOException {
+    String pathStr = generateAbsolutePath(categories, fileName);
     Path path = new Path(pathStr);
     if (fs.exists(path) && fs.isFile(path)) {
       return path;
@@ -115,8 +112,7 @@ public class LogFileStreamReader {
 
   public static void main(String[] args) {
     try {
-      LogFileStreamReader r = new LogFileStreamReader(new String[] { "3g",
-          "api", "access" }, 50);
+      LogFileStreamReader r = new LogFileStreamReader(new String[] { "3g", "api", "access" }, 50);
       String[] arr = r.getLineStream();
       for (String s : arr) {
         System.out.println(s);

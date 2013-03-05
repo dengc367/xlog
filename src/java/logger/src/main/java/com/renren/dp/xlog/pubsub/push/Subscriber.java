@@ -14,6 +14,12 @@ import com.renren.dp.xlog.pubsub.DispatcherAdapter;
 import com.renren.dp.xlog.pubsub.zookeeper.client.ClientZooKeeperAdapter;
 import static com.renren.dp.xlog.pubsub.PubSubConstants.*;
 
+/**
+ * A subscriber
+ * 
+ * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
+ * @since 3:58:57 PM Mar 5, 2013
+ */
 public class Subscriber {
 
   private static final Logger logger = LoggerFactory.getLogger(Subscriber.class);
@@ -45,8 +51,6 @@ public class Subscriber {
     t.cancel();
     t = null;
   }
-
-  
 
   class SubscribeTimer extends TimerTask {
 

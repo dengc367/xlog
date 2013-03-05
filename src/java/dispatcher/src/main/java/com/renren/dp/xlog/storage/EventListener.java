@@ -179,7 +179,7 @@ public class EventListener extends Thread {
         logMeta = null;
       } catch (Exception e) {
         LOG.warn("Fail to store logdata. CurrentThread: " + Thread.currentThread().getName() + ", QueueName: "
-            + counter.getQueueName(), e);
+            + counter.getQueueName() + ": \n" + e);
         continue;
       }
     }

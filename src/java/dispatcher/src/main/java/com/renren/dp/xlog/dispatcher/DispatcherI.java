@@ -34,7 +34,7 @@ public class DispatcherI extends _DispatcherDisp {
   private LoggerI logger;
   private PubSubService pubsub = null;
   private ZkConn conn = null;
-  boolean ispubSubStart = false;
+  private boolean ispubSubStart;
   private volatile boolean isRunning = true;
 
   private static Logger LOG = Logger.getLogger(DispatcherI.class);
@@ -44,8 +44,9 @@ public class DispatcherI extends _DispatcherDisp {
     logger = new LoggerI();
     logger.initialize(adapter);
     ispubSubStart = Configuration.getBoolean("xlog.pubsub.start", false);
+    LOG.debug("Check the pubsub server....., xlog.pubsub.start=" + ispubSubStart );
     if (ispubSubStart) {
-      LOG.info("the pubsub server is starting.");
+      LOG.info("The pubsub server is starting.");
       pubsub = new PubSubService();
       logger.setPubSub(pubsub);
     }
