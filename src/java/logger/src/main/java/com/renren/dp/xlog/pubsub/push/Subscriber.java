@@ -20,6 +20,8 @@ import static com.renren.dp.xlog.pubsub.PubSubConstants.*;
  * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
  * @since 3:58:57 PM Mar 5, 2013
  */
+
+// TODO the PUSH Method is evolving now.
 public class Subscriber {
 
   private static final Logger logger = LoggerFactory.getLogger(Subscriber.class);
@@ -41,7 +43,7 @@ public class Subscriber {
   }
 
   public void unsubscribe() throws XLogException {
-    String[] ips = ClientZooKeeperAdapter.getAddresses();
+    String[] ips = ClientZooKeeperAdapter.getInstance().getAddresses();
     Map<String, String> a = Maps.newHashMap();
     a.put(PUSH_SERVICE_ENDPOINT, endpoint);
     for (int i = 0; i < ips.length; i++) {
@@ -56,7 +58,7 @@ public class Subscriber {
 
     @Override
     public void run() {
-      String[] ips = ClientZooKeeperAdapter.getAddresses();
+      String[] ips = ClientZooKeeperAdapter.getInstance().getAddresses();
       Map<String, String> a = Maps.newHashMap();
       a.put(PUSH_SERVICE_ENDPOINT, endpoint);
       for (int i = 0; i < ips.length; i++) {
