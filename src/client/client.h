@@ -19,8 +19,9 @@ public:
 
     Client(const ::Ice::StringSeq& defaultAgents,
             const bool is_udp_protocol, const int maxQueueSize, const bool isCompress);
-    bool doSend(const slice::LogDataSeq& data);
+    virtual bool doSend(const slice::LogDataSeq& data);
     void close();
+    virtual ~Client(){}
 protected:
     void run();
 
@@ -41,6 +42,15 @@ protected:
     AgentAdapter *_agentAdapter;
 };
 
+class SyncClient : public Client{
+public:
+
+    SyncClient(const ::Ice::StringSeq& defaultAgents,
+            const bool is_udp_protocol, const int maxQueueSize, const bool isCompress);
+    bool doSend(const slice::LogDataSeq& data);
+    ~SyncClient(){}
+
+};
 }
 
 #endif

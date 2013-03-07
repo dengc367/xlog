@@ -76,4 +76,15 @@ void Client::close()
       sleep(2);
    }   
 }
+
+SyncClient::SyncClient(const ::Ice::StringSeq& defaultAgents,
+        const bool is_udp_protocol, const int maxQueueSize, const bool isCompress) :
+         Client::Client(defaultAgents, is_udp_protocol, maxQueueSize, isCompress)
+{
+}
+
+bool SyncClient::doSend(const slice::LogDataSeq& data)
+{
+    return _agentAdapter->send(data);
+}
 }

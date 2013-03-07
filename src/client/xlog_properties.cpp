@@ -33,6 +33,7 @@ namespace xlog{
         string hostsStr = DEFAULT_HOSTS ;
         int is_udp_protocol = true;
         int is_compress= true;
+        int is_async= true;
         int maxSendSize= 10000;
         int maxQueueSize= 100000;
 
@@ -66,6 +67,8 @@ namespace xlog{
                     is_udp_protocol =  boost::lexical_cast<xlog::LocaleBool>(value);
                 }else if("isCompress" == key){
                     is_compress =  boost::lexical_cast<xlog::LocaleBool>(value);
+                }else if("isAsync" == key){
+                    is_async =  boost::lexical_cast<xlog::LocaleBool>(value);
                 }else if("maxSendSize" == key){
                     maxSendSize = boost::lexical_cast<int>(value);
                 }else if("maxQueueSize" == key){
@@ -80,12 +83,15 @@ namespace xlog{
 
         _is_udp_protocol = is_udp_protocol;
         _is_compress= is_compress;
+        _is_async= is_async;
         _maxSendSize = maxSendSize;
         _maxQueueSize = maxQueueSize;
         _hosts = xlog::getAgentHosts(hostsStr);
     }
 
-    XLogProperties::XLogProperties(const string& hostsStr, const bool is_udp_protocol, const int maxSendSize, int maxQueueSize, const bool isCompress):_is_udp_protocol(is_udp_protocol), _maxSendSize(maxSendSize), _maxQueueSize(maxQueueSize), _is_compress(isCompress){
+    XLogProperties::XLogProperties(const string& hostsStr, const bool is_udp_protocol, const int maxSendSize, int maxQueueSize, const bool isCompress, const bool isAsync):
+        _is_udp_protocol(is_udp_protocol), _maxSendSize(maxSendSize), 
+        _maxQueueSize(maxQueueSize), _is_compress(isCompress), _is_async(isAsync){
         _hosts = xlog::getAgentHosts(hostsStr);
     }
 
@@ -102,6 +108,10 @@ namespace xlog{
 
     bool XLogProperties::isUdpProtocol() const{
         return _is_udp_protocol;
+    }
+
+    bool XLogProperties::isAsync() const{
+        return _is_async;
     }
 
     bool XLogProperties::isCompress() const{

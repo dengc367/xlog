@@ -24,15 +24,19 @@ namespace xlog
     }
 
     XLogAppender::XLogAppender(const vector<string>& categories,
-    const bool is_udp_protocol, const int maxSendSize, int maxQueueSize, const bool isCompress, string& hosts):_categories(categories),_strlen(0)
+    const bool is_udp_protocol, const int maxSendSize, int maxQueueSize, const bool isCompress, const bool isAsync, string& hosts):_categories(categories),_strlen(0)
     {
-        XLogProperties properties(hosts, is_udp_protocol, maxSendSize, maxQueueSize, isCompress);
+        XLogProperties properties(hosts, is_udp_protocol, maxSendSize, maxQueueSize, isCompress, isAsync);
         init(properties);
     }
 
     void XLogAppender::init(const XLogProperties& properties){
          vector<string> temp =properties.getHosts();
-        _client = new Client(temp, properties.isUdpProtocol(), properties.getMaxQueueSize(), properties.isCompress());
+         if(properties.isAsync()){
+            _client = new Client(temp, properties.isUdpProtocol(), properties.getMaxQueueSize(), properties.isCompress());
+         }else{
+            _client = new SyncClient(temp, properties.isUdpProtocol(), properties.getMaxQueueSize(), properties.isCompress());
+         }
         _maxSendSize = properties.getMaxSendSize();
 
         XLOG_INFO( "Xlog client configuration parameters: " );
@@ -40,7 +44,8 @@ namespace xlog
                 << ", isUdpProtocol: "<< properties.isUdpProtocol() 
                 << ", maxSendSize:" << properties.getMaxSendSize() 
                 << ", maxQueueSize: "<< properties.getMaxQueueSize() 
-                << ", isCompress: " << properties.isCompress() );
+                << ", isCompress: " << properties.isCompress() 
+                << ", isAsync: " << properties.isAsync() );
     }
 
 

@@ -13,9 +13,10 @@ namespace xlog{
             static const int MAX_QUEUE_SIZE = 100000;
             static string DEFAULT_HOSTS;
             XLogProperties(const char* path);
-            XLogProperties(const string& hosts, const bool is_udp_protocol, const int maxSendSize, int maxQueueSize, const bool isCompress);
+            XLogProperties(const string& hosts, const bool is_udp_protocol, const int maxSendSize, int maxQueueSize, const bool isCompress, const bool isAsync);
             bool isUdpProtocol() const;
             bool isCompress() const;
+            bool isAsync() const;
             int getMaxSendSize() const;
             int getMaxQueueSize() const;
             vector<string> getHosts() const;
@@ -23,6 +24,7 @@ namespace xlog{
             vector<string>* _hosts;
             bool _is_udp_protocol;
             bool _is_compress;
+            bool _is_async;
             int _maxSendSize;
             int _maxQueueSize;
 
