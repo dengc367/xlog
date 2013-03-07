@@ -6,24 +6,28 @@ namespace xlog
 {
 
 Client::Client(const ::Ice::StringSeq& defaultAgents,
-        const bool is_udp_protocol, const int maxQueueSize, const bool isCompress) :
-         _defaultAgents(defaultAgents), _is_udp_protocol(is_udp_protocol), _maxQueueSize(maxQueueSize),
-         _is_compress(isCompress)
-{
-   _agentAdapter = new AgentAdapter;
+        const bool is_udp_protocol, const bool isCompress) :
+         _defaultAgents(defaultAgents), _is_udp_protocol(is_udp_protocol),
+         _is_compress(isCompress), _agentAdapter(new AgentAdapter)
+{   
+   _flag=_agentAdapter->init(_defaultAgents,_is_udp_protocol, _is_compress);
+}
 
-   bool flag=_agentAdapter->init(_defaultAgents,_is_udp_protocol, _is_compress);
-   if (flag)
+AsyncClient::AsyncClient(const ::Ice::StringSeq& defaultAgents,
+        const bool is_udp_protocol, const int maxQueueSize, const bool isCompress) :
+    Client::Client(defaultAgents, is_udp_protocol, isCompress), _maxQueueSize(maxQueueSize)
+{
+   if (_flag)
    { 
-      XLOG_INFO("success to init agent adapter!");
+      XLOG_INFO("AsyncClient:: success to init agent adapter!");
       start().detach(); 
    } else
    {
-      XLOG_ERROR("failt to init agent adapter!");
+      XLOG_ERROR("AsyncClient:: failt to init agent adapter!");
    }
 }
 
-bool Client::doSend(const slice::LogDataSeq& data)
+bool AsyncClient::doSend(const slice::LogDataSeq& data)
 {
     ::IceUtil::Monitor<IceUtil::Mutex>::Lock lock(_dataMutex);
     if (_data.size() >= _maxQueueSize)
@@ -39,7 +43,7 @@ bool Client::doSend(const slice::LogDataSeq& data)
     return true;
 }
 
-void Client::run()
+void AsyncClient::run()
 {
     for (;;)
     {
@@ -69,7 +73,7 @@ void Client::run()
     }
 }
 
-void Client::close()
+void AsyncClient::close()
 {
    while(!_data.empty())
    {
@@ -78,9 +82,16 @@ void Client::close()
 }
 
 SyncClient::SyncClient(const ::Ice::StringSeq& defaultAgents,
-        const bool is_udp_protocol, const int maxQueueSize, const bool isCompress) :
-         Client::Client(defaultAgents, is_udp_protocol, maxQueueSize, isCompress)
+        const bool is_udp_protocol, const bool isCompress) :
+        Client::Client(defaultAgents, is_udp_protocol, isCompress)        
 {
+   if (_flag)
+   { 
+      XLOG_INFO("SyncClient:: success to init agent adapter!");
+   } else
+   {
+      XLOG_ERROR("SyncClient:: failt to init agent adapter!");
+   }
 }
 
 bool SyncClient::doSend(const slice::LogDataSeq& data)

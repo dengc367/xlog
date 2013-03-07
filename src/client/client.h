@@ -13,43 +13,43 @@
 namespace xlog
 {
 
-class Client : public ::IceUtil::Thread
+class Client
 {
 public:
 
     Client(const ::Ice::StringSeq& defaultAgents,
-            const bool is_udp_protocol, const int maxQueueSize, const bool isCompress);
-    virtual bool doSend(const slice::LogDataSeq& data);
-    void close();
+            const bool is_udp_protocol, const bool isCompress);
+    virtual bool doSend(const slice::LogDataSeq& data) = 0;
+    virtual void close(){}
     virtual ~Client(){}
 protected:
-    void run();
-
-    slice::LogDataSeq _data;
-
-    ::IceUtil::Monitor<IceUtil::Mutex> _dataMutex;
-
     ::Ice::StringSeq _defaultAgents;
-
-    int _maxQueueSize;
-     
     bool _is_udp_protocol;
-
     bool _is_compress;
-
-    ::IceUtil::Mutex _agentMutex;
-
+    bool _flag;
     AgentAdapter *_agentAdapter;
 };
 
 class SyncClient : public Client{
 public:
-
     SyncClient(const ::Ice::StringSeq& defaultAgents,
-            const bool is_udp_protocol, const int maxQueueSize, const bool isCompress);
-    bool doSend(const slice::LogDataSeq& data);
+            const bool is_udp_protocol, const bool isCompress);
     ~SyncClient(){}
+    bool doSend(const slice::LogDataSeq& data);
+};
 
+class AsyncClient : public Client, public ::IceUtil::Thread{
+public:
+    AsyncClient(const ::Ice::StringSeq& defaultAgents,
+            const bool is_udp_protocol, const int maxQueueSize, const bool isCompress);
+    ~AsyncClient(){}
+    bool doSend(const slice::LogDataSeq& data);
+    void close();
+protected:
+    void run();
+    ::IceUtil::Monitor<IceUtil::Mutex> _dataMutex;
+    slice::LogDataSeq _data;
+    int _maxQueueSize;
 };
 }
 

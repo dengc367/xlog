@@ -33,9 +33,9 @@ namespace xlog
     void XLogAppender::init(const XLogProperties& properties){
          vector<string> temp =properties.getHosts();
          if(properties.isAsync()){
-            _client = new Client(temp, properties.isUdpProtocol(), properties.getMaxQueueSize(), properties.isCompress());
+            _client = new AsyncClient(temp, properties.isUdpProtocol(), properties.getMaxQueueSize(), properties.isCompress());
          }else{
-            _client = new SyncClient(temp, properties.isUdpProtocol(), properties.getMaxQueueSize(), properties.isCompress());
+            _client = new SyncClient(temp, properties.isUdpProtocol(), properties.isCompress());
          }
         _maxSendSize = properties.getMaxSendSize();
 
