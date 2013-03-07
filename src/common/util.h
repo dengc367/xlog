@@ -34,7 +34,7 @@ public:
 	}else
         {
 	   os << "A:tcp -h " << host << " -p " << port;
-           return T::uncheckedCast(ic->stringToProxy(os.str())->ice_twoway()->ice_timeout(timeout));
+           return T::uncheckedCast(ic->stringToProxy(os.str())->ice_twoway()->ice_timeout(timeout)->ice_compress(compress));
 	}	
     }
 };
