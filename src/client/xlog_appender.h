@@ -10,7 +10,7 @@
 
 using namespace std;
 namespace xlog{
-    class XLogAppender
+    class XLogAppender : virtual public IceUtil::Shared
     {
         public:
             XLogAppender(const vector<string>& categories, const char* properties_file_path);
@@ -27,8 +27,8 @@ namespace xlog{
              int _strlen;
              ::IceUtil::Monitor<IceUtil::Mutex> _mutex;
     };
-    //typedef IceUtil::Handle<XLogAppender> XLogAppenderPtr;
-    typedef XLogAppender* XLogAppenderPtr;
+    typedef IceUtil::Handle<XLogAppender> XLogAppenderPtr;
+    //typedef XLogAppender* XLogAppenderPtr;
 }
 
 
