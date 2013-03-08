@@ -32,20 +32,24 @@ namespace xlog
 
     void XLogAppender::init(const XLogProperties& properties){
          vector<string> temp =properties.getHosts();
+        XLOG_INFO( "Xlog client configuration parameters: " );
          if(properties.isAsync()){
             _client = new AsyncClient(temp, properties.isUdpProtocol(), properties.getMaxQueueSize(), properties.isCompress());
+            XLOG_INFO( "hosts: " << xlog::vector2String(temp) 
+                    << ", isUdpProtocol: "<< properties.isUdpProtocol() 
+                    << ", maxSendSize:" << properties.getMaxSendSize() 
+                    << ", maxQueueSize: "<< properties.getMaxQueueSize() 
+                    << ", isCompress: " << properties.isCompress() 
+                    << ", isAsync: " << properties.isAsync() );
          }else{
             _client = new SyncClient(temp, properties.isUdpProtocol(), properties.isCompress());
+            XLOG_INFO( "hosts: " << xlog::vector2String(temp) 
+                    << ", isUdpProtocol: "<< properties.isUdpProtocol() 
+                    << ", maxSendSize:" << properties.getMaxSendSize() 
+                    << ", isCompress: " << properties.isCompress() 
+                    << ", isAsync: " << properties.isAsync() );
          }
         _maxSendSize = properties.getMaxSendSize();
-
-        XLOG_INFO( "Xlog client configuration parameters: " );
-        XLOG_INFO( "hosts: " << xlog::vector2String(temp) 
-                << ", isUdpProtocol: "<< properties.isUdpProtocol() 
-                << ", maxSendSize:" << properties.getMaxSendSize() 
-                << ", maxQueueSize: "<< properties.getMaxQueueSize() 
-                << ", isCompress: " << properties.isCompress() 
-                << ", isAsync: " << properties.isAsync() );
     }
 
 

@@ -1,6 +1,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "src/common/util.h"
+#include "src/common/common.h"
 #include "src/adapter/agent_adapter.h"
 #include "src/common/logger.h"
 
@@ -16,8 +17,12 @@ bool AgentAdapter::init(const ::Ice::StringSeq& defaultAgents,const bool is_udp_
     }
 
     srand(unsigned(time(NULL)));
-
-    _ic = ::Ice::initialize();
+    Ice::PropertiesPtr props=Ice::createProperties();
+    props->setProperty("Ice.MessageSizeMax", ICE_MESSAGE_SIZE_MAX);
+    props->setProperty("Ice.Override.Timeout", ICE_TIMEOUT_MILLISECONDS);
+	Ice::InitializationData id;
+    id.properties=props;
+    _ic = ::Ice::initialize(id);
 
     srand((unsigned) time(NULL));
     current_agent_prx_number=0;

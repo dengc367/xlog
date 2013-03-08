@@ -64,7 +64,8 @@ public:
 	    os << "tcp -h " << parts[0] << " -p " << parts[1];
         }
         props->setProperty("Ice.MessageSizeMax",ICE_MESSAGE_SIZE_MAX);
-	Ice::InitializationData id;
+        props->setProperty("Ice.Override.Timeout", ICE_TIMEOUT_MILLISECONDS);
+        Ice::InitializationData id;
         id.properties=props;
         Ice::CommunicatorPtr ic=Ice::initialize(id);
         Ice::ObjectAdapterPtr adapter = ic->createObjectAdapterWithEndpoints(appName(),
