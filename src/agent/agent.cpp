@@ -65,6 +65,9 @@ public:
         }
         props->setProperty("Ice.MessageSizeMax",ICE_MESSAGE_SIZE_MAX);
         props->setProperty("Ice.Override.Timeout", ICE_TIMEOUT_MILLISECONDS);
+        props->setProperty("Ice.ThreadPool.Server.Size", "10");
+        props->setProperty("Ice.ThreadPool.Server.SizeMax", "3000");
+        props->setProperty("Ice.ThreadPool.Server.StackSize", "131072");
         Ice::InitializationData id;
         id.properties=props;
         Ice::CommunicatorPtr ic=Ice::initialize(id);

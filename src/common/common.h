@@ -13,7 +13,7 @@ namespace xlog
 
 static const char* AGENTS_PATH = "/xlog/agents"; /*agent在zookeeper中的父目录*/
 static const char* DISPATCHERS_PATH = "/xlog/dispatchers"; /*client在zookeeper中的父目录*/
-static const char* ICE_MESSAGE_SIZE_MAX="10240";
+static const char* ICE_MESSAGE_SIZE_MAX="1024000";
 static const char* ICE_UDP_RCVSIZE="10485760";
 static const char* ICE_TIMEOUT_MILLISECONDS="1000";
 
