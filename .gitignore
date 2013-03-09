@@ -16,3 +16,6 @@ tmp
 *.un~
 gyp/out/Default
 build
+.svn
+*.svn-base
+.svn/*
