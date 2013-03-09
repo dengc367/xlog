@@ -10,7 +10,7 @@ Client::Client(const ::Ice::StringSeq& defaultAgents,
          _defaultAgents(defaultAgents), _is_udp_protocol(is_udp_protocol),
          _is_compress(isCompress)
 {   
-    _agentAdapter = AgentAdapter::instance();
+    _agentAdapter = new AgentAdapter;
    _flag=_agentAdapter->init(_defaultAgents,_is_udp_protocol, _is_compress);
 }
 

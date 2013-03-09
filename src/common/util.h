@@ -29,13 +29,15 @@ public:
         std::ostringstream os;
         if(udp)
         {
-	   os << "A:udp -h " << host << " -p " << port;
+           os << "A:udp -h " << host << " -p " << port;
            return T::uncheckedCast(ic->stringToProxy(os.str())->ice_locatorCacheTimeout(60)->ice_compress(compress)->ice_datagram());
-	}else
+        }
+        else
         {
-	   os << "A:tcp -h " << host << " -p " << port;
-           return T::uncheckedCast(ic->stringToProxy(os.str())->ice_oneway()->ice_timeout(timeout)->ice_compress(compress));
-	}	
+           os << "A:tcp -h " << host << " -p " << port;
+           //return T::uncheckedCast(ic->stringToProxy(os.str())->ice_oneway()->ice_timeout(timeout)->ice_compress(compress));
+           return T::checkedCast(ic->stringToProxy(os.str())->ice_twoway()->ice_timeout(-1)->ice_compress(compress));
+        }	
     }
 };
 
