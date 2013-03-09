@@ -8,8 +8,9 @@ namespace xlog
 Client::Client(const ::Ice::StringSeq& defaultAgents,
         const bool is_udp_protocol, const bool isCompress) :
          _defaultAgents(defaultAgents), _is_udp_protocol(is_udp_protocol),
-         _is_compress(isCompress), _agentAdapter(new AgentAdapter)
+         _is_compress(isCompress)
 {   
+    _agentAdapter = AgentAdapter::instance();
    _flag=_agentAdapter->init(_defaultAgents,_is_udp_protocol, _is_compress);
 }
 

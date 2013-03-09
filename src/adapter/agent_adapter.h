@@ -10,12 +10,13 @@
 #include <IceUtil/RWRecMutex.h>
 
 #include "xlog.h"
+#include "src/common/singleton.h"
 
 namespace xlog
 {
 
 //class AgentAdapter : public slice::Subscriber , public ::IceUtil::Thread
-class AgentAdapter : public Ice::Object
+class AgentAdapter : public Ice::Object, public virtual Singleton<AgentAdapter>
 {
 public:
     bool init(const ::Ice::StringSeq& defaultAgents, const bool is_udp_protocol, const bool is_compress);
