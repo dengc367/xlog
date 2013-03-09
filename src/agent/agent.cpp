@@ -57,11 +57,11 @@ public:
         Ice::PropertiesPtr props=Ice::createProperties();
         if(is_udp)
         {
-	    props->setProperty("Ice.UDP.RcvSize",ICE_UDP_RCVSIZE);
-	    os << "udp -h " << parts[0] << " -p " << parts[1];
+            props->setProperty("Ice.UDP.RcvSize",ICE_UDP_RCVSIZE);
+            os << "udp -h " << parts[0] << " -p " << parts[1];
         }else
         {
-	    os << "tcp -h " << parts[0] << " -p " << parts[1];
+            os << "tcp -h " << parts[0] << " -p " << parts[1];
         }
         props->setProperty("Ice.MessageSizeMax",ICE_MESSAGE_SIZE_MAX);
         props->setProperty("Ice.Override.Timeout", ICE_TIMEOUT_MILLISECONDS);
