@@ -77,8 +77,12 @@ namespace xlog
         ::IceUtil::Monitor<IceUtil::Mutex>::Lock lock(_mutex);
         _strlen += msg.length();
         _logSeq.push_back(msg);
-        if(_strlen >= _maxSendSize || time(NULL) - _lastSendTime > MAX_WAIT_MILLSECONDS)
+        //if(_strlen >= _maxSendSize || time(NULL) - _lastSendTime > MAX_WAIT_MILLSECONDS)
+        if(_strlen >= _maxSendSize)
         {
+            XLOG_DEBUG("Categories: " << _categories 
+                    << ", maxSendSize: " << _maxSendSize 
+                    << ", logSeq size: " << _logSeq.size());
             xlog::slice::LogDataSeq logDataSeq;
             xlog::slice::LogData logData;
             logData.categories = _categories;
