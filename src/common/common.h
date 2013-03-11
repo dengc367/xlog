@@ -16,7 +16,7 @@ static const char* DISPATCHERS_PATH = "/xlog/dispatchers"; /*clientåœ¨zookeeperä
 static const char* ICE_MESSAGE_SIZE_MAX="10485760";
 static const char* ICE_UDP_RCVSIZE="10485760";
 static const char* ICE_TIMEOUT_MILLISECONDS="60000";
-static const long MAX_WAIT_MILLSECONDS=60000;
+static const long MAX_WAIT_MILLISECONDS=60000;
 
 class ZooKeeperListener;
 typedef IceUtil::Handle<ZooKeeperListener> ZooKeeperListenerPtr;

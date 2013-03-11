@@ -30,7 +30,7 @@ namespace xlog{
              int _maxSendSize;
              vector<string> _categories;
              Ice::StringSeq _logSeq;
-             time_t _lastSendTime;
+             time_t _nextSendTime;
              int _strlen;
              ::IceUtil::Monitor<IceUtil::Mutex> _mutex;
     };
