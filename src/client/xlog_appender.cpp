@@ -80,7 +80,7 @@ namespace xlog
         //if(_strlen >= _maxSendSize || time(NULL) - _lastSendTime > MAX_WAIT_MILLSECONDS)
         if(_strlen >= _maxSendSize)
         {
-            XLOG_DEBUG("Categories: " << _categories 
+            XLOG_DEBUG("Categories: " << xlog::vector2String(_categories) 
                     << ", maxSendSize: " << _maxSendSize 
                     << ", logSeq size: " << _logSeq.size());
             xlog::slice::LogDataSeq logDataSeq;
