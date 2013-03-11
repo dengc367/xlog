@@ -22,6 +22,7 @@ namespace xlog{
             }
             int append(const string& msg);
             int append(const char* msg, int const len);
+            int append(std::vector<std::string>& logs);
             void close();
         private:
             void init(const XLogProperties& properties);

@@ -93,6 +93,16 @@ namespace xlog
         return 0;
     }
 
+    int XLogAppender::append(std::vector<std::string>& msg)
+    {
+        xlog::slice::LogDataSeq logDataSeq;
+        xlog::slice::LogData logData;
+        logData.categories = _categories;
+        logData.logs.swap(msg);
+        logDataSeq.push_back(logData);
+        return ! _client->doSend(logDataSeq);
+    }
+
     void XLogAppender::close()
     {
         _client->close();
