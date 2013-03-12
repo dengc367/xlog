@@ -19,7 +19,7 @@ public:
     virtual int run(int argc , char* argv[])
     {
 
-        INIT_LOG4CPLUS_PROPERTIES("log4cplus.properties"); // init the log4cplus configurator.
+        INIT_LOG4CPLUS_PROPERTIES("../conf/log4cplus.properties"); // init the log4cplus configurator.
 
         XLOG_DEBUG("Checking the args valid.");
         if(argc==1)
