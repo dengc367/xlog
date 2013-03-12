@@ -25,7 +25,8 @@ namespace xlog{
     };
 
     string XLogProperties::DEFAULT_HOSTS = "xlogagent1.d.xiaonei.com:10001,xlogagent2.d.xiaonei.com:10001,xlogagent3.d.xiaonei.com:10001";
-    const int XLogProperties::MAX_SEND_SIZE;
+    const int XLogProperties::MAX_UDP_SEND_SIZE;
+    const int XLogProperties::MAX_TCP_SEND_SIZE;
     const int XLogProperties::MAX_QUEUE_SIZE;
 
 
@@ -100,7 +101,11 @@ namespace xlog{
     }
 
     int XLogProperties::getMaxSendSize() const {
-        return (_maxSendSize > MAX_SEND_SIZE) ? MAX_SEND_SIZE : (_maxSendSize < 0) ? 0 : _maxSendSize;
+        if(_is_udp_protocol){
+            return (_maxSendSize > MAX_UDP_SEND_SIZE) ? MAX_UDP_SEND_SIZE : (_maxSendSize < 0) ? 0 : _maxSendSize;
+        } else{
+            return (_maxSendSize > MAX_TCP_SEND_SIZE) ? MAX_TCP_SEND_SIZE : (_maxSendSize < 0) ? 0 : _maxSendSize;
+        }
     }
     vector<string> XLogProperties::getHosts() const{
         return *_hosts;

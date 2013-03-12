@@ -9,7 +9,8 @@ namespace xlog{
         public:
             //const static int MAX_SEND_SIZE;
             //const static int MAX_QUEUE_SIZE;
-            static const int MAX_SEND_SIZE = 50000;
+            static const int MAX_UDP_SEND_SIZE = 51200; // UDP: 50K
+            static const int MAX_TCP_SEND_SIZE = 5242880; // TCP: 5M
             static const int MAX_QUEUE_SIZE = 100000;
             static string DEFAULT_HOSTS;
             XLogProperties(const char* path);
