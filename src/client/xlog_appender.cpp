@@ -62,7 +62,7 @@ namespace xlog
                     << ", isAsync: " << properties.isAsync() );
          }
         _maxSendSize = properties.getMaxSendSize();
-        _lastSendTime = time(NULL);
+        _nextSendTime = time(NULL) + MAX_WAIT_MILLISECONDS;
     }
 
 
@@ -77,12 +77,12 @@ namespace xlog
         ::IceUtil::Monitor<IceUtil::Mutex>::Lock lock(_mutex);
         _strlen += msg.length();
         _logSeq.push_back(msg);
-        //if(_strlen >= _maxSendSize || time(NULL) - _lastSendTime > MAX_WAIT_MILLSECONDS)
-        if(_strlen >= _maxSendSize)
+        if(_strlen >= _maxSendSize || time(NULL) > _nextSendTime)
+        //if(_strlen >= _maxSendSize)
         {
-            XLOG_DEBUG("Categories: " << xlog::vector2String(_categories) 
-                    << ", maxSendSize: " << _maxSendSize 
-                    << ", logSeq size: " << _logSeq.size());
+            //XLOG_DEBUG("Categories: " << xlog::vector2String(_categories) 
+            //        << ", sendSize: " << _strlen
+            //        << ", logSeq size: " << _logSeq.size());
             xlog::slice::LogDataSeq logDataSeq;
             xlog::slice::LogData logData;
             logData.categories = _categories;
@@ -90,7 +90,7 @@ namespace xlog
             logDataSeq.push_back(logData);
             bool ret = _client->doSend(logDataSeq);
             _strlen = 0;
-            _lastSendTime = time(NULL);
+            _nextSendTime = time(NULL) + MAX_WAIT_MILLISECONDS;
             return ! ret;
         }
         _mutex.notify();
