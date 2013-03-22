@@ -62,9 +62,9 @@ public:
         }else
         {
             os << "tcp -h " << parts[0] << " -p " << parts[1];
-		props->setProperty("Ice.ThreadPool.Server.Size", "10");
-		props->setProperty("Ice.ThreadPool.Server.SizeMax", "3000");
-		props->setProperty("Ice.ThreadPool.Server.StackSize", "131072");
+            props->setProperty("Ice.ThreadPool.Server.Size", "10");
+            props->setProperty("Ice.ThreadPool.Server.SizeMax", "3000");
+            props->setProperty("Ice.ThreadPool.Server.StackSize", "131072");
         }
         props->setProperty("Ice.MessageSizeMax",ICE_MESSAGE_SIZE_MAX);
         props->setProperty("Ice.Override.Timeout", ICE_TIMEOUT_MILLISECONDS);

@@ -51,10 +51,15 @@ int main(int argc , char** argv)
         if(file != ""){
             batchClient = new XLogAppender(categories, file.c_str()); 
         }else{
-            int mss = (parser.getOption("mss") == "") ? xlog::XLogProperties::MAX_SEND_SIZE : boost::lexical_cast<int>(parser.getOption("mss"));
+            bool is_udp_protocol = (parser.getOption("protocol") != "" && parser.getOption("protocol") == "tcp") ? false : true;
+            int mss = 0;
+            if(is_udp_protocol){
+                mss = (parser.getOption("mss") == "") ? xlog::XLogProperties::MAX_UDP_SEND_SIZE : boost::lexical_cast<int>(parser.getOption("mss"));
+            }else{
+                mss = (parser.getOption("mss") == "") ? xlog::XLogProperties::MAX_TCP_SEND_SIZE : boost::lexical_cast<int>(parser.getOption("mss"));
+            }
             int mqs = (parser.getOption("mqs") == "") ? xlog::XLogProperties::MAX_QUEUE_SIZE : boost::lexical_cast<int>(parser.getOption("mqs"));
             string hosts = (parser.getOption("hosts") == "" ) ? xlog::XLogProperties::DEFAULT_HOSTS : parser.getOption("hosts");
-            bool is_udp_protocol = (parser.getOption("protocol") != "" && parser.getOption("protocol") == "tcp") ? false : true;
             bool is_compress = (parser.getOption("compress") == "" || parser.getOption("compress") == "false") ? false : true;
             bool is_async= (parser.getOption("async") == "" || parser.getOption("async") == "true") ? true : false;
             batchClient = new XLogAppender(categories, is_udp_protocol, mss, mqs, is_compress, is_async, hosts); 

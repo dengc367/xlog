@@ -19,7 +19,7 @@ void DispatcherAdapter::init()
 bool DispatcherAdapter::sendNormal(const slice::LogData& data)
 {
     long version = _config_dispatcher->version();
-    if (version != _prx_version)
+    if (version != _prx_version || _prx.size() == 0)
     {
       if(rebuild_prx())
       {
