@@ -85,10 +85,10 @@ public class Log4jAppender extends AppenderSkeleton implements XLogAppenderParam
 
   @Override
   protected void append(LoggingEvent event) {
-    StringBuilder logBuilder = new StringBuilder(layout.format(event)).append('\n');
+    StringBuilder logBuilder = new StringBuilder(layout.format(event));
     if (event.getThrowableInformation() != null) {
       for (String o : event.getThrowableStrRep()) {
-        logBuilder.append(o).append('\n');
+        logBuilder.append('\n').append(o);
       }
     }
     wrapper.append(event.getLoggerName(), logBuilder.toString());
