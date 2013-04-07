@@ -50,13 +50,9 @@ module slice {
     bool register(Logger* subscriber, int frequence);
     int subscribe(Subscription sub) throws XLogException; // pub sub 
     int unsubscribe(Subscription sub) throws XLogException; // pub sub 
-    Ice::StringSeq getData(int categoryId) throws XLogException;
+    Ice::ByteSeq getBytes(int categoryId) throws XLogException; //pub sub
   };
 
-  //pub sub 
-  interface PublisherService{
-    int publish(LogData data);
-  };
 
 };
 };

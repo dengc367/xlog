@@ -1,10 +1,11 @@
-package com.renren.dp.xlog.pubsub;
+package com.renren.dp.xlog.fs;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jfree.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import xlog.slice.DispatcherPrx;
 import xlog.slice.DispatcherPrxHelper;
@@ -12,8 +13,6 @@ import xlog.slice.Subscription;
 import xlog.slice.XLogException;
 
 /**
- * A DispatcherI Adapter
- * 
  * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
  * @since 3:57:56 PM Mar 5, 2013
  */
@@ -22,6 +21,7 @@ public class DispatcherAdapter {
   private static Ice.Communicator ic;
   private static ConcurrentHashMap<String, DispatcherPrx> psMap = new ConcurrentHashMap<String, DispatcherPrx>(
       new HashMap<String, DispatcherPrx>());
+  private static final Logger LOG = LoggerFactory.getLogger(DispatcherAdapter.class);
 
   public DispatcherAdapter() {
     Ice.Properties prop = Ice.Util.createProperties();
@@ -69,12 +69,12 @@ public class DispatcherAdapter {
     }
   }
 
-  public String[] getData(String iceEndpoint, int categoryId) throws XLogException {
+  public byte[] getBytes(String iceEndpoint, int categoryId) throws XLogException {
     try {
-      return getDispatcherPrx(iceEndpoint).getData(categoryId);
+      return getDispatcherPrx(iceEndpoint).getBytes(categoryId);
     } catch (Ice.ConnectionRefusedException e) {
-      Log.error("Ice.ConnectionRefusedException, retry again. " + e);
-      return getDispatcherPrx(iceEndpoint, true).getData(categoryId);
+      LOG.error("Ice.ConnectionRefusedException, retry again. " + e);
+      return getDispatcherPrx(iceEndpoint, true).getBytes(categoryId);
     }
   }
 }

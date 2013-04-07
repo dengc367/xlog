@@ -196,7 +196,7 @@ public class HDFSAdapter implements StorageAdapter {
     try {
       fs = FileSystemUtil.createFileSystem();
     } catch (IOException e) {
-      LOG.error("FileSystem create Failed. " + e);
+      LOG.error("FileSystem create Failed. ", e);
     }
   }
 

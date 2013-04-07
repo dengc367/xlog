@@ -21,4 +21,18 @@
                 <level value="debug" />
                 <appender-ref ref="stdout" />
         </logger>
+        
+        <appender name="xlog-logger-file-appender" class="org.apache.log4j.RollingFileAppender">
+                <param name="File" value="logs/.log" />
+                
+                <param name="maxBackupIndex" value="10" />
+                <layout class="org.apache.log4j.PatternLayout">
+                        <param name="ConversionPattern" value="%n" />
+                </layout>
+        </appender>
+        
+        <logger name="xlog.pubsub.log" additivity="false">
+                <level value="debug" />
+                <appender-ref ref="xlog-logger-file-appender" />
+        </logger>
 </log4j:configuration>

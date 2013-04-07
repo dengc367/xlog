@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.FileSystem;
 
 public class FileSystemUtil {
   public static FileSystem createFileSystem() throws IOException {
+    Configuration.addDefaultResource("ha-site.xml");
     Configuration conf = new Configuration();
     conf.set("dfs.replication", com.renren.dp.xlog.config.Configuration.getString("storage.replication", "3"));
     conf.setLong("dfs.socket.timeout",

@@ -69,6 +69,7 @@
               <sources>
                 <source>src/generated/java</source>
                 <source>src/main/java</source>
+                <source>src/test/java</source>
               </sources>
             </configuration>
           </execution>
@@ -84,6 +85,7 @@
           <compilerArguments>
             <sourcepath>src/generated/java</sourcepath>
             <sourcepath>src/main/java</sourcepath>
+            <sourcepath>src/test/java</sourcepath>
           </compilerArguments>
         </configuration>
       </plugin>
@@ -175,7 +177,7 @@
 <dependency>
   <groupId>com.google.protobuf</groupId>
   <artifactId>protobuf-java</artifactId>
-  <version>2.2.0</version>
+  <version>2.4.1</version>
 </dependency>
 <dependency>
   <groupId>org.apache.hadoop</groupId>

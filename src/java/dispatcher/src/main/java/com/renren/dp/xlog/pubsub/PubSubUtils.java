@@ -59,13 +59,4 @@ public class PubSubUtils {
     }
     return catStr.toString();
   }
-
-  public static void main(String[] args) {
-    // try {
-    // getLocalFile("/root/workspace/hadoop/hadoop-1.0.3/src/hdfs/org/apache/hadoop/hdfs/ByteRangeInputStream.java");
-    System.out.print("d" + '\001' + "ads");
-    // } catch (IOException e) {
-    // e.printStackTrace();
-    // }
-  }
 }

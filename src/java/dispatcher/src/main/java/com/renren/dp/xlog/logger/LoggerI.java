@@ -31,8 +31,6 @@ public class LoggerI extends _LoggerDisp {
   private StorageRepository storageRepository = null;
   private CategoriesCounter categoriesCounter = null;
 
-  private PubSubService pubsub = null;
-
   private static Logger LOG = Logger.getLogger(LoggerI.class);
 
   public boolean initialize(ObjectAdapter adapter) {
@@ -101,16 +99,7 @@ public class LoggerI extends _LoggerDisp {
     categoriesCounter.incCategoryCount(category);
 
     String logFileNum = fileNameHandler.getCacheLogFileNum();
-    LogMeta logMeta = null;
-    /**
-     * 判断是否有订阅
-     */
-    if (pubsub != null && pubsub.isSubscribed(data.categories)) {
-      logMeta = new LogMeta(logFileNum, data, category, 3);
-      pubsub.publish(logMeta);
-    } else {
-      logMeta = new LogMeta(logFileNum, data, category, 2);
-    }
+    LogMeta logMeta = new LogMeta(logFileNum, data, category, 2);
     /**
      * 写本地缓存
      */
@@ -125,10 +114,6 @@ public class LoggerI extends _LoggerDisp {
       return;
     }
     storageRepository.addToRepository(logMeta);
-  }
-
-  public void setPubSub(PubSubService pubsub) {
-    this.pubsub = pubsub;
   }
 
 }

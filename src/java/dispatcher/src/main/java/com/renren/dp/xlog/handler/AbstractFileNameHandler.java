@@ -1,5 +1,6 @@
 package com.renren.dp.xlog.handler;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -12,6 +13,10 @@ public abstract class AbstractFileNameHandler {
   }
 
   public abstract String getCacheLogFileNum();
+
+  public abstract String getCacheLogFileNum(Date date);
+
+  public abstract String NextLogFileNum(String currentFileNum) throws ParseException;
 
   public abstract int getFileNameDataFormatLen();
 

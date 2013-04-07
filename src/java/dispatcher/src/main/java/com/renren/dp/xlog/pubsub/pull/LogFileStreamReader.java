@@ -1,49 +1,49 @@
 package com.renren.dp.xlog.pubsub.pull;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.util.List;
+import java.text.ParseException;
 
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
+import org.jfree.util.Log;
 
-import com.google.common.collect.Lists;
 import com.renren.dp.xlog.config.Configuration;
+import com.renren.dp.xlog.handler.AbstractFileNameHandler;
 import com.renren.dp.xlog.handler.FileNameHandlerFactory;
 import com.renren.dp.xlog.pubsub.PubSubUtils;
 
-public class LogFileStreamReader {
-  private static int FIRST_BEGIN_POINT = 1024 * 10;
+public class LogFileStreamReader implements Closeable {
 
   FileSystem fs;
   String[] categories;
   boolean pathExists;
-  String currentFileName;
+  String currentFileNum;
   long offset;
   int fetchLength; // fetch size from the client
   FSDataInputStream in;
+  AbstractFileNameHandler fileHandler = FileNameHandlerFactory.getInstance();
 
-  public LogFileStreamReader(String[] categories, int fetchSize) throws IOException {
-    org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
-    conf.set("fs.default.name", Configuration.getString("storage.uri"));
-    fs = DistributedFileSystem.get(conf);
+  public LogFileStreamReader(String[] categories, int fetchLength, FileSystem fs) throws IOException {
+    this.fs = fs;
     this.categories = categories;
-    fetchLength = fetchSize;
-    initDataInputStream(FIRST_BEGIN_POINT);
+    this.fetchLength = fetchLength;
+    checkInputStream();
   }
 
   @SuppressWarnings("deprecation")
-  private boolean initDataInputStream(int begin_point) throws IOException {
+  private boolean checkInputStream() throws IOException {
     if (!pathExists) {
-      currentFileName = getHDFSFileName();
-      Path currentPath = getAbsolutePathIfExist(categories, currentFileName);
-      if (currentPath != null) {
-        long fileSize = fs.getFileStatus(currentPath).getLen();
-        if (fileSize > begin_point) {
-          offset = fileSize - begin_point;
+      String tempFileNum = fileHandler.getCacheLogFileNum();
+      Path tmpPath = getAbsolutePathIfExist(categories, tempFileNum);
+      if (tmpPath != null) {
+        currentFileNum = tempFileNum;
+        long fileSize = fs.getFileStatus(tmpPath).getLen();
+        if (fileSize > fetchLength) {
+          offset = fileSize - fetchLength;
         }
-        in = fs.open(currentPath);
+        in = fs.open(tmpPath);
         in.seek(offset);
         if (offset > 0) {
           in.readLine(); // remove the first line because the first line is not
@@ -55,34 +55,38 @@ public class LogFileStreamReader {
     return pathExists;
   }
 
-  private boolean reinitDataInputStream(int begin_point) throws IOException {
+  private boolean recheckInputStream() throws IOException {
     if (!pathExists) {
-      String tempPathName = getHDFSFileName();
-      Path tempPath = getAbsolutePathIfExist(categories, tempPathName);
-      if (tempPath != null) {
-        in = fs.open(tempPath);
-        if (!currentFileName.equals(tempPathName)) {
-          currentFileName = tempPathName;
-          in.seek(0);
-        } else {
-          in.seek(offset);
-        }
+      if (currentFileNum == null) {
+        return checkInputStream();
+      }
+      String tempPathName = fileHandler.getCacheLogFileNum();
+      if (tempPathName.equals(currentFileNum)) {
         pathExists = true;
+      } else {
+        try {
+          tempPathName = fileHandler.NextLogFileNum(tempPathName);
+        } catch (ParseException e) {
+          Log.error("LogFileNum parse error: " + e);
+        }
+        Path tempPath = getAbsolutePathIfExist(categories, tempPathName);
+        if (tempPath != null) {
+          in = fs.open(tempPath);
+          if (!currentFileNum.equals(tempPathName)) {
+            currentFileNum = tempPathName;
+            offset = 0;
+          }
+          in.seek(offset);
+          pathExists = true;
+        }
       }
     }
     return pathExists;
   }
 
-  public String getHDFSFileName() {
-    return FileNameHandlerFactory.getInstance().getCacheLogFileNum() + "." + Configuration.getString("xlog.uuid");
-  }
-
-  public String generateAbsolutePath(String[] categories, String fileName) {
-    return fs.getWorkingDirectory() + "/" + PubSubUtils.serializeCategories(categories, "/") + "/" + fileName;
-  }
-
-  public Path getAbsolutePathIfExist(String[] categories, String fileName) throws IOException {
-    String pathStr = generateAbsolutePath(categories, fileName);
+  private Path getAbsolutePathIfExist(String[] categories, String fileNum) throws IOException {
+    String pathStr = fs.getWorkingDirectory() + "/" + PubSubUtils.serializeCategories(categories, "/") + "/" + fileNum
+        + "." + Configuration.getString("xlog.uuid");
     Path path = new Path(pathStr);
     if (fs.exists(path) && fs.isFile(path)) {
       return path;
@@ -90,47 +94,25 @@ public class LogFileStreamReader {
     return null;
   }
 
-  public synchronized String[] getLineStream() throws IOException {
-    if (!reinitDataInputStream(0)) {
-      return new String[0];
+  public byte[] getByteStream() throws IOException {
+    if (!recheckInputStream()) {
+      return new byte[0];
     }
-    String line;
-    int cnt = 0;
-    List<String> loggers = Lists.newArrayList();
-    while ((line = in.readLine()) != null) {
-      loggers.add(line);
-      if (++cnt > fetchLength) {
-        break;
-      }
-    }
-    if (line == null) {
+    byte[] aa = new byte[fetchLength];
+    int size = in.read(aa, 0, fetchLength);
+    offset += size;
+    if (size < fetchLength) {
       pathExists = false;
     }
-    offset = in.getPos();
-    return loggers.toArray(new String[0]);
+    return aa;
   }
 
-  public static void main(String[] args) {
-    try {
-      LogFileStreamReader r = new LogFileStreamReader(new String[] { "3g", "api", "access" }, 50);
-      String[] arr = r.getLineStream();
-      for (String s : arr) {
-        System.out.println(s);
-      }
-
-      try {
-        Thread.sleep(10000);
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      arr = r.getLineStream();
-      for (String s : arr) {
-        System.out.println(s);
-      }
-
-    } catch (IOException e) {
-      e.printStackTrace();
+  @Override
+  public void close() throws IOException {
+    if (in != null) {
+      in.close();
     }
+    fileHandler = null;
+    categories = null;
   }
 }
