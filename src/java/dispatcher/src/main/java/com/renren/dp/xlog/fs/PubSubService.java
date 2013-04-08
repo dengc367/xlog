@@ -27,6 +27,7 @@ public class PubSubService implements Closeable {
   public PubSubService() throws IOException {
     org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
     conf.set("fs.default.name", Configuration.getString("storage.uri"));
+    conf.set("mapred.task.id", "xlog_pubsub_" + com.renren.dp.xlog.config.Configuration.getString("xlog.uuid"));
     fs = DistributedFileSystem.get(conf);
   }
 

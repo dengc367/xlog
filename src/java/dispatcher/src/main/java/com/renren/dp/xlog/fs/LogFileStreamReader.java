@@ -65,7 +65,7 @@ public class LogFileStreamReader implements Closeable {
         Closeables.closeQuietly(in);
       } else {
         try {
-          tempPathName = fileHandler.NextLogFileNum(tempPathName);
+          tempPathName = fileHandler.NextLogFileNum(currentFileNum);
         } catch (ParseException e) {
           Log.error("LogFileNum parse error: " + e);
         }
