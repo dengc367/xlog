@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.pubsub.pull;
+package com.renren.dp.xlog.fs;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -12,20 +12,19 @@ import org.apache.hadoop.hdfs.DistributedFileSystem;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import com.renren.dp.xlog.config.Configuration;
-import com.renren.dp.xlog.pubsub.PubSubConstants;
 
 import xlog.slice.ErrorCode;
 import xlog.slice.Subscription;
 import xlog.slice.XLogException;
 
-public class PullService implements Closeable {
+public class PubSubService implements Closeable {
 
   private static Map<Integer, LogFileStreamReader> readerMap = Maps.newHashMap();
   private static Map<String, Integer> idMap = Maps.newHashMap();
   private static Integer nextId = 1;
   FileSystem fs;
 
-  public PullService() throws IOException {
+  public PubSubService() throws IOException {
     org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
     conf.set("fs.default.name", Configuration.getString("storage.uri"));
     fs = DistributedFileSystem.get(conf);
@@ -51,7 +50,7 @@ public class PullService implements Closeable {
       }
       int id = idMap.get(catStr);
       String fromScratch = StringUtils
-          .defaultIfEmpty(sub.options.get(PubSubConstants.XLOG_FETCH_FROM_SCRATCH), "false");
+          .defaultIfEmpty(sub.options.get(PubSubConstants.XLOG_FETCH_FROM_SCRATCH), "true");
       if ("true".equals(fromScratch)) {
         Closeables.closeQuietly(readerMap.get(id));
         readerMap.put(id, new LogFileStreamReader(sub.categories, Integer.parseInt(fetchsize), fs));

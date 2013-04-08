@@ -15,6 +15,12 @@ import org.slf4j.LoggerFactory;
 import xlog.slice.ErrorCode;
 import xlog.slice.XLogException;
 
+/**
+ * one dispatcher vs one reader
+ * 
+ * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
+ * @since 4:27:41 PM Apr 7, 2013
+ */
 public class DispatcherReader implements Closeable {
 
   private String endpoint;
@@ -72,6 +78,11 @@ public class DispatcherReader implements Closeable {
       }
     }
     return (new byte[0]);
+  }
+
+  @Override
+  public String toString() {
+    return "[DispatcherReader] endpoint: " + reader + ", categories: " + Arrays.toString(categories);
   }
 
   @Override

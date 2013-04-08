@@ -19,9 +19,9 @@ import Ice.ObjectPrx;
 
 import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.config.DispatcherCluster;
+import com.renren.dp.xlog.fs.PubSubService;
+import com.renren.dp.xlog.fs.PubSubUtils;
 import com.renren.dp.xlog.logger.LoggerI;
-import com.renren.dp.xlog.pubsub.PubSubService;
-import com.renren.dp.xlog.pubsub.PubSubUtils;
 
 import dp.election.impl.DefaultWatcher;
 import dp.zk.ZkConn;
@@ -141,12 +141,12 @@ public class DispatcherI extends _DispatcherDisp {
           + " want to subscribe. ");
       throw new XLogException(ErrorCode.PubSubNotStartedException, "the pubsub server is not started");
     }
-    return pubsub.subscribe(sub, __current);
+    return pubsub.subscribe(sub);
   }
 
   @Override
   public int unsubscribe(Subscription sub, Current __current) {
-    return pubsub.unsubscribe(sub, __current);
+    return pubsub.unsubscribe(sub);
   }
 
   @Override
@@ -157,7 +157,7 @@ public class DispatcherI extends _DispatcherDisp {
             + " want to getData. ");
         throw new XLogException(ErrorCode.PubSubNotStartedException, "the pubsub server is not started");
       }
-      return pubsub.getBytes(categoryId, __current);
+      return pubsub.getBytes(categoryId);
     } catch (IOException e) {
       LOG.error(e);
       return null;

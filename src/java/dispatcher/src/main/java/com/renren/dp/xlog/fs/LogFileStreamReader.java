@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.pubsub.pull;
+package com.renren.dp.xlog.fs;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -9,10 +9,10 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.jfree.util.Log;
 
+import com.google.common.io.Closeables;
 import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.handler.AbstractFileNameHandler;
 import com.renren.dp.xlog.handler.FileNameHandlerFactory;
-import com.renren.dp.xlog.pubsub.PubSubUtils;
 
 public class LogFileStreamReader implements Closeable {
 
@@ -62,23 +62,23 @@ public class LogFileStreamReader implements Closeable {
       }
       String tempPathName = fileHandler.getCacheLogFileNum();
       if (tempPathName.equals(currentFileNum)) {
-        pathExists = true;
+        Closeables.closeQuietly(in);
       } else {
         try {
           tempPathName = fileHandler.NextLogFileNum(tempPathName);
         } catch (ParseException e) {
           Log.error("LogFileNum parse error: " + e);
         }
-        Path tempPath = getAbsolutePathIfExist(categories, tempPathName);
-        if (tempPath != null) {
-          in = fs.open(tempPath);
-          if (!currentFileNum.equals(tempPathName)) {
-            currentFileNum = tempPathName;
-            offset = 0;
-          }
-          in.seek(offset);
-          pathExists = true;
+      }
+      Path tempPath = getAbsolutePathIfExist(categories, tempPathName);
+      if (tempPath != null) {
+        in = fs.open(tempPath);
+        if (!currentFileNum.equals(tempPathName)) {
+          currentFileNum = tempPathName;
+          offset = 0;
         }
+        in.seek(offset);
+        pathExists = true;
       }
     }
     return pathExists;

@@ -5,6 +5,8 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 /**
+ * xlog file system
+ * 
  * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
  * @since 3:15:56 PM Apr 7, 2013
  */

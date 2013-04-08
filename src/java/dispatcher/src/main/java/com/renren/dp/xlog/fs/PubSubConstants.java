@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.pubsub;
+package com.renren.dp.xlog.fs;
 
 public class PubSubConstants {
   public static String XLOG_FETCH_LENGTH = "xlog.fetch.length";

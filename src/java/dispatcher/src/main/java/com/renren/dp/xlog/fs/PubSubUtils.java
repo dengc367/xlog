@@ -1,4 +1,4 @@
-package com.renren.dp.xlog.pubsub;
+package com.renren.dp.xlog.fs;
 
 import java.io.BufferedReader;
 import java.io.IOException;

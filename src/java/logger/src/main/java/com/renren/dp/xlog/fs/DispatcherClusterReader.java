@@ -23,6 +23,12 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.google.common.io.Closeables;
 
+/**
+ * a dispatcher cluster reader
+ * 
+ * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
+ * @since 4:28:22 PM Apr 7, 2013
+ */
 public class DispatcherClusterReader implements Watcher, Closeable {
   private static final Logger LOG = LoggerFactory.getLogger(DispatcherClusterReader.class);
   private static final String ZOOKEEPER_ROOT_PATH = "/";
@@ -111,15 +117,18 @@ public class DispatcherClusterReader implements Watcher, Closeable {
     for (DispatcherReader reader : tmpArray) {
       if (removeSet.contains(reader.getEndpoint())) {
         Closeables.closeQuietly(reader);
+        LOG.debug("Close " + reader);
       } else {
         list.add(reader);
+        LOG.debug("Add old dispatcherReader, endpoint: " + reader + ", categories: " + Arrays.toString(categories));
       }
     }
-    for (String s : addSet) {
+    for (String reader : addSet) {
       try {
-        list.add(new DispatcherReader(s, categories, options));
+        list.add(new DispatcherReader(reader, categories, options));
       } catch (IOException e) {
-        LOG.error("Update dispatcherReader failed: endpoint: " + s + ", categories: " + Arrays.toString(categories), e);
+        LOG.error(
+            "Update dispatcherReader failed: endpoint: " + reader + ", categories: " + Arrays.toString(categories), e);
       }
     }
     Collections.shuffle(list);

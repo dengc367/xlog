@@ -13,6 +13,8 @@ import xlog.slice.Subscription;
 import xlog.slice.XLogException;
 
 /**
+ * ice connection manager adapter
+ * 
  * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
  * @since 3:57:56 PM Mar 5, 2013
  */
