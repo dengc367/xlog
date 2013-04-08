@@ -23,12 +23,14 @@ public class LogFileStreamReader implements Closeable {
   long offset;
   int fetchLength; // fetch size from the client
   FSDataInputStream in;
+  byte[] byteCache;
   AbstractFileNameHandler fileHandler = FileNameHandlerFactory.getInstance();
 
   public LogFileStreamReader(String[] categories, int fetchLength, FileSystem fs) throws IOException {
     this.fs = fs;
     this.categories = categories;
     this.fetchLength = fetchLength;
+    byteCache = new byte[fetchLength];
     checkInputStream();
   }
 
@@ -96,15 +98,20 @@ public class LogFileStreamReader implements Closeable {
 
   public byte[] getByteStream() throws IOException {
     if (!recheckInputStream()) {
-      return new byte[0];
+      return null;
     }
-    byte[] aa = new byte[fetchLength];
-    int size = in.read(aa, 0, fetchLength);
-    offset += size;
+
+    int size = in.read(byteCache, 0, fetchLength);
     if (size < fetchLength) {
       pathExists = false;
     }
-    return aa;
+    if (size <= 0) {
+      return null;
+    }
+    offset += size;
+    byte[] bb = new byte[size];
+    System.arraycopy(byteCache, 0, bb, 0, size);
+    return bb;
   }
 
   @Override

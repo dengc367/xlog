@@ -51,17 +51,25 @@ public class DispatcherClusterReader implements Watcher, Closeable {
     zk = ZooKeeperFactory.newZooKeeper(zkConnString, this);
   }
 
-  public synchronized String readLine() throws IOException {
+  public String readLine() throws IOException {
     if (readerArray.length == 0) {
       return null;
     }
-    for (int i = readerArray.length - 1; i >= 0; i++) {
-      String line = readerArray[next].readLine();
-      next = (next + 1) % readerArray.length;
-      if (line != null) {
-        return line;
+    synchronized (readerArray) {
+      for (int i = readerArray.length - 1; i >= 0; i++) {
+        String line;
+        try {
+          line = readerArray[next].readLine();
+          next = (next + 1) % readerArray.length;
+          if (StringUtils.isNotBlank(line)) {
+            return line;
+          }
+        } catch (Exception e) {
+          LOG.warn("readerArray.readLine error, reset the endpoints. ", e);
+        }
       }
     }
+    initDispatcherClient();
     return null;
   }
 
@@ -116,7 +124,7 @@ public class DispatcherClusterReader implements Watcher, Closeable {
     return tmp;
   }
 
-  private synchronized void updateReaders(SetView<String> removeSet, SetView<String> addSet) {
+  private void updateReaders(SetView<String> removeSet, SetView<String> addSet) {
     List<DispatcherReader> list = Lists.newArrayList();
     DispatcherReader[] tmpArray = readerArray;
     for (DispatcherReader reader : tmpArray) {
@@ -137,7 +145,9 @@ public class DispatcherClusterReader implements Watcher, Closeable {
       }
     }
     Collections.shuffle(list);
-    readerArray = list.toArray(new DispatcherReader[list.size()]);
+    synchronized (readerArray) {
+      readerArray = list.toArray(new DispatcherReader[list.size()]);
+    }
   }
 
   private Set<String> getServerSet() {

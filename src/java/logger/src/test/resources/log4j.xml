@@ -23,7 +23,7 @@
         </logger>
         
         <appender name="xlog-logger-file-appender" class="org.apache.log4j.RollingFileAppender">
-                <param name="File" value="logs/.log" />
+                <param name="File" value="logs/pubsub.log" />
                 
                 <param name="maxBackupIndex" value="10" />
                 <layout class="org.apache.log4j.PatternLayout">
