@@ -16,13 +16,14 @@ public class TestXLogFileSystem {
     try {
       XLogReader reader = xfs.open(new String[] { "feed", "dispatchtoV2" });
       String line;
-      int i = 10;
-      while ((line = reader.readLine()) != null) {
+      int i = 100000000;
+      while (true) {
+        line = reader.readLine();
         LOG.debug(line);
         System.out.println(line);
-        // if (i-- <= 0) {
-        // break;
-        // }
+         if (i-- <= 0) {
+         break;
+         }
       }
       reader.close();
       reader = xfs.open(new String[] { "api", "data", "active_user_log" });
@@ -33,11 +34,11 @@ public class TestXLogFileSystem {
           break;
         }
       }
+      reader.close();
       System.out.println("-------------------------------------");
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
-
 }

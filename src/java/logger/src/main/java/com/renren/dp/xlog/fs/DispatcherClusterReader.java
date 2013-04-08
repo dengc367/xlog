@@ -56,20 +56,15 @@ public class DispatcherClusterReader implements Watcher, Closeable {
       return null;
     }
     synchronized (readerArray) {
-      for (int i = readerArray.length - 1; i >= 0; i++) {
-        String line;
-        try {
-          line = readerArray[next].readLine();
-          next = (next + 1) % readerArray.length;
-          if (StringUtils.isNotBlank(line)) {
-            return line;
-          }
-        } catch (Exception e) {
-          LOG.warn("readerArray.readLine error, reset the endpoints. ", e);
-        }
+      try {
+        String line = readerArray[next].readLine();
+        next = (next + 1) % readerArray.length;
+        return line;
+      } catch (Exception e) {
+        LOG.warn("readerArray.readLine error, reset the endpoints. ", e);
+        initDispatcherClient();
       }
     }
-    initDispatcherClient();
     return null;
   }
 
