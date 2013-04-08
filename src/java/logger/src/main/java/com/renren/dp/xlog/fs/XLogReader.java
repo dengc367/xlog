@@ -27,8 +27,8 @@ public class XLogReader implements Closeable {
    * @param options
    * @throws IOException
    */
-  public XLogReader(String[] categories, String zkConnString, Map<String, String> options) throws IOException {
-    client = new DispatcherClusterReader(categories, zkConnString, options);
+  public XLogReader(String[] categories, String zkConnString, XLogConfiguration conf) throws IOException {
+    client = new DispatcherClusterReader(categories, zkConnString, conf);
     LOG.info("initialize the xlogInputStream successfully.");
   }
 

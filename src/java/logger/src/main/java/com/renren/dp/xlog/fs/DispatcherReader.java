@@ -9,6 +9,8 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,21 +29,21 @@ public class DispatcherReader implements Closeable {
   private String[] categories;
   DispatcherAdapter adapter;
   BufferedReader reader;
-  Map<String, String> options;
+  XLogConfiguration conf;
   private int categoryId;
   private static final Logger LOG = LoggerFactory.getLogger(DispatcherReader.class);
 
-  public DispatcherReader(String endpoint, String[] categories, Map<String, String> options) throws IOException {
+  public DispatcherReader(String endpoint, String[] categories, XLogConfiguration conf) throws IOException {
     this.endpoint = endpoint;
     this.categories = categories;
-    this.options = options;
+    this.conf = conf;
     adapter = DispatcherAdapter.getInstance();
     init();
   }
 
   private void init() throws IOException {
     try {
-      categoryId = adapter.subscribe(endpoint, categories, options);
+      categoryId = adapter.subscribe(endpoint, categories, conf.map());
       LOG.debug("successfully init the categories " + Arrays.toString(categories) + " with the endpoint " + endpoint
           + ".");
     } catch (XLogException e) {
@@ -59,7 +61,7 @@ public class DispatcherReader implements Closeable {
     try {
       adapter.unsubscribe(endpoint, categories, null);
       reader.close();
-      options = null;
+      conf = null;
       LOG.debug("successfully close the categories " + Arrays.toString(categories) + " with the endpoint " + endpoint
           + ".");
     } catch (XLogException e) {
@@ -99,20 +101,67 @@ public class DispatcherReader implements Closeable {
   }
 
   private class DispatcherInputStream extends InputStream {
-    private byte[] oneByteBuf = new byte[1];;
 
-    private ByteBuffer buffer = ByteBuffer.allocate(0);
+    private ByteBuffer buffer;
+
+    public DispatcherInputStream() {
+      int capacity = NumberUtils.toInt(conf.getFetchSize(), 1048576) + 10;
+      buffer = ByteBuffer.allocate(capacity);
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+      if (b == null) {
+        throw new NullPointerException();
+      } else if (off < 0 || len < 0 || len > b.length - off) {
+        throw new IndexOutOfBoundsException();
+      } else if (len == 0) {
+        return 0;
+      }
+
+      int size = -1;
+      if (buffer.hasRemaining()) {
+        if (buffer.remaining() < len) {
+          size = buffer.remaining();
+        } else {
+          size = len;
+        }
+        buffer.get(b, off, size);
+      }
+      if (!buffer.hasRemaining()) {
+        byte[] tmp = getBytes();
+        if (tmp == null || tmp.length == 0) {
+          return size;
+        }
+        buffer.clear();
+        buffer.put(tmp);
+        buffer.flip();
+        size = (size == -1) ? 0 : size;
+        if (len - size > 0) {
+          int remain = len - size;
+          if (remain - buffer.remaining() > 0) {
+            remain = buffer.remaining();
+          }
+          buffer.get(b, off + size, remain);
+          return size + remain;
+        }
+      }
+      return size;
+    }
 
     @Override
     public int read() throws IOException {
-      for (;;) {
-        if (buffer.hasRemaining()) {
-          oneByteBuf[0] = buffer.get();
-          return (oneByteBuf[0] & 0xff);
-        } else {
-          buffer = ByteBuffer.wrap(getBytes());
-        }
+      if (buffer.hasRemaining()) {
+        return (buffer.get() & 0xff);
       }
+      byte[] tmp = getBytes();
+      if (tmp == null || tmp.length == 0) {
+        return -1;
+      }
+      buffer.clear();
+      buffer.put(tmp);
+      buffer.flip();
+      return (buffer.get() & 0xff);
     }
   }
 }

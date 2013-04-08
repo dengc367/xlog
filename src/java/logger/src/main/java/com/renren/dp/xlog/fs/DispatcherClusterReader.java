@@ -34,30 +34,35 @@ public class DispatcherClusterReader implements Watcher, Closeable {
   private static final String ZOOKEEPER_ROOT_PATH = "/";
   private ZooKeeper zk;
   private String[] categories;
-  private Map<String, String> options;
+  private XLogConfiguration conf;
   private DispatcherReader[] readerArray = new DispatcherReader[0];
   private int next = 0;
   private String zkConnString;
 
-  public DispatcherClusterReader(String[] categories, String zkConnString, Map<String, String> options) {
+  public DispatcherClusterReader(String[] categories, String zkConnString, XLogConfiguration conf) {
     this.categories = categories;
     this.zkConnString = zkConnString;
-    this.options = options;
+    this.conf = conf;
     connectZooKeeper();
     initDispatcherClient();
   }
 
   private void connectZooKeeper() {
-    zk = ZooKeeperFactory.newZooKeeper(zkConnString, null);
+    zk = ZooKeeperFactory.newZooKeeper(zkConnString, this);
   }
 
   public synchronized String readLine() throws IOException {
     if (readerArray.length == 0) {
       return null;
     }
-    String line = readerArray[next].readLine();
-    next = (next + 1) % readerArray.length;
-    return line;
+    for (int i = readerArray.length - 1; i >= 0; i++) {
+      String line = readerArray[next].readLine();
+      next = (next + 1) % readerArray.length;
+      if (line != null) {
+        return line;
+      }
+    }
+    return null;
   }
 
   @Override
@@ -125,7 +130,7 @@ public class DispatcherClusterReader implements Watcher, Closeable {
     }
     for (String reader : addSet) {
       try {
-        list.add(new DispatcherReader(reader, categories, options));
+        list.add(new DispatcherReader(reader, categories, conf));
       } catch (IOException e) {
         LOG.error(
             "Update dispatcherReader failed: endpoint: " + reader + ", categories: " + Arrays.toString(categories), e);
