@@ -5,7 +5,15 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 /**
- * xlog file system
+ * xlog file system simple example:
+ * 
+ * <pre>
+ * XLogFileSystem xfs = new XLogFileSystem();
+ * String line;
+ * while ((line = reader.readLine()) != null) {
+ *   System.out.println(line);
+ * }
+ * </pre>
  * 
  * @author Zhancheng Deng {@mailto: zhancheng.deng@renren-inc.com}
  * @since 3:15:56 PM Apr 7, 2013
