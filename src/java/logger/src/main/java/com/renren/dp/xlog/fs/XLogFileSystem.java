@@ -1,14 +1,13 @@
 package com.renren.dp.xlog.fs;
 
 import java.io.IOException;
-import java.util.Map;
-import com.google.common.collect.Maps;
 
 /**
  * xlog file system simple example:
  * 
  * <pre>
  * XLogFileSystem xfs = new XLogFileSystem();
+ * XLogReader reader = xfs.open(new String[] { &quot;feed&quot;, &quot;dispatchtoV2&quot; });
  * String line;
  * while ((line = reader.readLine()) != null) {
  *   System.out.println(line);
