@@ -65,7 +65,7 @@ public class DispatcherClusterReader implements Watcher, Closeable {
         initDispatcherClient();
       }
     }
-    return null;
+    return StringUtils.EMPTY;
   }
 
   @Override
