@@ -7,7 +7,7 @@ cd ..
 
 if [ "$CLASSPATH" == "" ]
 then
-  CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+  CLASSPATH=.:./conf:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 fi
 
 LIBPATH="lib"
