@@ -15,57 +15,8 @@
   </properties>
 
   <modules>
-    <module>client</module>
     <module>dispatcher</module>
+    <module>client</module>
     <module>logger</module>
   </modules>
-  <build>
-    <plugins>
-        <plugin>
-           <groupId>org.apache.maven.plugins</groupId>
-           <artifactId>maven-antrun-plugin</artifactId>
-           <executions>
-               <execution>
-                   <id>add-source</id>
-                   <phase>generate-sources</phase>
-                   <goals>
-                        <goal>run</goal>
-                   </goals>
-                   <configuration>
-                       <tasks>
-                           <!-- the silce2java version should refer to the ant-ice.jar version -->
-                           <taskdef name="slice2java" classname="Slice2JavaTask" classpath="/opt/Ice-3.3/lib/ant-ice.jar" />
-                           <echo message="compiling UtilSlice to Java" />
-                           <mkdir dir="client/src/generated/java" />
-                           <slice2java outputdir="client/src/generated/java">
-                                 <includepath>
-                                     <pathelement path="../../interface" />
-                                     <pathelement path="/opt/Ice-3.3/slice" />
-                                 </includepath>
-                                 <fileset dir="../../interface" includes="*.ice" />
-                           </slice2java>
-                           <mkdir dir="dispatcher/src/generated/java" />
-                           <slice2java outputdir="dispatcher/src/generated/java">
-                                 <includepath>
-                                     <pathelement path="../../interface" />
-                                     <pathelement path="/opt/Ice-3.3/slice" />
-                                 </includepath>
-                                 <fileset dir="../../interface" includes="*.ice" />
-                           </slice2java>
-                           <mkdir dir="logger/src/generated/java" />
-                           <slice2java outputdir="logger/src/generated/java">
-                                 <includepath>
-                                     <pathelement path="../../interface" />
-                                     <pathelement path="/opt/Ice-3.3/slice" />
-                                 </includepath>
-                                 <fileset dir="../../interface" includes="*.ice" />
-                           </slice2java>
-                           <echo message="xlog ice code generated" />
-                       </tasks>
-                   </configuration>
-               </execution>
-           </executions>
-           </plugin>
-    </plugins>
-  </build>
 </project>

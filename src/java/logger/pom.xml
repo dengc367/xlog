@@ -58,6 +58,7 @@
             <configuration>
               <sources>
                 <source>src/generated/java</source>
+                <source>../slice/src/slice/java</source>
                 <source>src/main/java</source>
                 <source>src/test/java</source>
               </sources>
@@ -74,6 +75,7 @@
           <target>1.6</target>
           <compilerArguments>
             <sourcepath>src/generated/java</sourcepath>
+            <sourcepath>../slice/src/slice/java</sourcepath>
             <sourcepath>src/main/java</sourcepath>
             <sourcepath>src/test/java</sourcepath>
           </compilerArguments>

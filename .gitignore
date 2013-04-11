@@ -7,7 +7,7 @@
 cache.data.dir
 target
 logs
-#generated
+generated
 build
 *.swp
 .gradle
