@@ -2,11 +2,13 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
+  <!--
   <parent>
     <artifactId>xlog</artifactId>
     <groupId>com.renren.dp</groupId>
     <version>1.0-SNAPSHOT</version>
   </parent>
+  -->
   <groupId>com.renren.dp</groupId>
   <artifactId>xlog-logger</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -32,19 +34,6 @@
                    </goals>
                    <configuration>
                        <tasks>
-                           <!-- the silce2java version should refer to the ant-ice.jar version -->
-                           <taskdef name="slice2java" classname="Slice2JavaTask" classpath="/opt/Ice-3.3/lib/ant-ice.jar" />
-                           <echo message="compiling UtilSlice to Java" />
-                           <delete dir="src/generated/java/" />
-                           <mkdir dir="src/generated/java" />
-                           <slice2java outputdir="src/generated/java">
-                                 <includepath>
-                                     <pathelement path="../../../interface" />
-                                     <pathelement path="/opt/Ice-3.3/slice" />
-                                 </includepath>
-                                 <fileset dir="../../../interface" includes="*.ice" />
-                           </slice2java>
-                           <echo message="xlog ice code generated" />
                            <mkdir dir="src/generated/java/com/renren/dp/xlog/" />
                            <exec executable="./version.sh" output="src/generated/java/com/renren/dp/xlog/package-info.java">
                            </exec>
