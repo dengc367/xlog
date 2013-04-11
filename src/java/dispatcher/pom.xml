@@ -261,18 +261,12 @@
   <artifactId>hadoop-core</artifactId>
   <version>1.0.3</version>
 </dependency>
-<dependency>
-  <groupId>org.apache.hbase</groupId>
-  <artifactId>hbase</artifactId>
-  <version>0.94.1</version>
-</dependency>
+<!--
 <dependency>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-math</artifactId>
     <version>0.7</version>
 </dependency>
-
-<!--
 <dependency>
     <groupId>org.uncommons.maths</groupId>
     <artifactId>uncommons-maths</artifactId>

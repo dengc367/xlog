@@ -4,10 +4,11 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.text.ParseException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.jfree.util.Log;
 
 import com.google.common.io.Closeables;
 import com.renren.dp.xlog.config.Configuration;
@@ -15,16 +16,17 @@ import com.renren.dp.xlog.handler.AbstractFileNameHandler;
 import com.renren.dp.xlog.handler.FileNameHandlerFactory;
 
 public class LogFileStreamReader implements Closeable {
+  private static final Log LOG = LogFactory.getLog(LogFileStreamReader.class);
 
-  FileSystem fs;
-  String[] categories;
-  boolean pathExists;
-  String currentFileNum;
-  long offset;
-  int fetchLength; // fetch size from the client
-  FSDataInputStream in;
-  byte[] byteCache;
-  AbstractFileNameHandler fileHandler = FileNameHandlerFactory.getInstance();
+  private FileSystem fs;
+  private String[] categories;
+  private boolean pathExists;
+  private String currentFileNum;
+  private long offset;
+  private int fetchLength; // fetch size from the client
+  private FSDataInputStream in;
+  private byte[] byteCache;
+  private AbstractFileNameHandler fileHandler = FileNameHandlerFactory.getInstance();
 
   public LogFileStreamReader(String[] categories, int fetchLength, FileSystem fs) throws IOException {
     this.fs = fs;
@@ -69,7 +71,7 @@ public class LogFileStreamReader implements Closeable {
         try {
           tempPathName = fileHandler.NextLogFileNum(currentFileNum);
         } catch (ParseException e) {
-          Log.error("LogFileNum parse error: " + e);
+          LOG.error("LogFileNum parse error: " + e);
         }
       }
       Path tempPath = getAbsolutePathIfExist(categories, tempPathName);
