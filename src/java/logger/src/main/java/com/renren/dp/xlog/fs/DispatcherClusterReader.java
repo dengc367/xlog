@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +38,7 @@ public class DispatcherClusterReader implements Watcher, Closeable {
   private int next = 0;
   private String zkConnString;
 
-  public DispatcherClusterReader(String[] categories, String zkConnString, XLogConfiguration conf) {
+  public DispatcherClusterReader(String[] categories, String zkConnString, XLogConfiguration conf) throws IOException {
     this.categories = categories;
     this.zkConnString = zkConnString;
     this.conf = conf;
@@ -57,15 +56,19 @@ public class DispatcherClusterReader implements Watcher, Closeable {
     }
     synchronized (readerArray) {
       try {
-        String line = readerArray[next].readLine();
-        next = (next + 1) % readerArray.length;
-        return line;
+        int i = 1;
+        do {
+          String line = readerArray[next].readLine();
+          next = (next + 1) % readerArray.length;
+          if (line != null)
+            return line;
+        } while (i++ < readerArray.length);
       } catch (Exception e) {
         LOG.warn("readerArray.readLine error, reset the endpoints. ", e);
         initDispatcherClient();
       }
     }
-    return StringUtils.EMPTY;
+    return null;
   }
 
   @Override
@@ -98,13 +101,17 @@ public class DispatcherClusterReader implements Watcher, Closeable {
       }
     } else if (event.getType() == Event.EventType.NodeChildrenChanged
         || event.getType() == Event.EventType.NodeDataChanged || event.getType() == Event.EventType.NodeDeleted) {
-      initDispatcherClient();
+      try {
+        initDispatcherClient();
+      } catch (IOException e) {
+        LOG.warn("Init Dispatcher Connection error. ", e);
+      }
     } else {
       LOG.warn("Unhandled event:" + event);
     }
   }
 
-  private void initDispatcherClient() {
+  private void initDispatcherClient() throws IOException {
     Set<String> oldSet = getOldSet();
     Set<String> newSet = getServerSet();
     updateReaders(Sets.difference(oldSet, newSet), Sets.difference(newSet, oldSet));
@@ -119,7 +126,7 @@ public class DispatcherClusterReader implements Watcher, Closeable {
     return tmp;
   }
 
-  private void updateReaders(SetView<String> removeSet, SetView<String> addSet) {
+  private void updateReaders(SetView<String> removeSet, SetView<String> addSet) throws IOException {
     List<DispatcherReader> list = Lists.newArrayList();
     DispatcherReader[] tmpArray = readerArray;
     for (DispatcherReader reader : tmpArray) {
@@ -137,6 +144,7 @@ public class DispatcherClusterReader implements Watcher, Closeable {
       } catch (IOException e) {
         LOG.error(
             "Update dispatcherReader failed: endpoint: " + reader + ", categories: " + Arrays.toString(categories), e);
+        throw e;
       }
     }
     Collections.shuffle(list);

@@ -7,7 +7,7 @@
 cache.data.dir
 target
 logs
-generated
+#generated
 build
 *.swp
 .gradle
@@ -19,3 +19,4 @@ build
 .svn
 *.svn-base
 .svn/*
+.depend

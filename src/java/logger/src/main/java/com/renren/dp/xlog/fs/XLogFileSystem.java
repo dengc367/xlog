@@ -104,7 +104,14 @@ public class XLogFileSystem implements Closeable {
 
     @Override
     public String readLine() throws IOException {
-      return client.readLine();
+      String line = null;
+      while ((line = client.readLine()) == null) {
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
+      }
+      return line;
     }
 
     @Override

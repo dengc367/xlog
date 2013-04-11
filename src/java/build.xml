@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project name="maven-antrun-" default="main"  >
 <target name="main">
-  <mkdir dir="slice/src/slice/java"/>
+  <mkdir dir="slice/src/generated/java"/>
   <taskdef name="slice2java" classname="Slice2JavaTask" classpath="/opt/Ice-3.3/lib/ant-ice.jar"/>
   <echo message="compiling UtilSlice to Java"/>
-  <slice2java outputdir="slice/src/slice/java">
+  <slice2java outputdir="slice/src/generated/java">
     <includepath>
       <pathelement path="../../interface"/>
       <pathelement path="/opt/Ice-3.3/slice"/>

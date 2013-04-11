@@ -2,13 +2,11 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <!--
   <parent>
     <artifactId>xlog</artifactId>
     <groupId>com.renren.dp</groupId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  -->
   <groupId>com.renren.dp</groupId>
   <artifactId>xlog-logger</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -58,7 +56,6 @@
             <configuration>
               <sources>
                 <source>src/generated/java</source>
-                <source>../slice/src/slice/java</source>
                 <source>src/main/java</source>
                 <source>src/test/java</source>
               </sources>
@@ -75,7 +72,6 @@
           <target>1.6</target>
           <compilerArguments>
             <sourcepath>src/generated/java</sourcepath>
-            <sourcepath>../slice/src/slice/java</sourcepath>
             <sourcepath>src/main/java</sourcepath>
             <sourcepath>src/test/java</sourcepath>
           </compilerArguments>
@@ -122,6 +118,11 @@
     </plugins>
   </build>
 <dependencies>
+<dependency>
+  <groupId>com.renren.dp</groupId>
+  <artifactId>xlog-slice</artifactId>
+  <version>1.0-SNAPSHOT</version>
+</dependency>
 <dependency>
   <groupId>com.zeroc</groupId>
   <artifactId>Ice</artifactId>

@@ -25,9 +25,9 @@ public class DispatcherReader implements Closeable {
 
   private String endpoint;
   private String[] categories;
-  DispatcherAdapter adapter;
-  BufferedReader reader;
-  XLogConfiguration conf;
+  private DispatcherAdapter adapter;
+  private BufferedReader reader;
+  private XLogConfiguration conf;
   private int categoryId;
   private static final Logger LOG = LoggerFactory.getLogger(DispatcherReader.class);
 

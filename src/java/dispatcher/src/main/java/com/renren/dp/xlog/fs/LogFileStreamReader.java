@@ -44,12 +44,10 @@ public class LogFileStreamReader implements Closeable {
       if (tmpPath != null) {
         currentFileNum = tempFileNum;
         long fileSize = fs.getFileStatus(tmpPath).getLen();
+        in = fs.open(tmpPath);
         if (fileSize > fetchLength) {
           offset = fileSize - fetchLength;
-        }
-        in = fs.open(tmpPath);
-        in.seek(offset);
-        if (offset > 0) {
+          in.seek(offset);
           in.readLine(); // remove the first line because the first line is not
           // integer.
         }

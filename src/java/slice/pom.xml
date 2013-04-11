@@ -9,10 +9,10 @@
   </parent>
   
   <groupId>com.renren.dp</groupId>
-  <artifactId>xlog-client</artifactId>
-  <version>1.1-SNAPSHOT</version>
+  <artifactId>xlog-slice</artifactId>
+  <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>xlog-client</name>
+  <name>xlog-slice</name>
   <url>http://maven.apache.org</url>
   
   <properties>
@@ -32,12 +32,18 @@
                    </goals>
                    <configuration>
                        <tasks>
-                           <mkdir dir="src/generated/java/com/renren/dp/xlog/" />
-                           <exec executable="./version.sh" output="src/generated/java/com/renren/dp/xlog/package-info.java">
-                           </exec>
-                           <exec executable="echo" output="src/generated/java/com/renren/dp/xlog/package-info.java" append="true">
-                           <arg value="package com.renren.dp.xlog;" />
-                           </exec>
+                           <!-- the silce2java version should refer to the ant-ice.jar version -->
+                           <taskdef name="slice2java" classname="Slice2JavaTask" classpath="/opt/Ice-3.3/lib/ant-ice.jar" />
+                           <echo message="compiling UtilSlice to Java" />
+                           <mkdir dir="src/generated/java" />
+                           <slice2java outputdir="src/generated/java">
+                                 <includepath>
+                                     <pathelement path="../../../interface" />
+                                     <pathelement path="/opt/Ice-3.3/slice" />
+                                 </includepath>
+                                 <fileset dir="../../../interface" includes="*.ice" />
+                           </slice2java>
+                           <echo message="xlog ice code generated" />
                        </tasks>
                    </configuration>
                </execution>
@@ -56,8 +62,6 @@
             <configuration>
               <sources>
                 <source>src/generated/java</source>
-                <source>src/main/java</source>
-                <source>src/main/resources</source>
               </sources>
             </configuration>
           </execution>
@@ -71,8 +75,6 @@
           <target>1.6</target>
           <compilerArguments>
             <sourcepath>src/generated/java</sourcepath>
-            <sourcepath>src/main/java</sourcepath>
-            <sourcepath>src/main/resources</sourcepath>
           </compilerArguments>
         </configuration>
       </plugin>
@@ -88,68 +90,15 @@
                </execution>
            </executions>
        </plugin>
-       <!--
-      <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <executions>
-              <execution>
-                   <id>attach-javadocs</id>
-                   <goals>
-                         <goal>jar</goal>
-                   </goals>
-               </execution>
-           </executions>
-       </plugin>
-       -->
     </plugins>
   </build>
   <dependencies>
-    <dependency>
-      <groupId>com.renren.dp</groupId>
-      <artifactId>xlog-slice</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
-    </dependency>
     <dependency>
       <groupId>com.zeroc</groupId>
       <artifactId>Ice</artifactId>
       <version>3.3.1</version>
     </dependency>
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java</artifactId>
-    <version>2.4.1</version>
-   </dependency>
-   <dependency>
-       <groupId>ch.qos.logback</groupId>
-       <artifactId>logback-access</artifactId>
-       <version>1.0.7</version>
-   </dependency>
-   <dependency>
-       <groupId>ch.qos.logback</groupId>
-       <artifactId>logback-classic</artifactId>
-       <version>1.0.7</version>
-   </dependency>
   </dependencies>
-<!--
-<repository>
-            <id>archiva.snapshots</id>
-            <name>snapshots</name>
-  
-            <url>http://repos.d.xiaonei.com/nexus/content/repositories/snapshots
-  </repository>
--->
    <distributionManagement>
         <snapshotRepository>
             <id>archiva.snapshots</id>
