@@ -12,9 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.util.Constants;
-import com.renren.dp.xlog.util.LogDataFormat;
-
-import xlog.slice.LogData;
 
 public class WriteLocalOnlyCategoriesCache {
 

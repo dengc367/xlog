@@ -15,6 +15,7 @@ public interface Constants {
   public static final String LOG_WRITE_FINISHED_SUFFIX = ".done";
 
   public static final String LOG_WRITE_ERROR_SUFFIX = ".err";
+  public static final String LOG_WRITE_ERROR_TMP = ".tmp";
 
   public static final String LOG_SYNC_FINISHED_SUFFIX = ".del";
 

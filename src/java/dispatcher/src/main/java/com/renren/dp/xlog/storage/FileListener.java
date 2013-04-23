@@ -30,7 +30,7 @@ public class FileListener extends Thread {
         + "/" + CacheManager.CACHE_TYPE + "/" + categories);
     File[] files = null;
     SuffixFileFilter filter = new SuffixFileFilter(
-        new String[] { Constants.LOG_WRITE_FINISHED_SUFFIX });
+        new String[] {});
     StorageAdapter sa = null;
     try {
       sa = (StorageAdapter)ReflectionUtil.newInstance(Configuration.getString("storage.adapter.impl"));

@@ -21,7 +21,6 @@ import xlog.slice.LogData;
 
 public class SyncTask extends Thread {
 
-  private String cacheLogDir = null;
   private File slaveLogFile = null;
   private int batchCommitSize;
   private int slaveLogRootDirLen;
@@ -29,10 +28,9 @@ public class SyncTask extends Thread {
 
   private final static Logger LOG = LoggerFactory.getLogger(SyncTask.class);
 
-  public SyncTask(CacheManager cm,String cacheLogDir, File slaveLogFile,
+  public SyncTask(CacheManager cm, File slaveLogFile,
       int slaveLogRootDirLen, int batchCommitSize){
     this.cm=cm;
-    this.cacheLogDir = cacheLogDir;
     this.slaveLogFile = slaveLogFile;
     this.batchCommitSize = batchCommitSize;
     this.slaveLogRootDirLen = slaveLogRootDirLen;
@@ -40,39 +38,17 @@ public class SyncTask extends Thread {
 
   @Override
   public void run() {
-    String cacheLogStr = cacheLogDir + "/"
-        + slaveLogFile.getAbsolutePath().substring(slaveLogRootDirLen);
     String categories = slaveLogFile.getParent().substring(
         slaveLogRootDirLen + 1);
-    boolean res = false;
-    File cacheLogFile = null;
-    if (slaveLogFile.getName().endsWith(Constants.LOG_WRITE_ERROR_SUFFIX)) {
-      cacheLogFile = new File(
-          cacheLogStr.replaceFirst(Constants.LOG_WRITE_ERROR_SUFFIX,
-              Constants.LOG_WRITE_FINISHED_SUFFIX));
-      // 保证数据的一致性,
-      if (cacheLogFile.exists()) {
-        res = store(cacheLogFile, categories);
-        if (res) {
-          LOG.info("Success to sync data,local cache file:" + cacheLogStr);
-        } else {
-          LOG.info("Fail to sync data,local cache file:" + cacheLogStr);
-        }
-      }
+    boolean res = store(slaveLogFile, categories);
+    if (res) {
+      LOG.info("Success to sync data,slave file:"
+          + slaveLogFile.getAbsolutePath());
+      rename(slaveLogFile);
     } else {
-      cacheLogFile = new File(cacheLogStr);
-      if (cacheLogFile.exists()) {
-        res = store(slaveLogFile, categories);
-        if (res) {
-          LOG.info("Success to sync data,slave file:"
-              + slaveLogFile.getAbsolutePath());
-        } else {
-          LOG.info("Fail to sync data,slave file:"
-              + slaveLogFile.getAbsolutePath());
-        }
-      }
+      LOG.info("Fail to sync data,slave file:"
+          + slaveLogFile.getAbsolutePath());
     }
-   rename(slaveLogFile);
   }
 
   private boolean store(File sourceFile, String categories) {

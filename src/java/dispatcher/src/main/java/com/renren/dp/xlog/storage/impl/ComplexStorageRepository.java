@@ -11,7 +11,11 @@ import com.renren.dp.xlog.metrics.CategoriesCounter;
 import com.renren.dp.xlog.metrics.CategoriesInfo;
 import com.renren.dp.xlog.metrics.QueueCounter;
 import com.renren.dp.xlog.storage.StorageRepository;
-
+/**
+ * @deprecated
+ * @author xianquanzhang
+ *
+ */
 public class ComplexStorageRepository implements StorageRepository {
 
   private StorageRepository memoryStorageRepository = null;

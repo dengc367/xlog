@@ -22,7 +22,6 @@ import com.renren.dp.xlog.util.Constants;
 
 public class SyncTimer extends TimerTask {
 
-  private String cacheLogDir = null;
   private int slaveLogRootDirLen;
   private String slaveLogDir = null;
   private int batchCommitSize;
@@ -41,7 +40,6 @@ public class SyncTimer extends TimerTask {
     slaveLogDir = storePath + "/" + storageType;
     slaveLogRootDirLen = slaveLogDir.length();
     batchCommitSize = Configuration.getInt("batch.commit.size", 1000);
-    cacheLogDir = storePath + "/" + CacheManager.CACHE_TYPE;
     threadPool = Executors.newFixedThreadPool(Configuration.getInt(
         "error.data.sync.thread.count", 10));
     try {
@@ -58,8 +56,7 @@ public class SyncTimer extends TimerTask {
     StorageRepository sr = StorageRepositoryFactory.getInstance();
     sr.checkRepository();
 
-    FileFilter ff = new SuffixFileFilter(new String[] {
-        Constants.LOG_WRITE_FINISHED_SUFFIX, Constants.LOG_WRITE_ERROR_SUFFIX });
+    FileFilter ff = new SuffixFileFilter(new String[] {Constants.LOG_WRITE_ERROR_SUFFIX });
     try {
       buildSyncTask(new File(slaveLogDir), ff);
     } catch (Exception e) {
@@ -80,7 +77,7 @@ public class SyncTimer extends TimerTask {
         if (storageType.equalsIgnoreCase("hdfs")) {
           threadPool.execute(new HDFSSyncTask(logFile,slaveLogRootDirLen));
         } else {
-          threadPool.execute(new SyncTask(cm, cacheLogDir, logFile,
+          threadPool.execute(new SyncTask(cm, logFile,
               slaveLogRootDirLen, batchCommitSize));
         }
         taskCount++;

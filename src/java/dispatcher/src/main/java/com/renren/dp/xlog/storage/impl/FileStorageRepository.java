@@ -12,7 +12,11 @@ import com.renren.dp.xlog.metrics.CategoriesInfo;
 import com.renren.dp.xlog.metrics.QueueCounter;
 import com.renren.dp.xlog.storage.FileListener;
 import com.renren.dp.xlog.storage.StorageRepository;
-
+/**
+ * @deprecated
+ * @author xianquanzhang
+ *
+ */
 public class FileStorageRepository implements StorageRepository {
 
   private List<String> categoriesList = new ArrayList<String>();

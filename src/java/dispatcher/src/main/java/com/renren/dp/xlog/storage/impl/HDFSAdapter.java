@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.hadoop.fs.FileSystem;
@@ -199,7 +200,21 @@ public class HDFSAdapter implements StorageAdapter {
       LOG.error("FileSystem create Failed. ", e);
     }
   }
-
+  public synchronized void flush(String logFileNum){
+    Set<Map.Entry<String,String>> set=currentFileNumberMap.entrySet();
+    for(Map.Entry<String,String> me:set){
+      if(me.getValue().equals(logFileNum)){
+        continue;
+      }
+      try {
+        outputStreamMap.get(me.getKey()).close();
+      } catch (IOException e) {
+        LOG.error("Fail to close outputStreamMap : "+me.getKey(),e);
+        continue;
+      }
+      outputStreamMap.remove(me.getKey());
+    }
+  }
   @Override
   public synchronized void destory() {
     LOG.info("Close all hdfs clients." + outputStreamMap);

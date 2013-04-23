@@ -7,6 +7,8 @@ public interface StorageAdapter {
   public void initialize() throws IOException;
 
   public boolean store(Object o) throws IOException;
+  
+  public void flush(String logFileNum);
 
   public void destory();
 }

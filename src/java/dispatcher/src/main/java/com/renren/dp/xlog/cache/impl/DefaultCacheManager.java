@@ -14,7 +14,6 @@ import com.renren.dp.xlog.handler.FileNameHandlerFactory;
 import com.renren.dp.xlog.io.LogWriter;
 import com.renren.dp.xlog.io.impl.DefaultLogWriter;
 import com.renren.dp.xlog.logger.LogMeta;
-import com.renren.dp.xlog.util.Constants;
 
 public class DefaultCacheManager extends CacheManager {
 
@@ -43,7 +42,6 @@ public class DefaultCacheManager extends CacheManager {
             logMeta.getLogData().logs, false);
       } else {
         logWriter.close();
-        logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
 
         boolean res = logWriter.createFile(new File(cacheRootDir + "/"
             + category + "/" + logMeta.getLogFileNum()));
@@ -75,7 +73,6 @@ public class DefaultCacheManager extends CacheManager {
       LogWriter logWriter = me.getValue();
       if (!logFileNum.equals(logWriter.getLogFileName())) {
         logWriter.close();
-        logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
 
         boolean res = logWriter.createFile(new File(cacheRootDir + "/"
             + me.getKey() + "/" + logFileNum));

@@ -82,7 +82,6 @@ public class AsyncCacheManager extends CacheManager {
       if ((bq.size() == 0) && (!logFileNum.equals(currentLogFileNum))) {
         currentLogFileNum = logFileNum;
         logWriter.close();
-        logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
 
         boolean res = logWriter.createFile(new File(rootPath + "/"
             + currentLogFileNum));
@@ -105,7 +104,6 @@ public class AsyncCacheManager extends CacheManager {
                 true);
           } else {
             logWriter.close();
-            logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
 
             currentLogFileNum = logMeta.getLogFileNum();
             res = logWriter.createFile(new File(rootPath + "/"

@@ -7,7 +7,6 @@ import xlog.slice.LogData;
 
 import com.renren.dp.xlog.cache.CacheManager;
 import com.renren.dp.xlog.config.Configuration;
-import com.renren.dp.xlog.handler.FileNameHandlerFactory;
 import com.renren.dp.xlog.io.SuffixFileFilter;
 import com.renren.dp.xlog.logger.LogMeta;
 import com.renren.dp.xlog.storage.StorageRepositoryInitialization;
@@ -15,6 +14,11 @@ import com.renren.dp.xlog.storage.StorageRepository;
 import com.renren.dp.xlog.storage.StorageRepositoryFactory;
 import com.renren.dp.xlog.util.Constants;
 
+/**
+ * @deprecated
+ * @author xianquanzhang
+ *
+ */
 public class CSRInitialization extends StorageRepositoryInitialization {
 
   private StorageRepository storageRepository = null;
@@ -34,12 +38,6 @@ public class CSRInitialization extends StorageRepositoryInitialization {
     String storePath = Configuration.getString("oplog.store.path");
     cacheLogDir = new File(storePath + "/" + CacheManager.CACHE_TYPE);
     cacheLogDirLen = cacheLogDir.getAbsolutePath().length();
-    String logFileNum = FileNameHandlerFactory.getInstance()
-        .getCacheLogFileNum();
-    FileFilter noSuffixFF = new SuffixFileFilter();
-
-    check(cacheLogDir, logFileNum, noSuffixFF,
-        Constants.LOG_WRITE_FINISHED_SUFFIX);
 
     FileFilter suffixFF = new SuffixFileFilter(
         new String[] { Constants.LOG_WRITE_FINISHED_SUFFIX });

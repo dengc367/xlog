@@ -104,10 +104,11 @@ public class EventListener extends Thread {
         for (Map.Entry<String, LogWriter> me : set) {
           LogWriter logWriter = me.getValue();
           logWriter.close();
-          logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
+          logWriter.rename(Constants.LOG_WRITE_ERROR_SUFFIX);
         }
         logWriters.clear();
       }
+      this.sa.flush(logFileNum);
     }
   }
 
@@ -147,7 +148,7 @@ public class EventListener extends Thread {
             if (logWriters.contains(category)) {
               LogWriter logWriter = logWriters.remove(category);
               logWriter.close();
-              logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
+              logWriter.rename(Constants.LOG_WRITE_ERROR_SUFFIX);
             }
           }
         } else {
@@ -194,7 +195,7 @@ public class EventListener extends Thread {
         logWriter.write(logMeta.getLogFileNum(), logMeta.getLogData().logs, true);
       } else {
         logWriter.close();
-        logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
+        logWriter.rename(Constants.LOG_WRITE_ERROR_SUFFIX);
 
         logWriter = new DefaultLogWriter();
         logWriter.createFile(new File(slaveRootDir + "/" + category + "/" + logMeta.getLogFileNum()));
@@ -225,7 +226,6 @@ public class EventListener extends Thread {
     Collection<LogWriter> c = logWriters.values();
     for (LogWriter logWriter : c) {
       logWriter.close();
-      logWriter.rename(Constants.LOG_WRITE_FINISHED_SUFFIX);
     }
     logWriters.clear();
     logWriters = null;

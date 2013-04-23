@@ -50,7 +50,14 @@ public class SystemManager {
   }
 
   public Collection<CategoriesInfo> getCategoryInfos(){
-    return StorageRepositoryFactory.getInstance().getCategoryInfos();
+    Collection<CategoriesInfo> cis=StorageRepositoryFactory.getInstance().getCategoryInfos();
+    if(!cis.isEmpty()){
+      List<CategoriesInfo> list=new ArrayList<CategoriesInfo>();
+      list.addAll(cis);
+      Collections.sort(list);
+      return list;
+    }
+    return cis;
   }
   
   public boolean start() {

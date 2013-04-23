@@ -1,6 +1,6 @@
 package com.renren.dp.xlog.metrics;
 
-public class CategoriesInfo implements Cloneable {
+public class CategoriesInfo implements Cloneable , Comparable<Object>{
   private long successCount = 0;
   private long failCount = 0;
   private String category;
@@ -40,5 +40,16 @@ public class CategoriesInfo implements Cloneable {
 
   public void setCategoryRPS(long categoryRPS) {
     this.categoryRPS = categoryRPS;
+  }
+
+  @Override
+  public int compareTo(Object o) {
+    CategoriesInfo ci=(CategoriesInfo)o;
+    return category.compareTo(ci.category);
+//    if(this.categoryRPS>ci.categoryRPS){
+//      return -1;
+//    }else{
+//      return category.compareTo(ci.category);
+//    }
   }
 }
