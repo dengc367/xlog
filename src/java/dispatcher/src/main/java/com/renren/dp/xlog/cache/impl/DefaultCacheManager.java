@@ -38,16 +38,14 @@ public class DefaultCacheManager extends CacheManager {
     if (categoriesMap.containsKey(category)) {
       logWriter = categoriesMap.get(category);
       if (logWriter.getLogFileName().equals(logMeta.getLogFileNum())) {
-        return logWriter.write(logMeta.getLogFileNum(),
-            logMeta.getLogData().logs, false);
+        return logWriter.write(logMeta.getLogData().logs, false);
       } else {
         logWriter.close();
 
         boolean res = logWriter.createFile(new File(cacheRootDir + "/"
             + category + "/" + logMeta.getLogFileNum()));
         if (res) {
-          return logWriter.write(logMeta.getLogFileNum(),
-              logMeta.getLogData().logs, false);
+          return logWriter.write(logMeta.getLogData().logs, false);
         } else {
           return false;
         }
@@ -58,8 +56,7 @@ public class DefaultCacheManager extends CacheManager {
           + FileNameHandlerFactory.getInstance().getCacheLogFileNum()));
 
       categoriesMap.put(category, logWriter);
-      return logWriter.write(logMeta.getLogFileNum(),
-          logMeta.getLogData().logs, false);
+      return logWriter.write(logMeta.getLogData().logs, false);
     }
   }
 

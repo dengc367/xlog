@@ -100,7 +100,7 @@ public class AsyncCacheManager extends CacheManager {
           logMeta = bq.take();
 
           if (currentLogFileNum.equals(logMeta.getLogFileNum())) {
-            logWriter.write(logMeta.getLogFileNum(), logMeta.getLogData().logs,
+            logWriter.write(logMeta.getLogData().logs,
                 true);
           } else {
             logWriter.close();
@@ -109,7 +109,7 @@ public class AsyncCacheManager extends CacheManager {
             res = logWriter.createFile(new File(rootPath + "/"
                 + currentLogFileNum));
             if (res) {
-              logWriter.write(currentLogFileNum, logMeta.getLogData().logs,
+              logWriter.write(logMeta.getLogData().logs,
                   true);
             } else {
               logger.error("fail to create log file!");

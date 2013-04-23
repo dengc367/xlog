@@ -44,7 +44,7 @@ public class DefaultLogWriter implements LogWriter {
     return true;
   }
 
-  public boolean write(String logFileNum, String[] logs,
+  public boolean write(String[] logs,
       boolean isAllowPartSuccess) {
     lock.lock();
     for (String log : logs) {

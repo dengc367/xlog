@@ -12,7 +12,7 @@ public interface LogWriter {
    *          是否允许写部分成功
    * @return
    */
-  public boolean write(String logFileNum, String[] logs,
+  public boolean write(String[] logs,
       boolean isAllowPartSuccess);
 
   public boolean createFile(File logFile);

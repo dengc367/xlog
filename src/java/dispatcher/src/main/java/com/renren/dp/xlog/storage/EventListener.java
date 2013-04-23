@@ -2,6 +2,7 @@ package com.renren.dp.xlog.storage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -94,22 +95,32 @@ public class EventListener extends Thread {
     return this.counter;
   }
 
+  /**
+   * 检测是否日志文件需要关闭流,例如错误日志恢复正常，某些category没有流量等
+   * @param logFileNum
+   */
   public void checkExpiredLogFile(String logFileNum) {
-    if ((logBQ.size() == 0) && (!logFileNum.equals(currentLogFileNum))) {
-      synchronized (logWriters) {
-        if (logWriters.isEmpty()) {
-          return;
-        }
+    synchronized (logWriters) {
+      if (!logWriters.isEmpty()) {
+         /**
+          * 记录已经没有打错误日志的category
+          */
+        List<String> expiredCategories=new ArrayList<String>();
         Set<Map.Entry<String, LogWriter>> set = logWriters.entrySet();
         for (Map.Entry<String, LogWriter> me : set) {
           LogWriter logWriter = me.getValue();
-          logWriter.close();
-          logWriter.rename(Constants.LOG_WRITE_ERROR_SUFFIX);
-        }
-        logWriters.clear();
+          if(!logWriter.getLogFileName().equals(logFileNum)){
+            logWriter.close();
+            logWriter.rename(Constants.LOG_WRITE_ERROR_SUFFIX);
+            expiredCategories.add(me.getKey());
+            }
+          }
+         for(String category:expiredCategories){
+           logWriters.remove(category);
+          }
+       }
       }
-      this.sa.flush(logFileNum);
-    }
+     this.sa.flush(logFileNum);
   }
 
   public void run() {
@@ -192,7 +203,7 @@ public class EventListener extends Thread {
     if (logWriters.contains(category)) {
       logWriter = logWriters.get(category);
       if (currentLogFileNum.equals(logMeta.getLogFileNum())) {
-        logWriter.write(logMeta.getLogFileNum(), logMeta.getLogData().logs, true);
+        logWriter.write(logMeta.getLogData().logs, true);
       } else {
         logWriter.close();
         logWriter.rename(Constants.LOG_WRITE_ERROR_SUFFIX);
@@ -200,13 +211,13 @@ public class EventListener extends Thread {
         logWriter = new DefaultLogWriter();
         logWriter.createFile(new File(slaveRootDir + "/" + category + "/" + logMeta.getLogFileNum()));
         logWriters.put(category, logWriter);
-        logWriter.write(logMeta.getLogFileNum(), logMeta.getLogData().logs, true);
+        logWriter.write(logMeta.getLogData().logs, true);
       }
     } else {
       logWriter = new DefaultLogWriter();
       logWriter.createFile(new File(slaveRootDir + "/" + category + "/" + logMeta.getLogFileNum()));
       logWriters.put(category, logWriter);
-      logWriter.write(logMeta.getLogFileNum(), logMeta.getLogData().logs, true);
+      logWriter.write(logMeta.getLogData().logs, true);
     }
   }
 
