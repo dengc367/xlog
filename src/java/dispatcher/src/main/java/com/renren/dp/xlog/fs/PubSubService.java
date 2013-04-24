@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 
 import com.google.common.collect.Maps;
@@ -23,12 +24,15 @@ public class PubSubService implements Closeable {
   private static Map<String, Integer> idMap = Maps.newHashMap();
   private static Integer nextId = 1;
   FileSystem fs;
+  String pathFormat;
 
   public PubSubService() throws IOException {
     org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
     conf.set("fs.default.name", Configuration.getString("storage.uri"));
     conf.set("mapred.task.id", "xlog_pubsub_" + com.renren.dp.xlog.config.Configuration.getString("xlog.uuid"));
-    fs = DistributedFileSystem.get(conf);
+    // fs = DistributedFileSystem.get(conf);
+    fs = FileSystem.getLocal(conf);
+    pathFormat = Configuration.getString("oplog.store.path") + "/localcache/%s/%s";
   }
 
   public int subscribe(Subscription sub) throws XLogException {
@@ -42,7 +46,8 @@ public class PubSubService implements Closeable {
       if (!idMap.containsKey(catStr)) { // check
         synchronized (idMap) {
           if (!idMap.containsKey(catStr)) { // double check
-            LogFileStreamReader reader = new LogFileStreamReader(sub.categories, Integer.parseInt(fetchsize), fs);
+            LogFileStreamReader reader = new LogFileStreamReader(sub.categories, Integer.parseInt(fetchsize), fs,
+                pathFormat);
             idMap.put(catStr, nextId);
             readerMap.put(nextId, reader);
             return nextId++;
@@ -50,11 +55,10 @@ public class PubSubService implements Closeable {
         }
       }
       int id = idMap.get(catStr);
-      String fromScratch = StringUtils
-          .defaultIfEmpty(sub.options.get(PubSubConstants.XLOG_FETCH_FROM_SCRATCH), "true");
+      String fromScratch = StringUtils.defaultIfEmpty(sub.options.get(PubSubConstants.XLOG_FETCH_FROM_SCRATCH), "true");
       if ("true".equals(fromScratch)) {
         Closeables.closeQuietly(readerMap.get(id));
-        readerMap.put(id, new LogFileStreamReader(sub.categories, Integer.parseInt(fetchsize), fs));
+        readerMap.put(id, new LogFileStreamReader(sub.categories, Integer.parseInt(fetchsize), fs, pathFormat));
       }
       return id;
     } catch (IOException e) {

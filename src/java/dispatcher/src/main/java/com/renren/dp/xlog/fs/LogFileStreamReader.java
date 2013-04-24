@@ -11,7 +11,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.google.common.io.Closeables;
-import com.renren.dp.xlog.config.Configuration;
 import com.renren.dp.xlog.handler.AbstractFileNameHandler;
 import com.renren.dp.xlog.handler.FileNameHandlerFactory;
 
@@ -28,8 +27,11 @@ public class LogFileStreamReader implements Closeable {
   private byte[] byteCache;
   private AbstractFileNameHandler fileHandler = FileNameHandlerFactory.getInstance();
 
-  public LogFileStreamReader(String[] categories, int fetchLength, FileSystem fs) throws IOException {
+  private String pathFormat;
+
+  public LogFileStreamReader(String[] categories, int fetchLength, FileSystem fs, String pathFormat) throws IOException {
     this.fs = fs;
+    this.pathFormat = pathFormat;
     this.categories = categories;
     this.fetchLength = fetchLength;
     byteCache = new byte[fetchLength];
@@ -87,8 +89,7 @@ public class LogFileStreamReader implements Closeable {
   }
 
   private Path getAbsolutePathIfExist(String[] categories, String fileNum) throws IOException {
-    String pathStr = fs.getWorkingDirectory() + "/" + PubSubUtils.serializeCategories(categories, "/") + "/" + fileNum
-        + "." + Configuration.getString("xlog.uuid");
+    String pathStr = String.format(pathFormat, PubSubUtils.serializeCategories(categories, "/"), fileNum);
     Path path = new Path(pathStr);
     if (fs.exists(path) && fs.isFile(path)) {
       return path;
